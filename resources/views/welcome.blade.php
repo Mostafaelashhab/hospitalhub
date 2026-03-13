@@ -428,35 +428,38 @@
     </section>
 
     {{-- ===== MEDICAL DATABASE HIGHLIGHT ===== --}}
-    <section id="database" class="py-24 md:py-32 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
+    <section id="database" class="py-16 md:py-32 bg-gradient-to-b from-gray-50 to-white relative overflow-hidden">
         <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-100/20 rounded-full blur-3xl"></div>
         <div class="absolute bottom-0 left-0 w-[400px] h-[400px] bg-purple-100/20 rounded-full blur-3xl"></div>
 
         <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8" x-data="{activeDb:'meds'}">
-            <div class="text-center mb-16 fade-up">
-                <div class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-100 rounded-full text-sm font-bold text-indigo-700 uppercase tracking-wider mb-5">
+            <div class="text-center mb-10 md:mb-16 fade-up">
+                <div class="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-indigo-100 rounded-full text-xs sm:text-sm font-bold text-indigo-700 uppercase tracking-wider mb-5">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/></svg>
                     {{ app()->getLocale()==='ar' ? 'قاعدة بيانات طبية شاملة' : 'Complete Medical Database' }}
                 </div>
-                <h2 class="text-4xl md:text-5xl font-black text-gray-900 mb-5">{{ app()->getLocale()==='ar' ? 'كل البيانات الطبية في مكان واحد' : 'All Medical Data In One Place' }}</h2>
-                <p class="text-lg text-gray-500 max-w-2xl mx-auto mb-12">{{ app()->getLocale()==='ar' ? 'قاعدة بيانات كاملة للأدوية والتحاليل والأشعة مدمجة مباشرة في النظام' : 'A complete database of medications, lab tests, and radiology integrated directly into the system' }}</p>
+                <h2 class="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mb-4 sm:mb-5 px-2">{{ app()->getLocale()==='ar' ? 'كل البيانات الطبية في مكان واحد' : 'All Medical Data In One Place' }}</h2>
+                <p class="text-base sm:text-lg text-gray-500 max-w-2xl mx-auto mb-8 sm:mb-12 px-2">{{ app()->getLocale()==='ar' ? 'قاعدة بيانات كاملة للأدوية والتحاليل والأشعة مدمجة مباشرة في النظام' : 'A complete database of medications, lab tests, and radiology integrated directly into the system' }}</p>
 
                 {{-- Interactive Tabs --}}
-                <div class="inline-flex bg-white rounded-2xl p-2 shadow-lg shadow-gray-200/50 border border-gray-100 gap-1">
-                    <button @click="activeDb='meds'" class="px-6 py-3 rounded-xl text-sm font-bold transition-all flex items-center gap-2.5" :class="activeDb==='meds'?'bg-blue-600 text-white shadow-lg shadow-blue-500/25':'text-gray-500 hover:text-gray-700 hover:bg-gray-50'">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3"/></svg>
-                        {{ app()->getLocale()==='ar' ? 'الأدوية' : 'Medications' }}
-                        <span class="px-2 py-0.5 rounded-lg text-[11px] font-bold" :class="activeDb==='meds'?'bg-white/20':'bg-blue-50 text-blue-600'">24,000+</span>
+                <div class="inline-flex bg-white rounded-2xl p-1.5 sm:p-2 shadow-lg shadow-gray-200/50 border border-gray-100 gap-1">
+                    <button @click="activeDb='meds'" class="px-3 sm:px-6 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 sm:gap-2.5" :class="activeDb==='meds'?'bg-blue-600 text-white shadow-lg shadow-blue-500/25':'text-gray-500 hover:text-gray-700 hover:bg-gray-50'">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0m0 0v5.714c0 .597.237 1.17.659 1.591L19.8 15.3"/></svg>
+                        <span class="hidden sm:inline">{{ app()->getLocale()==='ar' ? 'الأدوية' : 'Medications' }}</span>
+                        <span class="sm:hidden">{{ app()->getLocale()==='ar' ? 'أدوية' : 'Meds' }}</span>
+                        <span class="hidden sm:inline px-2 py-0.5 rounded-lg text-[11px] font-bold" :class="activeDb==='meds'?'bg-white/20':'bg-blue-50 text-blue-600'">24,000+</span>
                     </button>
-                    <button @click="activeDb='labs'" class="px-6 py-3 rounded-xl text-sm font-bold transition-all flex items-center gap-2.5" :class="activeDb==='labs'?'bg-emerald-600 text-white shadow-lg shadow-emerald-500/25':'text-gray-500 hover:text-gray-700 hover:bg-gray-50'">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
-                        {{ app()->getLocale()==='ar' ? 'التحاليل' : 'Lab Tests' }}
-                        <span class="px-2 py-0.5 rounded-lg text-[11px] font-bold" :class="activeDb==='labs'?'bg-white/20':'bg-emerald-50 text-emerald-600'">500+</span>
+                    <button @click="activeDb='labs'" class="px-3 sm:px-6 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 sm:gap-2.5" :class="activeDb==='labs'?'bg-emerald-600 text-white shadow-lg shadow-emerald-500/25':'text-gray-500 hover:text-gray-700 hover:bg-gray-50'">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+                        <span class="hidden sm:inline">{{ app()->getLocale()==='ar' ? 'التحاليل' : 'Lab Tests' }}</span>
+                        <span class="sm:hidden">{{ app()->getLocale()==='ar' ? 'تحاليل' : 'Labs' }}</span>
+                        <span class="hidden sm:inline px-2 py-0.5 rounded-lg text-[11px] font-bold" :class="activeDb==='labs'?'bg-white/20':'bg-emerald-50 text-emerald-600'">500+</span>
                     </button>
-                    <button @click="activeDb='rad'" class="px-6 py-3 rounded-xl text-sm font-bold transition-all flex items-center gap-2.5" :class="activeDb==='rad'?'bg-violet-600 text-white shadow-lg shadow-violet-500/25':'text-gray-500 hover:text-gray-700 hover:bg-gray-50'">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
-                        {{ app()->getLocale()==='ar' ? 'الأشعة' : 'Radiology' }}
-                        <span class="px-2 py-0.5 rounded-lg text-[11px] font-bold" :class="activeDb==='rad'?'bg-white/20':'bg-violet-50 text-violet-600'">200+</span>
+                    <button @click="activeDb='rad'" class="px-3 sm:px-6 py-2.5 sm:py-3 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 sm:gap-2.5" :class="activeDb==='rad'?'bg-violet-600 text-white shadow-lg shadow-violet-500/25':'text-gray-500 hover:text-gray-700 hover:bg-gray-50'">
+                        <svg class="w-4 h-4 sm:w-5 sm:h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        <span class="hidden sm:inline">{{ app()->getLocale()==='ar' ? 'الأشعة' : 'Radiology' }}</span>
+                        <span class="sm:hidden">{{ app()->getLocale()==='ar' ? 'أشعة' : 'Rad' }}</span>
+                        <span class="hidden sm:inline px-2 py-0.5 rounded-lg text-[11px] font-bold" :class="activeDb==='rad'?'bg-white/20':'bg-violet-50 text-violet-600'">200+</span>
                     </button>
                 </div>
             </div>
@@ -465,8 +468,8 @@
             <div class="fade-up">
                 {{-- Medications --}}
                 <div x-show="activeDb==='meds'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-1 translate-y-0">
-                    <div class="grid md:grid-cols-2 gap-10 items-center">
-                        <div class="bg-blue-50 rounded-3xl p-8 md:p-10 flex items-center justify-center">
+                    <div class="grid md:grid-cols-2 gap-6 md:gap-10 items-center">
+                        <div class="hidden md:flex bg-blue-50 rounded-3xl p-8 md:p-10 items-center justify-center">
                             <svg viewBox="0 0 280 220" class="w-full max-w-[320px]" fill="none">
                                 {{-- Pill bottle --}}
                                 <rect x="80" y="40" width="100" height="130" rx="16" fill="#dbeafe" stroke="#93c5fd" stroke-width="1.5"/>
@@ -493,7 +496,7 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7"/></svg>
                                 24,000+ {{ app()->getLocale()==='ar' ? 'دواء' : 'medications' }}
                             </div>
-                            <h3 class="text-3xl font-black text-gray-900 mb-4">{{ app()->getLocale()==='ar' ? 'قاعدة بيانات الأدوية' : 'Medications Database' }}</h3>
+                            <h3 class="text-2xl sm:text-3xl font-black text-gray-900 mb-4">{{ app()->getLocale()==='ar' ? 'قاعدة بيانات الأدوية' : 'Medications Database' }}</h3>
                             <p class="text-gray-500 leading-relaxed mb-6">{{ app()->getLocale()==='ar' ? 'أكثر من 24,000 دواء بالأسماء التجارية والعلمية والجرعات والتفاعلات الدوائية. ابحث واختر الدواء المناسب فوراً.' : 'Over 24,000 medications with brand & generic names, dosages, and drug interactions. Search and select instantly.' }}</p>
                             {{-- Search mockup --}}
                             <div class="bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
@@ -522,8 +525,8 @@
 
                 {{-- Lab Tests --}}
                 <div x-show="activeDb==='labs'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-1 translate-y-0">
-                    <div class="grid md:grid-cols-2 gap-10 items-center">
-                        <div class="bg-emerald-50 rounded-3xl p-8 md:p-10 flex items-center justify-center">
+                    <div class="grid md:grid-cols-2 gap-6 md:gap-10 items-center">
+                        <div class="hidden md:flex bg-emerald-50 rounded-3xl p-8 md:p-10 items-center justify-center">
                             <svg viewBox="0 0 280 220" class="w-full max-w-[320px]" fill="none">
                                 <rect x="50" y="170" width="160" height="10" rx="5" fill="#d1d5db"/>
                                 <rect x="56" y="163" width="5" height="14" fill="#9ca3af"/><rect x="199" y="163" width="5" height="14" fill="#9ca3af"/>
@@ -540,7 +543,7 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7"/></svg>
                                 500+ {{ app()->getLocale()==='ar' ? 'تحليل' : 'lab tests' }}
                             </div>
-                            <h3 class="text-3xl font-black text-gray-900 mb-4">{{ app()->getLocale()==='ar' ? 'قاعدة بيانات التحاليل' : 'Lab Tests Database' }}</h3>
+                            <h3 class="text-2xl sm:text-3xl font-black text-gray-900 mb-4">{{ app()->getLocale()==='ar' ? 'قاعدة بيانات التحاليل' : 'Lab Tests Database' }}</h3>
                             <p class="text-gray-500 leading-relaxed mb-6">{{ app()->getLocale()==='ar' ? 'أكثر من 500 تحليل معملي مع المعدلات الطبيعية. اطلب التحاليل مباشرة من شاشة التشخيص.' : 'Over 500 lab tests with normal ranges. Order tests directly from the diagnosis screen.' }}</p>
                             {{-- Lab results mockup --}}
                             <div class="bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
@@ -560,8 +563,8 @@
 
                 {{-- Radiology --}}
                 <div x-show="activeDb==='rad'" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-4" x-transition:enter-end="opacity-1 translate-y-0">
-                    <div class="grid md:grid-cols-2 gap-10 items-center">
-                        <div class="bg-violet-50 rounded-3xl p-8 md:p-10 flex items-center justify-center">
+                    <div class="grid md:grid-cols-2 gap-6 md:gap-10 items-center">
+                        <div class="hidden md:flex bg-violet-50 rounded-3xl p-8 md:p-10 items-center justify-center">
                             <svg viewBox="0 0 280 220" class="w-full max-w-[320px]" fill="none">
                                 <rect x="30" y="10" width="200" height="160" rx="16" fill="#1e1b4b" stroke="#4338ca" stroke-width="1.5"/>
                                 <rect x="40" y="20" width="180" height="140" rx="10" fill="#312e81"/>
@@ -587,7 +590,7 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7"/></svg>
                                 200+ {{ app()->getLocale()==='ar' ? 'نوع أشعة' : 'imaging types' }}
                             </div>
-                            <h3 class="text-3xl font-black text-gray-900 mb-4">{{ app()->getLocale()==='ar' ? 'قاعدة بيانات الأشعة' : 'Radiology Database' }}</h3>
+                            <h3 class="text-2xl sm:text-3xl font-black text-gray-900 mb-4">{{ app()->getLocale()==='ar' ? 'قاعدة بيانات الأشعة' : 'Radiology Database' }}</h3>
                             <p class="text-gray-500 leading-relaxed mb-6">{{ app()->getLocale()==='ar' ? 'أكثر من 200 نوع أشعة مع الأوصاف والتصنيفات. اطلب الأشعة مباشرة من شاشة التشخيص.' : 'Over 200 radiology types with descriptions. Order imaging directly from the diagnosis screen.' }}</p>
                             {{-- Imaging types mockup --}}
                             <div class="grid grid-cols-2 gap-3">
@@ -620,28 +623,29 @@
     </section>
 
     {{-- ===== FEATURES ===== --}}
-    <section id="features" class="py-24 md:py-32 bg-white relative overflow-hidden">
+    <section id="features" class="py-16 md:py-32 bg-white relative overflow-hidden">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mb-20 fade-up">
-                <div class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-50 rounded-full text-sm font-bold text-indigo-600 uppercase tracking-wider mb-5">{{ __('app.features') }}</div>
-                <h2 class="text-4xl md:text-5xl font-black text-gray-900 mb-5">{{ __('app.landing_features_title') }}</h2>
-                <p class="text-lg text-gray-500 max-w-2xl mx-auto">{{ __('app.landing_features_desc') }}</p>
+            <div class="text-center mb-12 md:mb-20 fade-up">
+                <div class="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-indigo-50 rounded-full text-xs sm:text-sm font-bold text-indigo-600 uppercase tracking-wider mb-5">{{ __('app.features') }}</div>
+                <h2 class="text-3xl sm:text-4xl md:text-5xl font-black text-gray-900 mb-5 px-2">{{ __('app.landing_features_title') }}</h2>
+                <p class="text-base sm:text-lg text-gray-500 max-w-2xl mx-auto px-2">{{ __('app.landing_features_desc') }}</p>
             </div>
 
             {{-- Feature 1: Appointments - Image Left --}}
-            <div class="grid md:grid-cols-2 gap-16 items-center mb-24">
+            <div class="grid md:grid-cols-2 gap-8 md:gap-16 items-center mb-16 md:mb-24">
                 @if(app()->getLocale()==='ar')
                 <div class="fade-left md:order-2">
                 @else
                 <div class="fade-left">
                 @endif
-                    <div class="bg-indigo-50 rounded-3xl p-8 flex items-center justify-center">
-                        <svg viewBox="0 0 300 220" class="w-full max-w-[300px]" fill="none">
+                    <div class="bg-indigo-50 rounded-2xl md:rounded-3xl p-6 md:p-8 flex items-center justify-center">
+                        <svg viewBox="0 0 300 220" class="w-full max-w-[280px] md:max-w-[300px]" fill="none">
+                            <defs><filter id="popShadow"><feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#6366f1" flood-opacity="0.12"/></filter></defs>
                             {{-- Calendar --}}
                             <rect x="30" y="20" width="240" height="180" rx="16" fill="white" stroke="#e0e7ff" stroke-width="1.5"/>
                             <rect x="30" y="20" width="240" height="50" rx="16" fill="#6366f1"/>
                             <rect x="30" y="55" width="240" height="15" fill="#6366f1"/>
-                            <text x="150" y="50" text-anchor="middle" fill="white" font-size="16" font-weight="bold" font-family="Inter">{{ app()->getLocale()==='ar' ? 'مارس 2026' : 'March 2026' }}</text>
+                            <text x="150" y="50" text-anchor="middle" fill="white" font-size="16" font-weight="bold" font-family="system-ui,sans-serif">{{ app()->getLocale()==='ar' ? 'مارس 2026' : 'March 2026' }}</text>
                             {{-- Calendar grid --}}
                             @for($row=0;$row<3;$row++)
                                 @for($col=0;$col<7;$col++)
@@ -649,13 +653,13 @@
                                     @if($day <= 21)
                                         @if($day == 13)
                                             <circle cx="{{ $cx }}" cy="{{ $cy }}" r="14" fill="#6366f1"/>
-                                            <text x="{{ $cx }}" y="{{ $cy+4 }}" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="Inter">{{ $day }}</text>
+                                            <text x="{{ $cx }}" y="{{ $cy+4 }}" text-anchor="middle" fill="white" font-size="11" font-weight="bold" font-family="system-ui,sans-serif">{{ $day }}</text>
                                         @elseif(in_array($day,[5,8,15,19]))
                                             <circle cx="{{ $cx }}" cy="{{ $cy }}" r="14" fill="#eef2ff"/>
-                                            <text x="{{ $cx }}" y="{{ $cy+4 }}" text-anchor="middle" fill="#6366f1" font-size="11" font-weight="bold" font-family="Inter">{{ $day }}</text>
+                                            <text x="{{ $cx }}" y="{{ $cy+4 }}" text-anchor="middle" fill="#6366f1" font-size="11" font-weight="bold" font-family="system-ui,sans-serif">{{ $day }}</text>
                                             <circle cx="{{ $cx+8 }}" cy="{{ $cy-8 }}" r="3" fill="#10b981"/>
                                         @else
-                                            <text x="{{ $cx }}" y="{{ $cy+4 }}" text-anchor="middle" fill="#64748b" font-size="11" font-family="Inter">{{ $day }}</text>
+                                            <text x="{{ $cx }}" y="{{ $cy+4 }}" text-anchor="middle" fill="#64748b" font-size="11" font-family="system-ui,sans-serif">{{ $day }}</text>
                                         @endif
                                     @endif
                                 @endfor
@@ -664,13 +668,12 @@
                             <g transform="translate(170,75)" class="float-3">
                                 <rect x="0" y="0" width="110" height="55" rx="10" fill="white" stroke="#c7d2fe" stroke-width="1" filter="url(#popShadow)"/>
                                 <circle cx="18" cy="20" r="10" fill="#dbeafe"/>
-                                <text x="15" y="24" fill="#3b82f6" font-size="10" font-weight="bold" font-family="Inter">M</text>
-                                <text x="34" y="18" fill="#1e293b" font-size="9" font-weight="bold" font-family="Inter">Mohamed Ali</text>
-                                <text x="34" y="30" fill="#94a3b8" font-size="7" font-family="Inter">09:00 AM - Checkup</text>
+                                <text x="15" y="24" fill="#3b82f6" font-size="10" font-weight="bold" font-family="system-ui,sans-serif">M</text>
+                                <text x="34" y="18" fill="#1e293b" font-size="9" font-weight="bold" font-family="system-ui,sans-serif">Mohamed Ali</text>
+                                <text x="34" y="30" fill="#94a3b8" font-size="7" font-family="system-ui,sans-serif">09:00 AM - Checkup</text>
                                 <rect x="12" y="38" width="45" height="12" rx="4" fill="#dcfce7"/>
-                                <text x="22" y="47" fill="#16a34a" font-size="7" font-weight="bold" font-family="Inter">Confirmed</text>
+                                <text x="22" y="47" fill="#16a34a" font-size="7" font-weight="bold" font-family="system-ui,sans-serif">Confirmed</text>
                             </g>
-                            <defs><filter id="popShadow"><feDropShadow dx="0" dy="4" stdDeviation="8" flood-color="#6366f1" flood-opacity="0.12"/></filter></defs>
                         </svg>
                     </div>
                 </div>
@@ -691,14 +694,14 @@
             </div>
 
             {{-- Feature 2: Diagnoses - Image Right --}}
-            <div class="grid md:grid-cols-2 gap-16 items-center mb-24">
+            <div class="grid md:grid-cols-2 gap-8 md:gap-16 items-center mb-16 md:mb-24">
                 @if(app()->getLocale()==='ar')
                 <div class="fade-right md:order-1">
                 @else
                 <div class="fade-right md:order-2">
                 @endif
-                    <div class="bg-violet-50 rounded-3xl p-8 flex items-center justify-center">
-                        <svg viewBox="0 0 300 220" class="w-full max-w-[300px]" fill="none">
+                    <div class="bg-violet-50 rounded-2xl md:rounded-3xl p-6 md:p-8 flex items-center justify-center">
+                        <svg viewBox="0 0 300 220" class="w-full max-w-[260px] md:max-w-[300px]" fill="none">
                             {{-- Body outline (simple torso) --}}
                             <g transform="translate(30,10)">
                                 {{-- Body outline --}}
