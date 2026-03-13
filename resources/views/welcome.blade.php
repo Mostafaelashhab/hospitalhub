@@ -135,7 +135,7 @@
                         {{ __('app.landing_start_free') }}
                         <svg class="w-5 h-5 rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
                     </a>
-                    <a href="#features" class="w-full sm:w-auto flex items-center justify-center gap-2.5 px-8 py-4 text-white font-bold rounded-2xl border-2 border-white/20 hover:bg-white/10 transition-all text-lg backdrop-blur-sm">
+                    <a href="#features" class="w-full sm:w-auto flex items-center justify-center gap-2.5 px-8 py-4 text-white font-bold rounded-2xl border-2 border-white/40 hover:bg-white/10 hover:border-white/60 transition-all text-lg backdrop-blur-sm">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15.91 11.672a.375.375 0 010 .656l-5.603 3.113a.375.375 0 01-.557-.328V8.887c0-.286.307-.466.557-.327l5.603 3.112z"/></svg>
                         {{ __('app.landing_learn_more') }}
                     </a>
@@ -170,7 +170,11 @@
                 <div class="absolute -inset-4 bg-gradient-to-r from-indigo-500/20 via-purple-500/20 to-pink-500/20 rounded-[2rem] blur-2xl"></div>
 
                 {{-- Floating cards --}}
-                <div class="absolute -top-6 {{ app()->getLocale()==='ar' ? 'right-4 md:right-8' : 'left-4 md:left-8' }} z-30 float-1">
+                @if(app()->getLocale()==='ar')
+                <div class="absolute -top-6 right-4 md:right-8 z-30 float-1">
+                @else
+                <div class="absolute -top-6 left-4 md:left-8 z-30 float-1">
+                @endif
                     <div class="bg-white rounded-2xl shadow-2xl shadow-black/20 p-4 border border-gray-100 flex items-center gap-3">
                         <div class="w-11 h-11 bg-emerald-100 rounded-xl flex items-center justify-center">
                             <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -183,7 +187,11 @@
                     </div>
                 </div>
 
-                <div class="absolute -top-4 {{ app()->getLocale()==='ar' ? 'left-4 md:left-12' : 'right-4 md:right-12' }} z-30 float-2">
+                @if(app()->getLocale()==='ar')
+                <div class="absolute -top-4 left-4 md:left-12 z-30 float-2">
+                @else
+                <div class="absolute -top-4 right-4 md:right-12 z-30 float-2">
+                @endif
                     <div class="bg-white rounded-2xl shadow-2xl shadow-black/20 p-4 border border-gray-100 flex items-center gap-3">
                         <div class="w-11 h-11 bg-blue-100 rounded-xl flex items-center justify-center">
                             <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -196,7 +204,11 @@
                 </div>
 
                 {{-- Notification --}}
-                <div class="absolute -bottom-3 {{ app()->getLocale()==='ar' ? 'left-4 md:left-16' : 'right-4 md:right-16' }} z-30 float-3">
+                @if(app()->getLocale()==='ar')
+                <div class="absolute -bottom-3 left-4 md:left-16 z-30 float-3">
+                @else
+                <div class="absolute -bottom-3 right-4 md:right-16 z-30 float-3">
+                @endif
                     <div class="bg-white rounded-xl shadow-2xl shadow-black/20 p-3 border border-gray-100 flex items-center gap-3">
                         <div class="w-9 h-9 bg-indigo-100 rounded-lg flex items-center justify-center shrink-0">
                             <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
@@ -220,7 +232,7 @@
                         </div>
                         <div class="flex-1 bg-white rounded-lg px-4 py-1.5 text-xs text-gray-400 font-medium text-center border border-gray-200 flex items-center justify-center gap-2">
                             <svg class="w-3 h-3 text-emerald-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
-                            {{ strtolower(__('app.app_name')) }}.com/dashboard
+                            {{ trim(strtolower(__('app.app_name'))) }}.care/dashboard
                         </div>
                     </div>
 
@@ -584,7 +596,11 @@
 
             {{-- Feature 1: Appointments - Image Left --}}
             <div class="grid md:grid-cols-2 gap-16 items-center mb-24">
-                <div class="fade-left {{ app()->getLocale()==='ar' ? 'md:order-2' : '' }}">
+                @if(app()->getLocale()==='ar')
+                <div class="fade-left md:order-2">
+                @else
+                <div class="fade-left">
+                @endif
                     <div class="bg-indigo-50 rounded-3xl p-8 flex items-center justify-center">
                         <svg viewBox="0 0 300 220" class="w-full max-w-[300px]" fill="none">
                             {{-- Calendar --}}
@@ -624,7 +640,11 @@
                         </svg>
                     </div>
                 </div>
-                <div class="fade-right {{ app()->getLocale()==='ar' ? 'md:order-1' : '' }}">
+                @if(app()->getLocale()==='ar')
+                <div class="fade-right md:order-1">
+                @else
+                <div class="fade-right">
+                @endif
                     <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-50 rounded-lg text-xs font-bold text-blue-700 mb-4">{{ __('app.feature_appointments') }}</div>
                     <h3 class="text-3xl font-black text-gray-900 mb-4">{{ app()->getLocale()==='ar' ? 'جدولة ذكية للمواعيد' : 'Smart Appointment Scheduling' }}</h3>
                     <p class="text-gray-500 leading-relaxed mb-6">{{ __('app.landing_feat_appointments_desc') }}</p>
@@ -638,7 +658,11 @@
 
             {{-- Feature 2: Diagnoses - Image Right --}}
             <div class="grid md:grid-cols-2 gap-16 items-center mb-24">
-                <div class="fade-right {{ app()->getLocale()==='ar' ? 'md:order-1' : 'md:order-2' }}">
+                @if(app()->getLocale()==='ar')
+                <div class="fade-right md:order-1">
+                @else
+                <div class="fade-right md:order-2">
+                @endif
                     <div class="bg-violet-50 rounded-3xl p-8 flex items-center justify-center">
                         <svg viewBox="0 0 300 220" class="w-full max-w-[300px]" fill="none">
                             {{-- Body outline (simple torso) --}}
@@ -676,7 +700,11 @@
                         </svg>
                     </div>
                 </div>
-                <div class="fade-left {{ app()->getLocale()==='ar' ? 'md:order-2' : 'md:order-1' }}">
+                @if(app()->getLocale()==='ar')
+                <div class="fade-left md:order-2">
+                @else
+                <div class="fade-left md:order-1">
+                @endif
                     <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-violet-50 rounded-lg text-xs font-bold text-violet-700 mb-4">{{ __('app.landing_feat_diagnoses') }}</div>
                     <h3 class="text-3xl font-black text-gray-900 mb-4">{{ app()->getLocale()==='ar' ? 'تشخيصات تفاعلية ورسومات' : 'Interactive Diagnoses & Body Maps' }}</h3>
                     <p class="text-gray-500 leading-relaxed mb-6">{{ __('app.landing_feat_diagnoses_desc') }}</p>
