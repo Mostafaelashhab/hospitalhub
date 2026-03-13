@@ -1,0 +1,134 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Helpers\BranchHelper;
+use App\Http\Controllers\Controller;
+use App\Models\Appointment;
+use App\Models\Diagnosis;
+use Illuminate\Http\Request;
+
+class DiagnosisController extends Controller
+{
+    public function index(Request $request)
+    {
+        $clinic = auth()->user()->clinic;
+
+        $branchId = BranchHelper::activeBranchId();
+
+        $query = Diagnosis::where('clinic_id', $clinic->id)
+            ->with(['patient', 'doctor', 'appointment']);
+
+        if ($branchId) {
+            $query->where('branch_id', $branchId);
+        }
+
+        if ($search = $request->get('search')) {
+            $query->where(function ($q) use ($search) {
+                $q->whereHas('patient', fn($p) => $p->where('name', 'like', "%{$search}%")->orWhere('phone', 'like', "%{$search}%"))
+                  ->orWhereHas('doctor', fn($d) => $d->where('name', 'like', "%{$search}%"))
+                  ->orWhere('complaint', 'like', "%{$search}%")
+                  ->orWhere('diagnosis', 'like', "%{$search}%");
+            });
+        }
+
+        if ($doctorId = $request->get('doctor_id')) {
+            $query->where('doctor_id', $doctorId);
+        }
+
+        $diagnoses = $query->latest()->paginate(15);
+        $doctors = $clinic->doctors()->where('is_active', true)->get();
+
+        return view('admin.diagnoses.index', compact('diagnoses', 'doctors'));
+    }
+
+    public function create(Appointment $appointment)
+    {
+        $clinic = auth()->user()->clinic;
+        abort_if($appointment->clinic_id !== $clinic->id, 403);
+
+        $appointment->load(['patient', 'doctor.specialty']);
+
+        $specialty = $clinic->specialty ?? $appointment->doctor->specialty;
+        $diagramType = $this->getDiagramType($specialty?->name_en);
+
+        $diagnosis = $appointment->diagnosis;
+
+        return view('admin.diagnoses.create', compact('appointment', 'diagramType', 'diagnosis'));
+    }
+
+    public function store(Request $request, Appointment $appointment)
+    {
+        $clinic = auth()->user()->clinic;
+        abort_if($appointment->clinic_id !== $clinic->id, 403);
+
+        $validated = $request->validate([
+            'complaint' => 'nullable|string|max:2000',
+            'diagnosis' => 'nullable|string|max:2000',
+            'prescription' => 'nullable|string|max:2000',
+            'lab_tests' => 'nullable|string|max:2000',
+            'radiology' => 'nullable|string|max:2000',
+            'notes' => 'nullable|string|max:2000',
+            'diagram_data' => 'nullable|json',
+        ]);
+
+        $data = [
+            'clinic_id' => $clinic->id,
+            'branch_id' => $appointment->branch_id,
+            'appointment_id' => $appointment->id,
+            'patient_id' => $appointment->patient_id,
+            'doctor_id' => $appointment->doctor_id,
+            'complaint' => $validated['complaint'],
+            'diagnosis' => $validated['diagnosis'],
+            'prescription' => $validated['prescription'],
+            'lab_tests' => $validated['lab_tests'],
+            'radiology' => $validated['radiology'],
+            'notes' => $validated['notes'],
+            'diagram_data' => $validated['diagram_data'] ? json_decode($validated['diagram_data'], true) : null,
+        ];
+
+        $diagnosis = Diagnosis::updateOrCreate(
+            ['appointment_id' => $appointment->id],
+            $data
+        );
+
+        return redirect()->route('dashboard.appointments.show', $appointment)
+            ->with('success', __('app.diagnosis_saved'));
+    }
+
+    public function show(Diagnosis $diagnosis)
+    {
+        $clinic = auth()->user()->clinic;
+        abort_if($diagnosis->clinic_id !== $clinic->id, 403);
+
+        $diagnosis->load(['appointment', 'patient', 'doctor.specialty']);
+
+        $specialty = $clinic->specialty ?? $diagnosis->doctor->specialty;
+        $diagramType = $this->getDiagramType($specialty?->name_en);
+
+        return view('admin.diagnoses.show', compact('diagnosis', 'diagramType'));
+    }
+
+    private function getDiagramType(?string $specialtyName): string
+    {
+        $map = [
+            'Dentistry' => 'dental',
+            'Ophthalmology' => 'ophthalmology',
+            'Dermatology' => 'dermatology',
+            'Cardiology' => 'cardiology',
+            'Orthopedics' => 'orthopedics',
+            'Pediatrics' => 'pediatrics',
+            'ENT' => 'ent',
+            'Gynecology' => 'gynecology',
+            'Urology' => 'urology',
+            'Neurology' => 'neurology',
+            'General Medicine' => 'general',
+            'Psychiatry' => 'psychiatry',
+            'Internal Medicine' => 'internal-medicine',
+            'Physiotherapy' => 'physiotherapy',
+            'Nutrition' => 'nutrition',
+        ];
+
+        return $map[$specialtyName] ?? 'general';
+    }
+}
