@@ -50,30 +50,36 @@
     {{-- NAVBAR --}}
     <nav class="fixed top-0 inset-x-0 z-50 transition-all duration-500"
          x-data="{s:false}" x-init="window.addEventListener('scroll',()=>s=window.scrollY>30)"
-         :class="s?'bg-white/95 backdrop-blur-2xl shadow-lg shadow-gray-200/30 border-b border-gray-100':''">
+         :class="s?'bg-white/95 backdrop-blur-2xl shadow-lg shadow-gray-200/30 border-b border-gray-100':''"
+    >
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center py-4">
                 <a href="{{ route('home') }}" class="flex items-center gap-2.5 group">
                     <div class="w-10 h-10 bg-gradient-to-br from-indigo-600 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30 group-hover:scale-110 transition-transform">
                         <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
                     </div>
-                    <span class="text-xl font-extrabold text-gray-900">{{ __('app.app_name') }}</span>
+                    <span class="text-xl font-extrabold transition-colors" :class="s?'text-gray-900':'text-white'">{{ __('app.app_name') }}</span>
                 </a>
                 <div class="hidden md:flex items-center gap-8">
-                    <a href="#features" class="text-sm font-semibold text-gray-600 hover:text-indigo-600 transition-colors">{{ __('app.features') }}</a>
-                    <a href="#database" class="text-sm font-semibold text-gray-600 hover:text-indigo-600 transition-colors">{{ app()->getLocale()==='ar' ? 'قاعدة البيانات' : 'Database' }}</a>
-                    <a href="#how-it-works" class="text-sm font-semibold text-gray-600 hover:text-indigo-600 transition-colors">{{ __('app.landing_how_it_works') }}</a>
-                    <a href="#specialties" class="text-sm font-semibold text-gray-600 hover:text-indigo-600 transition-colors">{{ __('app.landing_specialties') }}</a>
+                    <a href="#features" class="text-sm font-semibold transition-colors" :class="s?'text-gray-600 hover:text-indigo-600':'text-indigo-200 hover:text-white'">{{ __('app.features') }}</a>
+                    <a href="#database" class="text-sm font-semibold transition-colors" :class="s?'text-gray-600 hover:text-indigo-600':'text-indigo-200 hover:text-white'">{{ app()->getLocale()==='ar' ? 'قاعدة البيانات' : 'Database' }}</a>
+                    <a href="#how-it-works" class="text-sm font-semibold transition-colors" :class="s?'text-gray-600 hover:text-indigo-600':'text-indigo-200 hover:text-white'">{{ __('app.landing_how_it_works') }}</a>
+                    <a href="#specialties" class="text-sm font-semibold transition-colors" :class="s?'text-gray-600 hover:text-indigo-600':'text-indigo-200 hover:text-white'">{{ __('app.landing_specialties') }}</a>
                 </div>
                 <div class="flex items-center gap-3">
-                    <div class="flex bg-gray-100 rounded-xl p-1 text-xs">
-                        <a href="{{ route('lang.switch', 'en') }}" class="px-3 py-1.5 rounded-lg font-bold transition-all {{ app()->getLocale()==='en' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500' }}">EN</a>
-                        <a href="{{ route('lang.switch', 'ar') }}" class="px-3 py-1.5 rounded-lg font-bold transition-all {{ app()->getLocale()==='ar' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500' }}">عربي</a>
+                    <div class="flex rounded-xl p-1 text-xs transition-colors" :class="s?'bg-gray-100':'bg-white/10'">
+                        @if(app()->getLocale()==='en')
+                            <a href="{{ route('lang.switch', 'en') }}" class="px-3 py-1.5 rounded-lg font-bold transition-all bg-white text-gray-900 shadow-sm">EN</a>
+                            <a href="{{ route('lang.switch', 'ar') }}" class="px-3 py-1.5 rounded-lg font-bold transition-all" :class="s?'text-gray-500':'text-indigo-200'">عربي</a>
+                        @else
+                            <a href="{{ route('lang.switch', 'en') }}" class="px-3 py-1.5 rounded-lg font-bold transition-all" :class="s?'text-gray-500':'text-indigo-200'">EN</a>
+                            <a href="{{ route('lang.switch', 'ar') }}" class="px-3 py-1.5 rounded-lg font-bold transition-all bg-white text-gray-900 shadow-sm">عربي</a>
+                        @endif
                     </div>
                     @auth
                         <a href="{{ route('dashboard') }}" class="px-5 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/25">{{ __('app.dashboard') }}</a>
                     @else
-                        <a href="{{ route('login') }}" class="text-sm font-bold text-gray-700 hover:text-indigo-600 transition-colors hidden sm:block">{{ __('app.login') }}</a>
+                        <a href="{{ route('login') }}" class="text-sm font-bold transition-colors hidden sm:block" :class="s?'text-gray-700 hover:text-indigo-600':'text-indigo-200 hover:text-white'">{{ __('app.login') }}</a>
                         <a href="{{ route('register.clinic') }}" class="px-5 py-2.5 bg-indigo-600 text-white text-sm font-bold rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/25">{{ __('app.get_started') }}</a>
                     @endauth
                 </div>
@@ -214,14 +220,18 @@
                         </div>
                         <div class="flex-1 bg-white rounded-lg px-4 py-1.5 text-xs text-gray-400 font-medium text-center border border-gray-200 flex items-center justify-center gap-2">
                             <svg class="w-3 h-3 text-emerald-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/></svg>
-                            {{ __('app.app_name') | strtolower }}.com/dashboard
+                            {{ strtolower(__('app.app_name')) }}.com/dashboard
                         </div>
                     </div>
 
                     {{-- Dashboard UI --}}
                     <div class="flex">
                         {{-- Sidebar --}}
-                        <div class="w-14 md:w-52 bg-white border-{{ app()->getLocale()==='ar' ? 'l' : 'r' }} border-gray-100 py-4 shrink-0 hidden sm:block">
+                        @if(app()->getLocale()==='ar')
+                        <div class="w-14 md:w-52 bg-white border-l border-gray-100 py-4 shrink-0 hidden sm:block">
+                        @else
+                        <div class="w-14 md:w-52 bg-white border-r border-gray-100 py-4 shrink-0 hidden sm:block">
+                        @endif
                             <div class="flex items-center gap-2.5 px-4 mb-6">
                                 <div class="w-8 h-8 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center">
                                     <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
