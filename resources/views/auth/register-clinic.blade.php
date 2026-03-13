@@ -23,78 +23,187 @@
     <div class="min-h-screen flex" x-data="{ step: {{ $initialStep }}, loading: false, hasSystem: {{ old('has_existing_system', false) ? 'true' : 'false' }}, isSolo: {{ old('is_solo_doctor', '0') == '1' ? 'true' : 'false' }} }">
 
         {{-- Left Side - Branding --}}
-        <div class="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-500 overflow-hidden">
-            <div class="absolute inset-0">
-                <div class="absolute top-20 left-10 w-72 h-72 bg-white/10 rounded-full blur-3xl animate-pulse"></div>
-                <div class="absolute bottom-20 right-10 w-96 h-96 bg-purple-300/10 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
-                <div class="absolute top-1/2 left-1/3 w-64 h-64 bg-pink-300/10 rounded-full blur-3xl animate-pulse" style="animation-delay: 2s;"></div>
+        <div class="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-indigo-950 via-indigo-900 to-purple-950 overflow-hidden">
+            {{-- Animated background --}}
+            <div class="absolute inset-0 opacity-[0.06]" style="background-image:linear-gradient(rgba(129,140,248,.5) 1px,transparent 1px),linear-gradient(90deg,rgba(129,140,248,.5) 1px,transparent 1px);background-size:50px 50px"></div>
+            <div class="absolute top-1/4 left-1/2 -translate-x-1/2 w-[500px] h-[300px] bg-indigo-500/15 rounded-full blur-[100px]"></div>
+            <div class="absolute bottom-20 right-10 w-[300px] h-[300px] bg-purple-500/10 rounded-full blur-[80px]"></div>
+
+            {{-- Floating medical icons --}}
+            <style>
+                @keyframes rfl1{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-15px) rotate(3deg)}}
+                @keyframes rfl2{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px) rotate(-2deg)}}
+                @keyframes rfl3{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+                @keyframes rfl4{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-18px) rotate(-5deg)}}
+                .rfl-1{animation:rfl1 6s ease-in-out infinite}.rfl-2{animation:rfl2 8s ease-in-out infinite}.rfl-3{animation:rfl3 7s ease-in-out infinite}.rfl-4{animation:rfl4 9s ease-in-out infinite}
+            </style>
+
+            <div class="absolute top-[12%] right-[10%] rfl-1">
+                <div class="w-12 h-12 bg-white/[0.07] backdrop-blur-sm border border-white/[0.1] rounded-xl flex items-center justify-center rotate-12">
+                    <svg class="w-6 h-6 text-indigo-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21"/></svg>
+                </div>
             </div>
-            <div class="absolute inset-0 opacity-[0.03]">
-                <svg class="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-                    <defs><pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="white" stroke-width="1"/></pattern></defs>
-                    <rect width="100%" height="100%" fill="url(#grid)"/>
-                </svg>
+            <div class="absolute top-[35%] left-[7%] rfl-2">
+                <div class="w-10 h-10 bg-white/[0.07] backdrop-blur-sm border border-white/[0.1] rounded-lg flex items-center justify-center -rotate-6">
+                    <svg class="w-5 h-5 text-purple-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.104v5.714a2.25 2.25 0 01-.659 1.591L5 14.5M9.75 3.104c-.251.023-.501.05-.75.082m.75-.082a24.301 24.301 0 014.5 0"/></svg>
+                </div>
+            </div>
+            <div class="absolute bottom-[25%] right-[12%] rfl-3" style="animation-delay:-2s">
+                <div class="w-11 h-11 bg-white/[0.07] backdrop-blur-sm border border-white/[0.1] rounded-xl flex items-center justify-center rotate-6">
+                    <svg class="w-5 h-5 text-emerald-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0"/></svg>
+                </div>
+            </div>
+            <div class="absolute bottom-[45%] left-[15%] rfl-4" style="animation-delay:-3s">
+                <div class="w-9 h-9 bg-white/[0.07] backdrop-blur-sm border border-white/[0.1] rounded-lg flex items-center justify-center rotate-3">
+                    <svg class="w-4 h-4 text-pink-300" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/></svg>
+                </div>
             </div>
 
             <div class="relative z-10 flex flex-col justify-between p-12 w-full">
+                {{-- Logo --}}
                 <div>
-                    <a href="{{ route('home') }}" class="inline-flex items-center gap-3">
-                        <div class="w-10 h-10 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center">
-                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
+                    <a href="{{ route('home') }}" class="inline-flex items-center gap-3 group">
+                        <div class="w-11 h-11 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/25 group-hover:scale-110 transition-transform">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
                         </div>
-                        <span class="text-2xl font-bold text-white">{{ __('app.app_name') }}</span>
+                        <span class="text-2xl font-extrabold text-white">{{ __('app.app_name') }}</span>
                     </a>
                 </div>
 
                 {{-- Dynamic content based on step --}}
                 <div class="space-y-8">
                     <div>
-                        <h1 class="text-4xl xl:text-5xl font-extrabold leading-tight mb-4">
+                        <h1 class="text-4xl xl:text-5xl font-black leading-tight mb-5">
                             <span x-show="step === 1">
-                                @if(app()->getLocale() === 'ar') ابدأ رحلتك<br>في إدارة عيادتك @else Start Your<br>Clinic Journey @endif
+                                @if(app()->getLocale() === 'ar')
+                                    <span class="text-white">ابدأ رحلتك</span><br>
+                                    <span class="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">في إدارة عيادتك</span>
+                                @else
+                                    <span class="text-white">Start Your</span><br>
+                                    <span class="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Clinic Journey</span>
+                                @endif
                             </span>
                             <span x-show="step === 2" x-cloak>
-                                @if(app()->getLocale() === 'ar') خلينا نعرف<br>عيادتك أكتر @else Tell Us More<br>About Your Clinic @endif
+                                @if(app()->getLocale() === 'ar')
+                                    <span class="text-white">خلينا نعرف</span><br>
+                                    <span class="bg-gradient-to-r from-purple-400 via-pink-400 to-rose-400 bg-clip-text text-transparent">عيادتك أكتر</span>
+                                @else
+                                    <span class="text-white">Tell Us More</span><br>
+                                    <span class="bg-gradient-to-r from-purple-400 via-pink-400 to-rose-400 bg-clip-text text-transparent">About Your Clinic</span>
+                                @endif
                             </span>
                             <span x-show="step === 3" x-cloak>
-                                @if(app()->getLocale() === 'ar') خطوة أخيرة<br>لتفعيل حسابك @else Last Step<br>To Activate @endif
+                                @if(app()->getLocale() === 'ar')
+                                    <span class="text-white">خطوة أخيرة</span><br>
+                                    <span class="bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">لتفعيل حسابك</span>
+                                @else
+                                    <span class="text-white">Last Step</span><br>
+                                    <span class="bg-gradient-to-r from-emerald-400 via-teal-400 to-cyan-400 bg-clip-text text-transparent">To Activate</span>
+                                @endif
                             </span>
                         </h1>
-                        <p class="text-lg text-white/70 max-w-md">{{ __('app.hero_subtitle') }}</p>
+                        <p class="text-lg text-indigo-200/60 max-w-md leading-relaxed">{{ __('app.hero_subtitle') }}</p>
                     </div>
 
-                    <div class="space-y-4">
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
-                                <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                    {{-- Step-specific preview cards --}}
+                    {{-- Step 1: Clinic setup preview --}}
+                    <div x-show="step === 1" class="bg-white/[0.06] backdrop-blur-sm border border-white/[0.08] rounded-2xl p-5 max-w-sm">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-9 h-9 bg-indigo-500/20 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21"/></svg>
                             </div>
-                            <span class="text-white/80">{{ __('app.feature_appointments') }}</span>
+                            <div>
+                                <p class="text-sm font-bold text-white">{{ app()->getLocale()==='ar' ? 'إعداد العيادة' : 'Clinic Setup' }}</p>
+                                <p class="text-[11px] text-indigo-300/50">{{ app()->getLocale()==='ar' ? 'سجّل بياناتك الأساسية' : 'Register your basic info' }}</p>
+                            </div>
+                        </div>
+                        <div class="space-y-2">
+                            <div class="h-3 bg-white/[0.06] rounded-full w-full"></div>
+                            <div class="h-3 bg-white/[0.06] rounded-full w-3/4"></div>
+                            <div class="h-3 bg-indigo-500/20 rounded-full w-1/2"></div>
+                        </div>
+                    </div>
+
+                    {{-- Step 2: Clinic details preview --}}
+                    <div x-show="step === 2" x-cloak class="bg-white/[0.06] backdrop-blur-sm border border-white/[0.08] rounded-2xl p-5 max-w-sm">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-9 h-9 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 11-3 0m3 0a1.5 1.5 0 10-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 01-3 0m3 0a1.5 1.5 0 00-3 0m-9.75 0h9.75"/></svg>
+                            </div>
+                            <div>
+                                <p class="text-sm font-bold text-white">{{ app()->getLocale()==='ar' ? 'تفاصيل العيادة' : 'Clinic Details' }}</p>
+                                <p class="text-[11px] text-indigo-300/50">{{ app()->getLocale()==='ar' ? 'حدّد نظام عملك' : 'Configure your workflow' }}</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2">
+                            <div class="bg-white/[0.06] rounded-lg p-3 text-center">
+                                <svg class="w-5 h-5 text-purple-400 mx-auto mb-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <p class="text-[9px] text-indigo-300/50">{{ app()->getLocale()==='ar' ? 'مواعيد العمل' : 'Working Hours' }}</p>
+                            </div>
+                            <div class="bg-white/[0.06] rounded-lg p-3 text-center">
+                                <svg class="w-5 h-5 text-pink-400 mx-auto mb-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg>
+                                <p class="text-[9px] text-indigo-300/50">{{ app()->getLocale()==='ar' ? 'فريق العمل' : 'Team Size' }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Step 3: Almost done preview --}}
+                    <div x-show="step === 3" x-cloak class="bg-white/[0.06] backdrop-blur-sm border border-white/[0.08] rounded-2xl p-5 max-w-sm">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="w-9 h-9 bg-emerald-500/20 rounded-lg flex items-center justify-center">
+                                <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 1.268-.63 2.39-1.593 3.068a3.745 3.745 0 01-1.043 3.296 3.745 3.745 0 01-3.296 1.043A3.745 3.745 0 0112 21c-1.268 0-2.39-.63-3.068-1.593a3.746 3.746 0 01-3.296-1.043 3.745 3.745 0 01-1.043-3.296A3.745 3.745 0 013 12c0-1.268.63-2.39 1.593-3.068a3.745 3.745 0 011.043-3.296 3.746 3.746 0 013.296-1.043A3.746 3.746 0 0112 3c1.268 0 2.39.63 3.068 1.593a3.746 3.746 0 013.296 1.043 3.745 3.745 0 011.043 3.296A3.745 3.745 0 0121 12z"/></svg>
+                            </div>
+                            <div>
+                                <p class="text-sm font-bold text-white">{{ app()->getLocale()==='ar' ? 'تقريباً خلصت!' : 'Almost Done!' }}</p>
+                                <p class="text-[11px] text-indigo-300/50">{{ app()->getLocale()==='ar' ? 'أنشئ حساب المدير' : 'Create admin account' }}</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2">
+                            <div class="bg-white/[0.06] rounded-lg p-3 text-center">
+                                <p class="text-lg font-black text-white">18</p>
+                                <p class="text-[9px] text-indigo-300/50">{{ __('app.appointments') }}</p>
+                            </div>
+                            <div class="bg-white/[0.06] rounded-lg p-3 text-center">
+                                <p class="text-lg font-black text-white">248</p>
+                                <p class="text-[9px] text-indigo-300/50">{{ __('app.patients') }}</p>
+                            </div>
+                            <div class="bg-white/[0.06] rounded-lg p-3 text-center">
+                                <p class="text-lg font-black text-emerald-400">+12%</p>
+                                <p class="text-[9px] text-indigo-300/50">{{ app()->getLocale()==='ar' ? 'نمو' : 'Growth' }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Feature checkmarks --}}
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-3">
+                            <div class="w-7 h-7 rounded-lg bg-emerald-500/15 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-sm text-indigo-200/70">{{ __('app.feature_appointments') }}</span>
                         </div>
                         <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
-                                <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            <div class="w-7 h-7 rounded-lg bg-emerald-500/15 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                             </div>
-                            <span class="text-white/80">{{ __('app.feature_patients') }}</span>
+                            <span class="text-sm text-indigo-200/70">{{ __('app.feature_patients') }}</span>
                         </div>
                         <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
-                                <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            <div class="w-7 h-7 rounded-lg bg-emerald-500/15 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                             </div>
-                            <span class="text-white/80">{{ __('app.feature_billing') }}</span>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <div class="w-8 h-8 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center flex-shrink-0">
-                                <svg class="w-4 h-4 text-emerald-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-                            </div>
-                            <span class="text-white/80">{{ __('app.feature_multi_lang') }}</span>
+                            <span class="text-sm text-indigo-200/70">{{ __('app.feature_billing') }}</span>
                         </div>
                     </div>
                 </div>
 
+                {{-- Bottom stats --}}
                 <div class="flex gap-8">
-                    <div><div class="text-3xl font-bold">500+</div><div class="text-sm text-white/60">{{ __('app.clinics') }}</div></div>
-                    <div><div class="text-3xl font-bold">50K+</div><div class="text-sm text-white/60">{{ __('app.patients') }}</div></div>
-                    <div><div class="text-3xl font-bold">99.9%</div><div class="text-sm text-white/60">Uptime</div></div>
+                    <div><div class="text-2xl font-black text-white">5,000+</div><div class="text-xs text-indigo-300/50 font-medium">{{ app()->getLocale()==='ar' ? 'دواء' : 'Medications' }}</div></div>
+                    <div class="w-px h-10 bg-white/10"></div>
+                    <div><div class="text-2xl font-black text-white">500+</div><div class="text-xs text-indigo-300/50 font-medium">{{ app()->getLocale()==='ar' ? 'تحليل' : 'Lab Tests' }}</div></div>
+                    <div class="w-px h-10 bg-white/10"></div>
+                    <div><div class="text-2xl font-black text-white">15+</div><div class="text-xs text-indigo-300/50 font-medium">{{ app()->getLocale()==='ar' ? 'تخصص' : 'Specialties' }}</div></div>
                 </div>
             </div>
         </div>
