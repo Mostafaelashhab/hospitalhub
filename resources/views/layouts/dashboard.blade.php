@@ -63,12 +63,21 @@
                 </div>
             </div>
             <div class="flex items-center gap-2 mb-2">
-                <a href="{{ route('lang.switch', 'ar') }}" class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium rounded-xl transition-all duration-200 {{ app()->getLocale() === 'ar' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'text-gray-500 hover:bg-gray-100 border border-gray-100' }}">
-                    العربية
-                </a>
-                <a href="{{ route('lang.switch', 'en') }}" class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium rounded-xl transition-all duration-200 {{ app()->getLocale() === 'en' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'text-gray-500 hover:bg-gray-100 border border-gray-100' }}">
+                @if(app()->getLocale() === 'ar')
+                <a href="{{ route('lang.switch', 'en') }}" class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium rounded-xl transition-all duration-200 text-gray-500 hover:bg-gray-100 border border-gray-100">
                     English
                 </a>
+                <a href="{{ route('lang.switch', 'ar') }}" class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium rounded-xl transition-all duration-200 bg-indigo-50 text-indigo-700 border border-indigo-200">
+                    العربية
+                </a>
+                @else
+                <a href="{{ route('lang.switch', 'ar') }}" class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium rounded-xl transition-all duration-200 text-gray-500 hover:bg-gray-100 border border-gray-100">
+                    العربية
+                </a>
+                <a href="{{ route('lang.switch', 'en') }}" class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 text-sm font-medium rounded-xl transition-all duration-200 bg-indigo-50 text-indigo-700 border border-indigo-200">
+                    English
+                </a>
+                @endif
             </div>
             <form method="POST" action="{{ route('logout') }}">
                 @csrf
@@ -83,11 +92,11 @@
     {{-- Main content --}}
     <div class="min-h-screen" id="main-content">
         {{-- Top Header Bar --}}
-        <header class="sticky top-0 z-30 glass-header border-b border-gray-200 flex items-center {{ app()->getLocale() === 'ar' ? 'flex-row-reverse' : '' }} justify-between px-4 lg:px-8 pwa-safe-top" style="min-height: calc(3.5rem + env(safe-area-inset-top, 0px)); padding-top: env(safe-area-inset-top, 0px);">
+        <header class="sticky top-0 z-30 glass-header border-b border-gray-200 flex items-center justify-between px-4 lg:px-8 pwa-safe-top" style="min-height: calc(3.5rem + env(safe-area-inset-top, 0px)); padding-top: env(safe-area-inset-top, 0px);">
             {{-- Spacer (hamburger removed - bottom nav handles mobile) --}}
             <div class="block"></div>
 
-            {{-- Branch + Lang (left in RTL, right in LTR) --}}
+            {{-- Branch + Lang --}}
             <div class="flex items-center gap-3">
                 {{-- Branch Switcher --}}
                 @php
@@ -105,7 +114,7 @@
                         <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
                     </button>
                     <div x-show="open" @click.away="open = false" x-transition
-                         class="absolute {{ app()->getLocale() === 'ar' ? 'left-0' : 'right-0' }} mt-2 bg-white border border-gray-200 rounded-xl shadow-lg py-2 z-50" style="min-width: 280px;">
+                         class="absolute {{ app()->getLocale() === 'ar' ? 'right-0' : 'right-0' }} mt-2 bg-white border border-gray-200 rounded-xl shadow-lg py-2 z-50" style="min-width: 280px;">
                         <p class="px-4 py-2 text-xs font-semibold text-gray-400 uppercase tracking-wider border-b border-gray-100 mb-1">{{ __('app.branches') }}</p>
                         @foreach($branches as $branch)
                         <form method="POST" action="{{ route('dashboard.branches.switch', $branch) }}">
@@ -188,41 +197,62 @@
 
                 {{-- Language Switcher (desktop only, mobile has it in bottom sheet) --}}
                 <div class="hidden lg:flex items-center border border-gray-200 rounded-xl overflow-hidden">
+                    @if(app()->getLocale() === 'ar')
+                    <a href="{{ route('lang.switch', 'en') }}"
+                       class="px-3 py-1.5 text-xs font-semibold transition-all bg-white text-gray-500 hover:bg-gray-50">
+                        EN
+                    </a>
                     <a href="{{ route('lang.switch', 'ar') }}"
-                       class="px-3 py-1.5 text-xs font-semibold transition-all {{ app()->getLocale() === 'ar' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-500 hover:bg-gray-50' }}">
+                       class="px-3 py-1.5 text-xs font-semibold transition-all bg-indigo-600 text-white">
+                        عربي
+                    </a>
+                    @else
+                    <a href="{{ route('lang.switch', 'ar') }}"
+                       class="px-3 py-1.5 text-xs font-semibold transition-all bg-white text-gray-500 hover:bg-gray-50">
                         عربي
                     </a>
                     <a href="{{ route('lang.switch', 'en') }}"
-                       class="px-3 py-1.5 text-xs font-semibold transition-all {{ app()->getLocale() === 'en' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-500 hover:bg-gray-50' }}">
+                       class="px-3 py-1.5 text-xs font-semibold transition-all bg-indigo-600 text-white">
                         EN
                     </a>
+                    @endif
                 </div>
             </div>
         </header>
 
-        {{-- Flash messages --}}
-        @if(session('success'))
-        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)" x-transition
-             class="mx-6 lg:mx-8 mt-4 px-5 py-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 text-sm flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center">
-                    <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                </div>
-                <span class="font-medium">{{ session('success') }}</span>
+     
+
+        {{-- Low Balance Warning Banner --}}
+        @php
+            $walletBalance = auth()->user()->clinic?->wallet?->balance ?? 0;
+            $userRole = auth()->user()->role;
+            $isFreeMode = \App\Models\PlatformSetting::isFreeModeActive();
+        @endphp
+        @if(!$isFreeMode && in_array($userRole, ['admin', 'accountant', 'secretary']) && $walletBalance <= 10 && $walletBalance > 0)
+        <div class="mx-4 lg:mx-8 mt-4 bg-amber-50 border border-amber-200 rounded-xl px-5 py-3 flex items-center gap-3">
+            <div class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
             </div>
-            <button @click="show = false" class="text-emerald-400 hover:text-emerald-600 transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-amber-800">{{ __('app.low_balance_warning') }}</p>
+                <p class="text-xs text-amber-600 mt-0.5">{{ __('app.low_balance_desc', ['count' => $walletBalance]) }}</p>
+            </div>
+            <a href="{{ route('dashboard.recharge.index') }}" class="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-amber-500 hover:bg-amber-600 rounded-lg transition-all">
+                {{ __('app.recharge_now') }}
+            </a>
         </div>
-        @endif
-        @if(session('error'))
-        <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)" x-transition
-             class="mx-6 lg:mx-8 mt-4 px-5 py-3.5 bg-red-50 border border-red-200 rounded-xl text-red-700 text-sm flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
-                    <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                </div>
-                <span class="font-medium">{{ session('error') }}</span>
+        @elseif(!$isFreeMode && in_array($userRole, ['admin', 'accountant', 'secretary']) && $walletBalance <= 0)
+        <div class="mx-4 lg:mx-8 mt-4 bg-red-50 border border-red-200 rounded-xl px-5 py-3 flex items-center gap-3">
+            <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center shrink-0">
+                <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
             </div>
-            <button @click="show = false" class="text-red-400 hover:text-red-600 transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-red-800">{{ __('app.zero_balance_warning') }}</p>
+                <p class="text-xs text-red-600 mt-0.5">{{ __('app.zero_balance_desc') }}</p>
+            </div>
+            <a href="{{ route('dashboard.recharge.index') }}" class="shrink-0 inline-flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-white bg-red-500 hover:bg-red-600 rounded-lg transition-all">
+                {{ __('app.recharge_now') }}
+            </a>
         </div>
         @endif
 

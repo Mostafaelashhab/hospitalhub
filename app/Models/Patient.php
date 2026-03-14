@@ -52,4 +52,24 @@ class Patient extends Model
     {
         return $this->hasMany(Invoice::class);
     }
+
+    public function files()
+    {
+        return $this->hasMany(PatientFile::class);
+    }
+
+    public function insurances()
+    {
+        return $this->hasMany(PatientInsurance::class);
+    }
+
+    public function activeInsurance()
+    {
+        return $this->hasOne(PatientInsurance::class)
+            ->where('is_active', true)
+            ->where(function ($q) {
+                $q->whereNull('expiry_date')->orWhere('expiry_date', '>=', now());
+            })
+            ->latest();
+    }
 }

@@ -199,7 +199,52 @@
             </div>
             @endif
 
-            @if($diagnosis->prescription)
+            @if($diagnosis->prescription && $diagnosis->prescription->items->count())
+            <div class="bg-white rounded-2xl border border-gray-200/80 shadow-lg shadow-gray-200/50 p-6 hover:shadow-xl transition-shadow">
+                <div class="flex items-center justify-between mb-4">
+                    <div class="flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-lg bg-indigo-100 flex items-center justify-center">
+                            <svg class="w-3.5 h-3.5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                        </div>
+                        <h4 class="text-sm font-bold text-gray-900">{{ __('app.prescription') }}</h4>
+                    </div>
+                    <a href="{{ route('dashboard.prescriptions.print', $diagnosis->prescription) }}" target="_blank"
+                       class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg hover:bg-indigo-100 transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                        {{ __('app.print') }}
+                    </a>
+                </div>
+                <div class="space-y-3">
+                    @foreach($diagnosis->prescription->items as $index => $item)
+                    <div class="bg-gray-50 rounded-xl p-3">
+                        <div class="flex items-center gap-2 mb-1.5">
+                            <span class="w-5 h-5 bg-indigo-100 text-indigo-700 rounded-md flex items-center justify-center text-[10px] font-bold">{{ $index + 1 }}</span>
+                            <span class="text-sm font-semibold text-gray-900">{{ $item->drug_name }}</span>
+                        </div>
+                        <div class="flex flex-wrap gap-3 {{ app()->getLocale() === 'ar' ? 'pr-7' : 'pl-7' }}">
+                            @if($item->dosage)
+                            <span class="text-xs text-gray-500"><span class="font-semibold text-gray-700">{{ __('app.dosage') }}:</span> {{ $item->dosage }}</span>
+                            @endif
+                            @if($item->frequency)
+                            <span class="text-xs text-gray-500"><span class="font-semibold text-gray-700">{{ __('app.frequency') }}:</span> {{ __('app.' . $item->frequency) }}</span>
+                            @endif
+                            @if($item->duration)
+                            <span class="text-xs text-gray-500"><span class="font-semibold text-gray-700">{{ __('app.duration') }}:</span> {{ $item->duration }}</span>
+                            @endif
+                            @if($item->instructions)
+                            <span class="text-xs text-gray-500"><span class="font-semibold text-gray-700">{{ __('app.instructions') }}:</span> {{ $item->instructions }}</span>
+                            @endif
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+                @if($diagnosis->prescription->notes)
+                <div class="mt-3 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+                    <p class="text-xs text-amber-700"><span class="font-semibold">{{ __('app.notes') }}:</span> {{ $diagnosis->prescription->notes }}</p>
+                </div>
+                @endif
+            </div>
+            @elseif($diagnosis->prescription_text ?? $diagnosis->prescription)
             <div class="bg-white rounded-2xl border border-gray-200/80 shadow-lg shadow-gray-200/50 p-6 hover:shadow-xl transition-shadow">
                 <div class="flex items-center gap-2 mb-3">
                     <div class="w-7 h-7 rounded-lg bg-indigo-100 flex items-center justify-center">

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Clinic;
+use App\Models\RechargeRequest;
 use App\Models\User;
 use App\Notifications\BroadcastNotification;
 use Illuminate\Http\Request;
@@ -39,7 +40,12 @@ class ClinicManagementController extends Controller
             $q->latest()->take(20);
         }]);
 
-        return view('super-admin.clinics.show', compact('clinic'));
+        $rechargeRequests = RechargeRequest::where('clinic_id', $clinic->id)
+            ->with('user')
+            ->latest()
+            ->paginate(10, ['*'], 'recharge_page');
+
+        return view('super-admin.clinics.show', compact('clinic', 'rechargeRequests'));
     }
 
     public function updateStatus(Request $request, Clinic $clinic)
@@ -90,6 +96,82 @@ class ClinicManagementController extends Controller
         return back()->with('success', __('app.points_deducted'));
     }
 
+    public function approveRecharge(RechargeRequest $rechargeRequest)
+    {
+        if ($rechargeRequest->status !== 'pending') {
+            return back()->with('error', __('app.request_already_processed'));
+        }
+
+        $rechargeRequest->update(['status' => 'approved']);
+
+        // Credit the clinic wallet
+        $wallet = $rechargeRequest->clinic->wallet;
+        if ($wallet) {
+            $wallet->credit(
+                $rechargeRequest->points,
+                __('app.recharge_approved_desc', ['method' => __('app.payment_' . $rechargeRequest->payment_method)]),
+                'recharge',
+                $rechargeRequest->id,
+            );
+        }
+
+        // Notify the clinic admin
+        $admins = User::where('clinic_id', $rechargeRequest->clinic_id)->where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            try {
+                $admin->notify(new BroadcastNotification(
+                    __('app.recharge_approved_title'),
+                    __('app.recharge_approved_body', ['points' => number_format($rechargeRequest->points)])
+                ));
+            } catch (\Exception $e) {}
+        }
+
+        return back()->with('success', __('app.recharge_request_approved'));
+    }
+
+    public function rejectRecharge(Request $request, RechargeRequest $rechargeRequest)
+    {
+        if ($rechargeRequest->status !== 'pending') {
+            return back()->with('error', __('app.request_already_processed'));
+        }
+
+        $rechargeRequest->update([
+            'status' => 'rejected',
+            'admin_notes' => $request->input('admin_notes'),
+        ]);
+
+        // Notify the clinic admin
+        $admins = User::where('clinic_id', $rechargeRequest->clinic_id)->where('role', 'admin')->get();
+        foreach ($admins as $admin) {
+            try {
+                $admin->notify(new BroadcastNotification(
+                    __('app.recharge_rejected_title'),
+                    __('app.recharge_rejected_body', ['points' => number_format($rechargeRequest->points)])
+                ));
+            } catch (\Exception $e) {}
+        }
+
+        return back()->with('success', __('app.recharge_request_rejected'));
+    }
+
+    public function rechargeRequests(Request $request)
+    {
+        $query = RechargeRequest::with(['clinic', 'user'])->latest();
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('payment_method')) {
+            $query->where('payment_method', $request->payment_method);
+        }
+
+        $rechargeRequests = $query->paginate(20);
+        $pendingCount = RechargeRequest::where('status', 'pending')->count();
+
+        return view('super-admin.recharge-requests', compact('rechargeRequests', 'pendingCount'));
+    }
+
     public function sendNotification(Request $request)
     {
         $validated = $request->validate([
@@ -105,7 +187,11 @@ class ClinicManagementController extends Controller
             // Send to all clinic admins
             $admins = User::where('role', 'admin')->whereNotNull('clinic_id')->get();
             foreach ($admins as $admin) {
-                $admin->notify($notification);
+                try {
+                    $admin->notify($notification);
+                } catch (\Exception $e) {
+                    // Skip notification failures
+                }
             }
             $count = $admins->count();
         } else {
@@ -114,7 +200,11 @@ class ClinicManagementController extends Controller
                 ->whereIn('role', ['admin', 'doctor', 'accountant', 'secretary'])
                 ->get();
             foreach ($staff as $user) {
-                $user->notify($notification);
+                try {
+                    $user->notify($notification);
+                } catch (\Exception $e) {
+                    // Skip notification failures
+                }
             }
             $count = $staff->count();
         }

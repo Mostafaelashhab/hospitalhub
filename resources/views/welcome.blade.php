@@ -119,12 +119,17 @@
             </div>
         </div>
 
+        @php $landingFreeMode = \App\Models\PlatformSetting::isFreeModeActive(); @endphp
         <div class="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-32 pb-10">
             {{-- Text - Centered --}}
             <div class="text-center max-w-4xl mx-auto mb-16">
                 <div class="fade-up inline-flex items-center gap-2.5 px-5 py-2.5 bg-white/[0.08] border border-white/[0.12] rounded-full text-sm font-bold text-indigo-300 mb-8 backdrop-blur-sm">
                     <span class="relative flex h-2.5 w-2.5"><span class="animate-ping absolute h-full w-full rounded-full bg-indigo-400 opacity-75"></span><span class="relative rounded-full h-2.5 w-2.5 bg-indigo-400"></span></span>
-                    {{ __('app.landing_badge') }}
+                    @if($landingFreeMode)
+                        {{ __('app.landing_badge') }}
+                    @else
+                        {{ __('app.landing_badge_paid') }}
+                    @endif
                 </div>
                 <h1 class="fade-up d1 text-4xl md:text-6xl lg:text-7xl font-black leading-[1.08] mb-6 tracking-tight text-white">
                     {{ __('app.landing_hero_line1') }}
@@ -133,7 +138,7 @@
                 <p class="fade-up d2 text-lg md:text-xl text-indigo-200/70 mb-10 max-w-2xl mx-auto leading-relaxed">{{ __('app.landing_hero_desc') }}</p>
                 <div class="fade-up d3 flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
                     <a href="{{ route('register.clinic') }}" class="group w-full sm:w-auto flex items-center justify-center gap-2.5 px-8 py-4 bg-white text-indigo-700 font-bold rounded-2xl hover:bg-indigo-50 transition-all shadow-xl shadow-black/20 text-lg hover:scale-[1.02]">
-                        {{ __('app.landing_start_free') }}
+                        {{ $landingFreeMode ? __('app.landing_start_free') : __('app.landing_start_now') }}
                         <svg class="w-5 h-5 rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
                     </a>
                     <a href="#features" class="w-full sm:w-auto flex items-center justify-center gap-2.5 px-8 py-4 text-white font-bold rounded-2xl border-2 border-white/40 hover:bg-white/10 hover:border-white/60 transition-all text-lg backdrop-blur-sm">
@@ -997,7 +1002,7 @@
             <p class="text-xl text-indigo-200/70 mb-10 max-w-xl mx-auto leading-relaxed">{{ __('app.landing_cta_desc') }}</p>
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
                 <a href="{{ route('register.clinic') }}" class="group w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-10 py-5 bg-white text-indigo-700 text-lg font-black rounded-2xl hover:bg-indigo-50 transition-all shadow-xl shadow-black/20 hover:scale-[1.02]">
-                    {{ __('app.landing_start_free') }}
+                    {{ $landingFreeMode ? __('app.landing_start_free') : __('app.landing_start_now') }}
                     <svg class="w-5 h-5 rtl:rotate-180 group-hover:translate-x-1 rtl:group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
                 </a>
                 <a href="#features" class="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-10 py-5 text-white text-lg font-bold rounded-2xl border-2 border-white/20 hover:bg-white/10 transition-all backdrop-blur-sm">
@@ -1007,7 +1012,7 @@
             <div class="flex items-center justify-center gap-6 flex-wrap">
                 <p class="text-sm text-indigo-300/80 font-medium flex items-center gap-2">
                     <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                    {{ __('app.landing_no_credit') }}
+                    {{ $landingFreeMode ? __('app.landing_no_credit') : __('app.landing_no_credit_paid') }}
                 </p>
                 <p class="text-sm text-indigo-300/80 font-medium flex items-center gap-2">
                     <svg class="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>

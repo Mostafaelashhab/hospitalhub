@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\Diagnosis;
 use App\Models\Patient;
+use App\Models\Prescription;
+use App\Models\PrescriptionItem;
 use App\Models\User;
 use App\Notifications\AppointmentStatusChanged;
 use App\Notifications\DiagnosisRecorded;
@@ -45,7 +47,20 @@ class DoctorDashboardController extends Controller
             ->take(5)
             ->get();
 
-        return view('doctor.dashboard', compact('doctor', 'stats', 'todayAppointments', 'upcomingAppointments'));
+        $queueWaiting = $doctor->appointments()
+            ->with(['patient'])
+            ->where('appointment_date', today())
+            ->where('queue_status', 'waiting')
+            ->orderBy('queue_number')
+            ->get();
+
+        $queueCurrent = $doctor->appointments()
+            ->with(['patient'])
+            ->where('appointment_date', today())
+            ->where('queue_status', 'in_room')
+            ->first();
+
+        return view('doctor.dashboard', compact('doctor', 'stats', 'todayAppointments', 'upcomingAppointments', 'queueWaiting', 'queueCurrent'));
     }
 
     public function appointments(Request $request)
@@ -74,7 +89,7 @@ class DoctorDashboardController extends Controller
         $doctor = $request->user()->doctor;
         abort_if($appointment->doctor_id !== $doctor->id, 403);
 
-        $appointment->load(['patient', 'diagnosis']);
+        $appointment->load(['patient', 'diagnosis.prescription.items']);
 
         $clinic = $request->user()->clinic;
         $specialty = $clinic->specialty ?? $doctor->specialty;
@@ -119,10 +134,19 @@ class DoctorDashboardController extends Controller
             'radiology' => 'nullable|string|max:2000',
             'notes' => 'nullable|string|max:2000',
             'diagram_data' => 'nullable|json',
+            'rx_drugs_json' => 'nullable|string',
+            'rx_notes' => 'nullable|string|max:1000',
         ]);
+
+        // Parse rx_drugs from JSON
+        $rxDrugs = [];
+        if (!empty($validated['rx_drugs_json'])) {
+            $rxDrugs = json_decode($validated['rx_drugs_json'], true) ?? [];
+        }
 
         $data = [
             'clinic_id' => $clinic->id,
+            'branch_id' => $appointment->branch_id,
             'appointment_id' => $appointment->id,
             'patient_id' => $appointment->patient_id,
             'doctor_id' => $doctor->id,
@@ -135,17 +159,46 @@ class DoctorDashboardController extends Controller
             'diagram_data' => $validated['diagram_data'] ? json_decode($validated['diagram_data'], true) : null,
         ];
 
-        Diagnosis::updateOrCreate(
+        $diagnosisRecord = Diagnosis::updateOrCreate(
             ['appointment_id' => $appointment->id],
             $data
         );
+
+        // Save structured prescription
+        if (!empty($rxDrugs)) {
+            $prescription = Prescription::updateOrCreate(
+                ['diagnosis_id' => $diagnosisRecord->id],
+                [
+                    'clinic_id' => $clinic->id,
+                    'branch_id' => $appointment->branch_id,
+                    'patient_id' => $appointment->patient_id,
+                    'doctor_id' => $doctor->id,
+                    'notes' => $validated['rx_notes'] ?? null,
+                ]
+            );
+
+            $prescription->items()->delete();
+            foreach ($rxDrugs as $drug) {
+                $prescription->items()->create([
+                    'drug_name' => $drug['drug_name'] ?? '',
+                    'dosage' => $drug['dosage'] ?? null,
+                    'frequency' => $drug['frequency'] ?? null,
+                    'duration' => $drug['duration'] ?? null,
+                    'instructions' => $drug['instructions'] ?? null,
+                ]);
+            }
+        }
 
         // Notify clinic admins about diagnosis
         $admins = User::where('clinic_id', $clinic->id)
             ->where('role', 'admin')
             ->get();
         foreach ($admins as $admin) {
-            $admin->notify(new DiagnosisRecorded($appointment));
+            try {
+                $admin->notify(new DiagnosisRecorded($appointment));
+            } catch (\Exception $e) {
+                // Skip notification failures
+            }
         }
 
         return redirect()->route('doctor.appointment.show', $appointment)
@@ -161,7 +214,14 @@ class DoctorDashboardController extends Controller
             'status' => 'required|in:in_progress,completed',
         ]);
 
-        $appointment->update(['status' => $validated['status']]);
+        $updateData = ['status' => $validated['status']];
+        if ($validated['status'] === 'completed' && $appointment->queue_status) {
+            $updateData['queue_status'] = 'done';
+        }
+        if ($validated['status'] === 'in_progress' && $appointment->queue_status === 'waiting') {
+            $updateData['queue_status'] = 'in_room';
+        }
+        $appointment->update($updateData);
 
         // Notify clinic admins
         $clinic = $request->user()->clinic;
@@ -169,10 +229,76 @@ class DoctorDashboardController extends Controller
             ->where('role', 'admin')
             ->get();
         foreach ($admins as $admin) {
-            $admin->notify(new AppointmentStatusChanged($appointment, $validated['status']));
+            try {
+                $admin->notify(new AppointmentStatusChanged($appointment, $validated['status']));
+            } catch (\Exception $e) {
+                // Skip notification failures
+            }
         }
 
         return back()->with('success', __('app.status_updated'));
+    }
+
+    public function queue(Request $request)
+    {
+        $doctor = $request->user()->doctor;
+        abort_if(!$doctor, 403);
+
+        $todayQueue = $doctor->appointments()
+            ->with(['patient'])
+            ->where('appointment_date', today())
+            ->whereNotNull('queue_status')
+            ->whereIn('queue_status', ['waiting', 'called', 'in_room'])
+            ->orderBy('queue_number')
+            ->get();
+
+        $currentPatient = $todayQueue->firstWhere('queue_status', 'in_room');
+        $calledPatient = $todayQueue->firstWhere('queue_status', 'called');
+        $waitingPatients = $todayQueue->where('queue_status', 'waiting');
+
+        return view('doctor.queue', compact('doctor', 'todayQueue', 'currentPatient', 'calledPatient', 'waitingPatients'));
+    }
+
+    public function callPatient(Request $request, Appointment $appointment)
+    {
+        $doctor = $request->user()->doctor;
+        abort_if($appointment->doctor_id !== $doctor->id, 403);
+
+        if ($appointment->queue_status !== 'waiting') {
+            return back()->with('error', __('app.patient_not_waiting'));
+        }
+
+        $appointment->update([
+            'queue_status' => 'called',
+            'called_at' => now(),
+        ]);
+
+        return back()->with('success', __('app.patient_called'));
+    }
+
+    public function startFromQueue(Request $request, Appointment $appointment)
+    {
+        $doctor = $request->user()->doctor;
+        abort_if($appointment->doctor_id !== $doctor->id, 403);
+
+        if (!in_array($appointment->queue_status, ['waiting', 'called'])) {
+            return back()->with('error', __('app.invalid_queue_action'));
+        }
+
+        // Mark any current in_room appointment as done in queue
+        $doctor->appointments()
+            ->where('appointment_date', today())
+            ->where('queue_status', 'in_room')
+            ->update(['queue_status' => 'done']);
+
+        $appointment->update([
+            'queue_status' => 'in_room',
+            'status' => 'in_progress',
+            'called_at' => $appointment->called_at ?? now(),
+        ]);
+
+        return redirect()->route('doctor.appointment.show', $appointment)
+            ->with('success', __('app.patient_in_room'));
     }
 
     public function settings(Request $request)

@@ -52,50 +52,39 @@ class DoctorController extends Controller
 
     public function store(Request $request)
     {
-        $rules = [
+        $validated = $request->validate([
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
-            'email' => 'nullable|email|max:255',
+            'email' => 'required|email|max:255|unique:users,email',
+            'password' => 'required|string|min:6',
             'specialty_id' => 'required|exists:specialties,id',
             'consultation_fee' => 'required|numeric|min:0',
             'bio' => 'nullable|string|max:1000',
-            'create_account' => 'nullable|boolean',
-        ];
-
-        if ($request->boolean('create_account')) {
-            $rules['email'] = 'required|email|max:255|unique:users,email';
-            $rules['password'] = 'required|string|min:6';
-        }
-
-        $validated = $request->validate($rules);
+        ]);
 
         $clinic = auth()->user()->clinic;
-        $userId = null;
 
-        if ($request->boolean('create_account') && $validated['email']) {
-            $user = User::create([
-                'name' => $validated['name'],
-                'email' => $validated['email'],
-                'password' => Hash::make($validated['password']),
-                'clinic_id' => $clinic->id,
-                'role' => 'doctor',
-                'phone' => $validated['phone'],
-                'is_active' => true,
-            ]);
-            $userId = $user->id;
+        $user = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'clinic_id' => $clinic->id,
+            'role' => 'doctor',
+            'phone' => $validated['phone'],
+            'is_active' => true,
+        ]);
 
-            $this->ensureDefaultPermissions($clinic->id, 'doctor');
-        }
+        $this->ensureDefaultPermissions($clinic->id, 'doctor');
 
         $clinic->doctors()->create([
             'branch_id' => BranchHelper::activeBranchId(),
             'name' => $validated['name'],
             'phone' => $validated['phone'],
-            'email' => $validated['email'] ?? null,
+            'email' => $validated['email'],
             'specialty_id' => $validated['specialty_id'],
             'consultation_fee' => $validated['consultation_fee'],
             'bio' => $validated['bio'] ?? null,
-            'user_id' => $userId,
+            'user_id' => $user->id,
             'is_active' => true,
         ]);
 
@@ -130,17 +119,60 @@ class DoctorController extends Controller
         $clinic = auth()->user()->clinic;
         abort_if($doctor->clinic_id !== $clinic->id, 403);
 
+        $emailRule = 'required|email|max:255';
+        if ($doctor->user_id) {
+            $emailRule .= '|unique:users,email,' . $doctor->user_id;
+        } else {
+            $emailRule .= '|unique:users,email';
+        }
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'phone' => 'required|string|max:20',
-            'email' => 'nullable|email|max:255',
+            'email' => $emailRule,
+            'password' => 'nullable|string|min:6',
             'specialty_id' => 'required|exists:specialties,id',
             'consultation_fee' => 'required|numeric|min:0',
             'bio' => 'nullable|string|max:1000',
             'is_active' => 'boolean',
         ]);
 
-        $doctor->update($validated);
+        $doctor->update([
+            'name' => $validated['name'],
+            'phone' => $validated['phone'],
+            'email' => $validated['email'],
+            'specialty_id' => $validated['specialty_id'],
+            'consultation_fee' => $validated['consultation_fee'],
+            'bio' => $validated['bio'] ?? null,
+            'is_active' => $validated['is_active'] ?? true,
+        ]);
+
+        // Sync User account
+        if ($doctor->user_id) {
+            $userData = [
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'phone' => $validated['phone'],
+                'is_active' => $validated['is_active'] ?? true,
+            ];
+            if (!empty($validated['password'])) {
+                $userData['password'] = Hash::make($validated['password']);
+            }
+            $doctor->user->update($userData);
+        } else {
+            // Create User account for existing doctors that don't have one
+            $user = User::create([
+                'name' => $validated['name'],
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password'] ?? 'password123'),
+                'clinic_id' => $clinic->id,
+                'role' => 'doctor',
+                'phone' => $validated['phone'],
+                'is_active' => $validated['is_active'] ?? true,
+            ]);
+            $doctor->update(['user_id' => $user->id]);
+            $this->ensureDefaultPermissions($clinic->id, 'doctor');
+        }
 
         return redirect()->route('dashboard.doctors.show', $doctor)
             ->with('success', __('app.doctor_updated'));
@@ -151,7 +183,13 @@ class DoctorController extends Controller
         $clinic = auth()->user()->clinic;
         abort_if($doctor->clinic_id !== $clinic->id, 403);
 
-        $doctor->update(['is_active' => !$doctor->is_active]);
+        $newStatus = !$doctor->is_active;
+        $doctor->update(['is_active' => $newStatus]);
+
+        // Sync User account status
+        if ($doctor->user_id) {
+            $doctor->user->update(['is_active' => $newStatus]);
+        }
 
         return back()->with('success', __('app.status_updated'));
     }

@@ -87,6 +87,41 @@
         </div>
     </div>
 
+    {{-- Queue Widget --}}
+    @if($queueCurrent || $queueWaiting->count() > 0)
+    <div class="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl shadow-lg shadow-indigo-500/25 p-6 mb-6 text-white">
+        <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <h3 class="text-base font-bold">{{ __('app.waiting_queue') }}</h3>
+            </div>
+            <a href="{{ route('doctor.queue') }}" class="text-sm font-semibold text-white/80 hover:text-white transition-colors">{{ __('app.view_all') }} &rarr;</a>
+        </div>
+        <div class="flex items-center gap-6">
+            @if($queueCurrent)
+            <div class="flex items-center gap-3 bg-white/20 rounded-xl px-4 py-3">
+                <div class="w-10 h-10 rounded-lg bg-white/30 flex items-center justify-center font-bold">{{ $queueCurrent->queue_number }}</div>
+                <div>
+                    <p class="text-xs text-white/70">{{ __('app.current_patient') }}</p>
+                    <p class="font-semibold">{{ $queueCurrent->patient->name ?? '-' }}</p>
+                </div>
+            </div>
+            @endif
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-white/20 flex items-center justify-center font-bold text-xl">{{ $queueWaiting->count() }}</div>
+                <div>
+                    <p class="text-xs text-white/70">{{ __('app.waiting') }}</p>
+                    @if($queueWaiting->first())
+                    <p class="font-semibold text-sm">{{ __('app.next') }}: {{ $queueWaiting->first()->patient->name ?? '-' }}</p>
+                    @else
+                    <p class="font-semibold text-sm">{{ __('app.no_waiting_patients') }}</p>
+                    @endif
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
     {{-- Today's Appointments --}}
     <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-6">
         <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between">

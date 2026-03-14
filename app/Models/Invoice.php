@@ -11,8 +11,11 @@ class Invoice extends Model
         'branch_id',
         'patient_id',
         'appointment_id',
+        'insurance_provider_id',
         'amount',
         'discount',
+        'insurance_coverage',
+        'patient_share',
         'total',
         'status',
         'payment_method',
@@ -24,6 +27,8 @@ class Invoice extends Model
         return [
             'amount' => 'decimal:2',
             'discount' => 'decimal:2',
+            'insurance_coverage' => 'decimal:2',
+            'patient_share' => 'decimal:2',
             'total' => 'decimal:2',
         ];
     }
@@ -46,5 +51,10 @@ class Invoice extends Model
     public function appointment()
     {
         return $this->belongsTo(Appointment::class);
+    }
+
+    public function insuranceProvider()
+    {
+        return $this->belongsTo(InsuranceProvider::class);
     }
 }

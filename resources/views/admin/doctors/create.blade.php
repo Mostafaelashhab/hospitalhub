@@ -45,8 +45,8 @@
 
                 {{-- Email --}}
                 <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('app.email') }}</label>
-                    <input type="email" name="email" value="{{ old('email') }}" dir="ltr"
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('app.email') }} <span class="text-red-500">*</span></label>
+                    <input type="email" name="email" value="{{ old('email') }}" required dir="ltr"
                            class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-all">
                 </div>
 
@@ -79,34 +79,17 @@
                           class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-all resize-none">{{ old('bio') }}</textarea>
             </div>
 
-            {{-- Create Login Account --}}
-            <div x-data="{ createAccount: {{ old('create_account') ? 'true' : 'false' }} }" class="border border-gray-200 rounded-xl p-5 bg-gray-50/50">
-                <div class="flex items-center justify-between">
-                    <div>
-                        <h3 class="text-sm font-semibold text-gray-700">{{ __('app.create_login_account') }}</h3>
-                        <p class="text-xs text-gray-500 mt-0.5">{{ __('app.create_login_account_desc') }}</p>
-                    </div>
-                    <label class="relative inline-flex items-center cursor-pointer">
-                        <input type="hidden" name="create_account" value="0">
-                        <input type="checkbox" name="create_account" value="1" x-model="createAccount"
-                               class="sr-only peer" {{ old('create_account') ? 'checked' : '' }}>
-                        <div class="w-11 h-6 bg-gray-300 peer-focus:ring-2 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
-                    </label>
+            {{-- Login Account --}}
+            <div class="border border-gray-200 rounded-xl p-5 bg-gray-50/50">
+                <div class="flex items-center gap-2 text-xs text-indigo-600 bg-indigo-50 px-3 py-2 rounded-lg mb-4">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    {{ __('app.doctor_account_auto_created') }}
                 </div>
 
-                <div x-show="createAccount" x-collapse class="mt-4 space-y-4">
-                    <div class="flex items-center gap-2 text-xs text-indigo-600 bg-indigo-50 px-3 py-2 rounded-lg">
-                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        {{ __('app.account_will_be_created') }}
-                    </div>
-
-                    {{-- Password --}}
-                    <div class="max-w-sm">
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('app.password') }} <span class="text-red-500">*</span></label>
-                        <input type="password" name="password" dir="ltr"
-                               x-bind:required="createAccount"
-                               class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all">
-                    </div>
+                <div class="max-w-sm">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('app.password') }} <span class="text-red-500">*</span></label>
+                    <input type="password" name="password" required dir="ltr"
+                           class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all">
                 </div>
             </div>
 

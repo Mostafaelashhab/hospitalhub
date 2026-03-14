@@ -83,6 +83,44 @@
                 </div>
             </div>
 
+            {{-- Recurring Appointment Section --}}
+            <div class="mt-6 pt-6 border-t border-gray-100" x-data="{ recurrenceType: '{{ old('recurrence_type', 'none') }}' }">
+                <h4 class="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    {{ __('app.recurring_appointment') }}
+                </h4>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {{-- Recurrence Type --}}
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('app.recurrence_type') }}</label>
+                        <select name="recurrence_type" x-model="recurrenceType"
+                                class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-all">
+                            <option value="none">{{ __('app.no_recurrence') }}</option>
+                            <option value="daily">{{ __('app.daily') }}</option>
+                            <option value="weekly">{{ __('app.weekly') }}</option>
+                            <option value="biweekly">{{ __('app.biweekly') }}</option>
+                            <option value="monthly">{{ __('app.monthly') }}</option>
+                        </select>
+                    </div>
+
+                    {{-- Recurrence Count --}}
+                    <div x-show="recurrenceType !== 'none'" x-transition>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('app.recurrence_count') }}</label>
+                        <input type="number" name="recurrence_count" value="{{ old('recurrence_count', 4) }}" min="2" max="52"
+                               class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-all">
+                        <p class="text-xs text-gray-400 mt-1.5">{{ __('app.recurrence_count_hint') }}</p>
+                    </div>
+                </div>
+
+                {{-- Info box --}}
+                <div x-show="recurrenceType !== 'none'" x-transition class="mt-4 bg-indigo-50 border border-indigo-200 rounded-xl px-4 py-3">
+                    <p class="text-sm text-indigo-700 flex items-center gap-2">
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        {{ __('app.recurring_info') }}
+                    </p>
+                </div>
+            </div>
+
             <div class="flex items-center gap-3 mt-8 pt-6 border-t border-gray-100">
                 <button type="submit" class="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-sm shadow-indigo-500/20 transition-all">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>

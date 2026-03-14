@@ -149,6 +149,84 @@
                 </div>
             </div>
 
+            {{-- Recharge Requests --}}
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <div class="px-6 py-5 border-b border-gray-100">
+                    <h2 class="text-base font-bold text-gray-900">{{ __('app.recharge_requests') }}</h2>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="bg-gray-50/50">
+                                <th class="text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }} px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('app.points') }}</th>
+                                <th class="text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }} px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('app.payment_method') }}</th>
+                                <th class="text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }} px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('app.reference_number') }}</th>
+                                <th class="text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }} px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('app.status') }}</th>
+                                <th class="text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }} px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('app.date') }}</th>
+                                <th class="text-{{ app()->getLocale() === 'ar' ? 'right' : 'left' }} px-6 py-3.5 text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('app.actions') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-100">
+                            @forelse($rechargeRequests as $req)
+                            <tr class="hover:bg-gray-50/50 transition-colors">
+                                <td class="px-6 py-3.5 text-sm font-bold text-gray-900">{{ number_format($req->points) }}</td>
+                                <td class="px-6 py-3.5 text-sm text-gray-600">{{ __('app.payment_' . $req->payment_method) }}</td>
+                                <td class="px-6 py-3.5 text-sm text-gray-600 font-mono" dir="ltr">{{ $req->reference_number ?? '-' }}</td>
+                                <td class="px-6 py-3.5">
+                                    @php
+                                        $reqStyles = [
+                                            'pending' => 'bg-amber-50 text-amber-700 border-amber-200',
+                                            'approved' => 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                                            'rejected' => 'bg-red-50 text-red-700 border-red-200',
+                                        ];
+                                    @endphp
+                                    <span class="inline-flex items-center px-2.5 py-0.5 text-xs font-semibold rounded-lg border {{ $reqStyles[$req->status] ?? '' }}">
+                                        {{ __('app.status_' . $req->status) }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-3.5 text-sm text-gray-500">{{ $req->created_at->format('Y-m-d H:i') }}</td>
+                                <td class="px-6 py-3.5">
+                                    @if($req->status === 'pending')
+                                    <div class="flex items-center gap-2">
+                                        <form method="POST" action="{{ route('super.recharge.approve', $req) }}">
+                                            @csrf @method('PATCH')
+                                            <button type="submit" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition-colors">
+                                                {{ __('app.approve') }}
+                                            </button>
+                                        </form>
+                                        <div x-data="{ showReject: false }" class="relative">
+                                            <button @click="showReject = !showReject" type="button" class="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg transition-colors">
+                                                {{ __('app.reject') }}
+                                            </button>
+                                            <div x-show="showReject" x-transition @click.outside="showReject = false"
+                                                 class="absolute {{ app()->getLocale() === 'ar' ? 'left-0' : 'right-0' }} top-full mt-2 w-64 bg-white rounded-xl shadow-lg border border-gray-200 p-3 z-10">
+                                                <form method="POST" action="{{ route('super.recharge.reject', $req) }}" class="space-y-2">
+                                                    @csrf @method('PATCH')
+                                                    <textarea name="admin_notes" rows="2" placeholder="{{ __('app.rejection_reason') }}"
+                                                              class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs focus:border-red-500 focus:ring-1 focus:ring-red-500 resize-none"></textarea>
+                                                    <button type="submit" class="w-full py-2 bg-red-600 hover:bg-red-700 text-white text-xs font-semibold rounded-lg transition-colors">
+                                                        {{ __('app.confirm_reject') }}
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    @else
+                                    <span class="text-xs text-gray-400">-</span>
+                                    @endif
+                                </td>
+                            </tr>
+                            @empty
+                            <tr>
+                                <td colspan="6" class="px-6 py-12 text-center text-gray-400 text-sm">{{ __('app.no_recharge_requests') }}</td>
+                            </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+                {{ $rechargeRequests->links() }}
+            </div>
+
             {{-- Transactions --}}
             <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                 <div class="px-6 py-5 border-b border-gray-100">

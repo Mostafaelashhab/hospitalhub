@@ -10,7 +10,8 @@
         elseif (str_contains($currentRoute, 'offers')) $active = 'offers';
         else $active = 'dashboard';
     } elseif ($isDoctor) {
-        if (str_contains($currentRoute, 'appointment')) $active = 'appointments';
+        if (str_contains($currentRoute, 'queue')) $active = 'queue';
+        elseif (str_contains($currentRoute, 'appointment')) $active = 'appointments';
         elseif (str_contains($currentRoute, 'settings')) $active = 'settings';
         else $active = 'dashboard';
     } else {
@@ -18,6 +19,7 @@
         elseif (str_contains($currentRoute, 'patients')) $active = 'patients';
         elseif (str_contains($currentRoute, 'invoices')) $active = 'invoices';
         elseif (str_contains($currentRoute, 'doctors')) $active = 'doctors';
+        elseif (str_contains($currentRoute, 'insurance')) $active = 'more';
         elseif (str_contains($currentRoute, 'staff') || str_contains($currentRoute, 'permissions')) $active = 'more';
         elseif (str_contains($currentRoute, 'settings') || str_contains($currentRoute, 'branches') || str_contains($currentRoute, 'website')) $active = 'more';
         elseif ($currentRoute === 'dashboard') $active = 'dashboard';
@@ -68,6 +70,18 @@
                 </a>
                 @endif
 
+                @if($user->hasPermission('appointments.view'))
+                <a href="{{ route('dashboard.queue.index') }}" class="bottom-sheet-item">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    {{ __('app.waiting_queue') }}
+                </a>
+                @endif
+
+                <a href="{{ route('dashboard.insurance.index') }}" class="bottom-sheet-item">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                    {{ __('app.insurance') }}
+                </a>
+
                 <a href="{{ route('dashboard.diagnoses.index') }}" class="bottom-sheet-item">
                     <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                     {{ __('app.diagnoses') }}
@@ -107,12 +121,21 @@
 
             {{-- Language Switcher --}}
             <div class="flex items-center gap-2 mt-2 pt-3 border-t border-gray-100 px-1">
-                <a href="{{ route('lang.switch', 'ar') }}" class="flex-1 flex items-center justify-center py-2.5 text-sm font-medium rounded-xl transition-all {{ app()->getLocale() === 'ar' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'text-gray-500 bg-gray-50 border border-gray-100' }}">
-                    العربية
-                </a>
-                <a href="{{ route('lang.switch', 'en') }}" class="flex-1 flex items-center justify-center py-2.5 text-sm font-medium rounded-xl transition-all {{ app()->getLocale() === 'en' ? 'bg-indigo-50 text-indigo-700 border border-indigo-200' : 'text-gray-500 bg-gray-50 border border-gray-100' }}">
+                @if(app()->getLocale() === 'ar')
+                <a href="{{ route('lang.switch', 'en') }}" class="flex-1 flex items-center justify-center py-2.5 text-sm font-medium rounded-xl transition-all text-gray-500 bg-gray-50 border border-gray-100">
                     English
                 </a>
+                <a href="{{ route('lang.switch', 'ar') }}" class="flex-1 flex items-center justify-center py-2.5 text-sm font-medium rounded-xl transition-all bg-indigo-50 text-indigo-700 border border-indigo-200">
+                    العربية
+                </a>
+                @else
+                <a href="{{ route('lang.switch', 'ar') }}" class="flex-1 flex items-center justify-center py-2.5 text-sm font-medium rounded-xl transition-all text-gray-500 bg-gray-50 border border-gray-100">
+                    العربية
+                </a>
+                <a href="{{ route('lang.switch', 'en') }}" class="flex-1 flex items-center justify-center py-2.5 text-sm font-medium rounded-xl transition-all bg-indigo-50 text-indigo-700 border border-indigo-200">
+                    English
+                </a>
+                @endif
             </div>
 
             {{-- Logout --}}
@@ -148,13 +171,13 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
                     <span>{{ __('app.dashboard') }}</span>
                 </a>
+                <a href="{{ route('doctor.queue') }}" class="bottom-nav-item {{ $active === 'queue' ? 'bottom-nav-active' : '' }}">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span>{{ __('app.queue') }}</span>
+                </a>
                 <a href="{{ route('doctor.appointments') }}" class="bottom-nav-item {{ $active === 'appointments' ? 'bottom-nav-active' : '' }}">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                     <span>{{ __('app.appointments') }}</span>
-                </a>
-                <a href="{{ route('doctor.settings') }}" class="bottom-nav-item {{ $active === 'settings' ? 'bottom-nav-active' : '' }}">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                    <span>{{ __('app.settings') }}</span>
                 </a>
 
             @else

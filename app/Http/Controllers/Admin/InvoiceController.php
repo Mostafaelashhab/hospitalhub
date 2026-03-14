@@ -61,7 +61,7 @@ class InvoiceController extends Controller
         $clinic = auth()->user()->clinic;
         abort_if($invoice->clinic_id !== $clinic->id, 403);
 
-        $invoice->load(['patient', 'appointment.doctor']);
+        $invoice->load(['patient', 'appointment.doctor', 'insuranceProvider']);
 
         return view('admin.invoices.show', compact('invoice'));
     }
@@ -79,13 +79,31 @@ class InvoiceController extends Controller
         ]);
 
         $discount = $validated['discount'] ?? $invoice->discount;
-        $total = $invoice->amount - $discount;
+        $subtotal = $invoice->amount - $discount;
+
+        // Recalculate insurance coverage
+        $insuranceCoverage = 0;
+        $patientShare = max(0, $subtotal);
+
+        if ($invoice->insurance_provider_id) {
+            $provider = $invoice->insuranceProvider;
+            if ($provider) {
+                $insuranceCoverage = $subtotal * ($provider->coverage_percentage / 100);
+                if ($provider->max_coverage && $insuranceCoverage > $provider->max_coverage) {
+                    $insuranceCoverage = $provider->max_coverage;
+                }
+                $insuranceCoverage = max(0, round($insuranceCoverage, 2));
+                $patientShare = max(0, $subtotal - $insuranceCoverage);
+            }
+        }
 
         $invoice->update([
             'status' => $validated['status'],
             'payment_method' => $validated['payment_method'] ?? $invoice->payment_method,
             'discount' => $discount,
-            'total' => max(0, $total),
+            'insurance_coverage' => $insuranceCoverage,
+            'patient_share' => $patientShare,
+            'total' => max(0, $patientShare),
             'notes' => $validated['notes'] ?? $invoice->notes,
         ]);
 
@@ -95,7 +113,11 @@ class InvoiceController extends Controller
             ->whereIn('role', ['admin', 'accountant'])
             ->get();
         foreach ($admins as $admin) {
-            $admin->notify(new InvoiceUpdated($invoice, $validated['status']));
+            try {
+                $admin->notify(new InvoiceUpdated($invoice, $validated['status']));
+            } catch (\Exception $e) {
+                // Skip notification failures
+            }
         }
 
         return redirect()->route('dashboard.invoices.show', $invoice)

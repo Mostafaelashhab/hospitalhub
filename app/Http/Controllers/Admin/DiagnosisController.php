@@ -6,6 +6,7 @@ use App\Helpers\BranchHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\Diagnosis;
+use App\Models\Prescription;
 use Illuminate\Http\Request;
 
 class DiagnosisController extends Controller
@@ -70,7 +71,21 @@ class DiagnosisController extends Controller
             'radiology' => 'nullable|string|max:2000',
             'notes' => 'nullable|string|max:2000',
             'diagram_data' => 'nullable|json',
+            'rx_drugs_json' => 'nullable|string',
+            'rx_drugs' => 'nullable|array',
+            'rx_drugs.*.drug_name' => 'required|string|max:255',
+            'rx_drugs.*.dosage' => 'nullable|string|max:255',
+            'rx_drugs.*.frequency' => 'nullable|string|max:255',
+            'rx_drugs.*.duration' => 'nullable|string|max:255',
+            'rx_drugs.*.instructions' => 'nullable|string|max:500',
+            'rx_notes' => 'nullable|string|max:1000',
         ]);
+
+        // Parse rx_drugs from JSON (doctor portal) or array (admin portal)
+        $rxDrugs = $validated['rx_drugs'] ?? [];
+        if (empty($rxDrugs) && !empty($validated['rx_drugs_json'])) {
+            $rxDrugs = json_decode($validated['rx_drugs_json'], true) ?? [];
+        }
 
         $data = [
             'clinic_id' => $clinic->id,
@@ -87,10 +102,35 @@ class DiagnosisController extends Controller
             'diagram_data' => $validated['diagram_data'] ? json_decode($validated['diagram_data'], true) : null,
         ];
 
-        $diagnosis = Diagnosis::updateOrCreate(
+        $diagnosisRecord = Diagnosis::updateOrCreate(
             ['appointment_id' => $appointment->id],
             $data
         );
+
+        // Save structured prescription
+        if (!empty($rxDrugs)) {
+            $prescription = Prescription::updateOrCreate(
+                ['diagnosis_id' => $diagnosisRecord->id],
+                [
+                    'clinic_id' => $clinic->id,
+                    'branch_id' => $appointment->branch_id,
+                    'patient_id' => $appointment->patient_id,
+                    'doctor_id' => $appointment->doctor_id,
+                    'notes' => $validated['rx_notes'] ?? null,
+                ]
+            );
+
+            $prescription->items()->delete();
+            foreach ($rxDrugs as $drug) {
+                $prescription->items()->create([
+                    'drug_name' => $drug['drug_name'] ?? '',
+                    'dosage' => $drug['dosage'] ?? null,
+                    'frequency' => $drug['frequency'] ?? null,
+                    'duration' => $drug['duration'] ?? null,
+                    'instructions' => $drug['instructions'] ?? null,
+                ]);
+            }
+        }
 
         return redirect()->route('dashboard.appointments.show', $appointment)
             ->with('success', __('app.diagnosis_saved'));
@@ -101,7 +141,7 @@ class DiagnosisController extends Controller
         $clinic = auth()->user()->clinic;
         abort_if($diagnosis->clinic_id !== $clinic->id, 403);
 
-        $diagnosis->load(['appointment', 'patient', 'doctor.specialty']);
+        $diagnosis->load(['appointment', 'patient', 'doctor.specialty', 'prescription.items']);
 
         $specialty = $clinic->specialty ?? $diagnosis->doctor->specialty;
         $diagramType = $this->getDiagramType($specialty?->name_en);

@@ -120,6 +120,11 @@ class Clinic extends Model
         return $this->hasMany(User::class)->whereIn('role', ['accountant', 'secretary']);
     }
 
+    public function insuranceProviders()
+    {
+        return $this->hasMany(InsuranceProvider::class);
+    }
+
     public function isActive(): bool
     {
         return $this->status === 'active';

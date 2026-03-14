@@ -89,6 +89,33 @@
                 </div>
             </div>
 
+            {{-- Recurring Group --}}
+            @if($appointment->isRecurring())
+            <div class="bg-white rounded-2xl border border-indigo-100 shadow-sm overflow-hidden">
+                <div class="px-6 py-5 border-b border-indigo-100 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                    <h3 class="text-base font-bold text-gray-900">{{ __('app.recurring_appointment') }}</h3>
+                    <span class="text-xs font-semibold text-indigo-600 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-lg">{{ __('app.' . $appointment->recurrence_type) }}</span>
+                </div>
+                <div class="p-6">
+                    <div class="space-y-2 max-h-48 overflow-y-auto">
+                        @foreach($appointment->recurringGroup()->orderBy('appointment_date')->get() as $relatedAppt)
+                        <a href="{{ route('dashboard.appointments.show', $relatedAppt) }}"
+                           class="flex items-center justify-between px-3 py-2 rounded-lg text-sm {{ $relatedAppt->id === $appointment->id ? 'bg-indigo-50 border border-indigo-200' : 'hover:bg-gray-50' }} transition-all">
+                            <span class="font-medium {{ $relatedAppt->id === $appointment->id ? 'text-indigo-700' : 'text-gray-700' }}">
+                                {{ \Carbon\Carbon::parse($relatedAppt->appointment_date)->format('Y-m-d') }}
+                            </span>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-semibold rounded-md border {{ $statusStyles[$relatedAppt->status] ?? 'bg-gray-50 text-gray-600 border-gray-200' }}">
+                                <span class="w-1.5 h-1.5 rounded-full {{ $statusDots[$relatedAppt->status] ?? 'bg-gray-400' }}"></span>
+                                {{ __('app.' . $relatedAppt->status) }}
+                            </span>
+                        </a>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+            @endif
+
             {{-- Patient Info --}}
             <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                 <div class="px-6 py-5 border-b border-gray-100">

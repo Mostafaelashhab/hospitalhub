@@ -13,6 +13,7 @@ use App\Http\Controllers\Admin\DrugSearchController;
 use App\Http\Controllers\Doctor\DoctorDashboardController;
 use App\Http\Controllers\ClinicRegistrationController;
 use App\Http\Controllers\ClinicPageController;
+use App\Http\Controllers\OnlineBookingController;
 use App\Http\Controllers\Admin\ClinicWebsiteController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\LanguageController;
@@ -20,9 +21,16 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\Admin\OfferController as AdminOfferController;
+use App\Http\Controllers\Admin\PrescriptionController;
+use App\Http\Controllers\Admin\InsuranceController;
+use App\Http\Controllers\Admin\PatientFileController;
+use App\Http\Controllers\Admin\QueueController;
+use App\Http\Controllers\Admin\RechargeController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\SuperAdmin\ClinicManagementController;
 use App\Http\Controllers\SuperAdmin\DashboardController as SuperDashboardController;
 use App\Http\Controllers\SuperAdmin\OfferController as SuperOfferController;
+use App\Http\Controllers\SuperAdmin\SettingsController as SuperSettingsController;
 use Illuminate\Support\Facades\Route;
 
 // Landing page
@@ -42,6 +50,7 @@ Route::get('/register-clinic/success', [ClinicRegistrationController::class, 'su
 
 // Public clinic website
 Route::get('/clinic/{slug}', [ClinicPageController::class, 'show'])->name('clinic.page');
+Route::post('/clinic/{slug}/book', [OnlineBookingController::class, 'store'])->name('clinic.book');
 
 // Clinic suspended page
 Route::get('/clinic-suspended', function () {
@@ -66,6 +75,15 @@ Route::middleware(['auth', 'role:super_admin'])->prefix('super-admin')->name('su
     Route::put('/offers/{offer}', [SuperOfferController::class, 'update'])->name('offers.update');
     Route::patch('/offers/{offer}/toggle', [SuperOfferController::class, 'toggleStatus'])->name('offers.toggle');
     Route::delete('/offers/{offer}', [SuperOfferController::class, 'destroy'])->name('offers.destroy');
+
+    // Recharge Requests
+    Route::get('/recharge-requests', [ClinicManagementController::class, 'rechargeRequests'])->name('recharge.index');
+    Route::patch('/recharge/{rechargeRequest}/approve', [ClinicManagementController::class, 'approveRecharge'])->name('recharge.approve');
+    Route::patch('/recharge/{rechargeRequest}/reject', [ClinicManagementController::class, 'rejectRecharge'])->name('recharge.reject');
+
+    // Platform Settings
+    Route::get('/settings', [SuperSettingsController::class, 'index'])->name('settings.index');
+    Route::put('/settings', [SuperSettingsController::class, 'update'])->name('settings.update');
 });
 
 // ===== Clinic Dashboard Routes =====
@@ -100,6 +118,21 @@ Route::middleware(['auth', 'role:admin,doctor,accountant,secretary', 'clinic.act
     Route::get('/patients/{patient}/edit', [PatientController::class, 'edit'])->name('.patients.edit')->middleware('permission:patients.edit');
     Route::put('/patients/{patient}', [PatientController::class, 'update'])->name('.patients.update')->middleware('permission:patients.edit');
     Route::get('/patients/{patient}/timeline', [PatientController::class, 'timeline'])->name('.patients.timeline')->middleware('permission:patients.view');
+
+    // Patient Files
+    Route::post('/patients/{patient}/files', [PatientFileController::class, 'store'])->name('.patients.files.store')->middleware('permission:patients.edit');
+    Route::get('/patient-files/{patientFile}/download', [PatientFileController::class, 'download'])->name('.patients.files.download')->middleware('permission:patients.view');
+    Route::delete('/patient-files/{patientFile}', [PatientFileController::class, 'destroy'])->name('.patients.files.destroy')->middleware('permission:patients.edit');
+
+    // Insurance Providers
+    Route::get('/insurance', [InsuranceController::class, 'index'])->name('.insurance.index');
+    Route::post('/insurance', [InsuranceController::class, 'store'])->name('.insurance.store');
+    Route::put('/insurance/{provider}', [InsuranceController::class, 'update'])->name('.insurance.update');
+    Route::delete('/insurance/{provider}', [InsuranceController::class, 'destroy'])->name('.insurance.destroy');
+
+    // Patient Insurance
+    Route::post('/patients/{patient}/insurance', [InsuranceController::class, 'assignToPatient'])->name('.patients.insurance.store')->middleware('permission:patients.edit');
+    Route::patch('/patient-insurance/{insurance}/remove', [InsuranceController::class, 'removeFromPatient'])->name('.patients.insurance.remove')->middleware('permission:patients.edit');
 
     // Staff Management (admin only)
     Route::get('/staff', [StaffController::class, 'index'])->name('.staff.index')->middleware('permission:staff.view');
@@ -139,9 +172,24 @@ Route::middleware(['auth', 'role:admin,doctor,accountant,secretary', 'clinic.act
     // Offers (view only for clinic admins)
     Route::get('/offers', [AdminOfferController::class, 'index'])->name('.offers.index');
 
+    // Prescriptions
+    Route::get('/prescriptions/{prescription}/print', [PrescriptionController::class, 'print'])->name('.prescriptions.print');
+
+    // Reports
+    Route::get('/reports', [ReportController::class, 'index'])->name('.reports.index');
+
+    // Queue Management
+    Route::get('/queue', [QueueController::class, 'index'])->name('.queue.index')->middleware('permission:appointments.view');
+    Route::patch('/appointments/{appointment}/checkin', [QueueController::class, 'checkIn'])->name('.queue.checkin')->middleware('permission:appointments.change_status');
+    Route::patch('/appointments/{appointment}/queue-skip', [QueueController::class, 'skip'])->name('.queue.skip')->middleware('permission:appointments.change_status');
+
     // Clinic Website Settings (admin only)
     Route::get('/website', [ClinicWebsiteController::class, 'edit'])->name('.website.edit');
     Route::put('/website', [ClinicWebsiteController::class, 'update'])->name('.website.update');
+
+    // Recharge
+    Route::get('/recharge', [RechargeController::class, 'index'])->name('.recharge.index');
+    Route::post('/recharge', [RechargeController::class, 'store'])->name('.recharge.store');
 
     // Settings
     Route::get('/settings', [SettingsController::class, 'index'])->name('.settings.index');
@@ -156,6 +204,10 @@ Route::middleware(['auth', 'role:doctor', 'clinic.active'])->prefix('doctor')->n
     Route::patch('/appointments/{appointment}/status', [DoctorDashboardController::class, 'updateStatus'])->name('appointment.status');
     Route::post('/appointments/{appointment}/diagnosis', [DoctorDashboardController::class, 'storeDiagnosis'])->name('diagnosis.store');
     Route::get('/patients/{patient}/history', [DoctorDashboardController::class, 'patientHistory'])->name('patient.history');
+    Route::get('/prescriptions/{prescription}/print', [PrescriptionController::class, 'print'])->name('prescription.print');
+    Route::get('/queue', [DoctorDashboardController::class, 'queue'])->name('queue');
+    Route::patch('/appointments/{appointment}/call', [DoctorDashboardController::class, 'callPatient'])->name('appointment.call');
+    Route::patch('/appointments/{appointment}/start-from-queue', [DoctorDashboardController::class, 'startFromQueue'])->name('appointment.start-from-queue');
 
     // Settings
     Route::get('/settings', [DoctorDashboardController::class, 'settings'])->name('settings');

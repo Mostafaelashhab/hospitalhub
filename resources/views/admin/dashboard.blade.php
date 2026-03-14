@@ -8,6 +8,25 @@
         @include('partials.dashboard-sidebar', ['active' => 'dashboard'])
     </x-slot>
 
+    {{-- Free Mode Banner --}}
+    @if(\App\Models\PlatformSetting::isFreeModeActive())
+    <div class="mb-6 bg-emerald-50 border border-emerald-200 rounded-2xl p-5">
+        <div class="flex items-start gap-4">
+            <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center shrink-0">
+                <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg>
+            </div>
+            <div>
+                <h3 class="text-base font-bold text-emerald-800">{{ __('app.free_mode_banner_title') }}</h3>
+                <p class="text-sm text-emerald-700 mt-1">{{ __('app.free_mode_banner_desc') }}</p>
+                @php $freeModeUntil = \App\Models\PlatformSetting::get('free_mode_until'); @endphp
+                @if($freeModeUntil)
+                <p class="text-xs text-emerald-600 mt-2 font-semibold">{{ __('app.until') }} {{ $freeModeUntil }}</p>
+                @endif
+            </div>
+        </div>
+    </div>
+    @endif
+
     {{-- Pending Review Banner --}}
     @if($isPending)
     <div class="mb-6 bg-amber-50 border border-amber-200 rounded-2xl p-5">
@@ -102,12 +121,12 @@
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
                     </div>
                 </div>
-                <p class="text-3xl font-bold tracking-wide">Unlimited</p>
-                <p class="text-indigo-200 text-sm mt-1">{{ __('app.balance') }}</p>
-                <span class="inline-flex items-center gap-1.5 mt-3 px-3 py-1 text-[11px] font-semibold bg-white/15 backdrop-blur rounded-lg text-white/90">
-                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-                    {{ __('app.limited_time_offer') }}
-                </span>
+                <p class="text-3xl font-bold tracking-wide">{{ number_format($stats['wallet_balance']) }}</p>
+                <p class="text-indigo-200 text-sm mt-1">{{ __('app.points_balance') }}</p>
+                <a href="{{ route('dashboard.recharge.index') }}" class="inline-flex items-center gap-1.5 mt-3 px-3 py-1 text-[11px] font-semibold bg-white/15 backdrop-blur rounded-lg text-white/90 hover:bg-white/25 transition-all">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    {{ __('app.recharge') }}
+                </a>
             </div>
         </div>
 

@@ -110,6 +110,11 @@ class User extends Authenticatable
             return true;
         }
 
+        // Solo doctor admin gets all permissions EXCEPT doctor management
+        if ($this->isSoloDoctorAdmin()) {
+            return !str_starts_with($permission, 'doctors.');
+        }
+
         if (!$this->clinic_id) {
             return false;
         }

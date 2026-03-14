@@ -130,7 +130,11 @@ class ClinicRegistrationController extends Controller
         // Notify all super admins about the new clinic
         $superAdmins = User::where('role', 'super_admin')->get();
         foreach ($superAdmins as $superAdmin) {
-            $superAdmin->notify(new NewClinicRegistered($result['clinic']));
+            try {
+                $superAdmin->notify(new NewClinicRegistered($result['clinic']));
+            } catch (\Exception $e) {
+                // Skip notification failures
+            }
         }
 
         Auth::login($result['admin']);

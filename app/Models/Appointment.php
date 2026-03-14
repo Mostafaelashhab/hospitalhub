@@ -15,6 +15,13 @@ class Appointment extends Model
         'appointment_time',
         'status',
         'notes',
+        'recurrence_group_id',
+        'recurrence_type',
+        'recurrence_count',
+        'queue_number',
+        'queue_status',
+        'checked_in_at',
+        'called_at',
     ];
 
     protected function casts(): array
@@ -22,6 +29,8 @@ class Appointment extends Model
         return [
             'appointment_date' => 'date',
             'appointment_time' => 'datetime:H:i',
+            'checked_in_at' => 'datetime',
+            'called_at' => 'datetime',
         ];
     }
 
@@ -53,5 +62,34 @@ class Appointment extends Model
     public function invoice()
     {
         return $this->hasOne(Invoice::class);
+    }
+
+    public function recurringGroup()
+    {
+        return $this->hasMany(Appointment::class, 'recurrence_group_id', 'recurrence_group_id');
+    }
+
+    public function isRecurring(): bool
+    {
+        return $this->recurrence_type !== 'none' && $this->recurrence_group_id !== null;
+    }
+
+    public function isCheckedIn(): bool
+    {
+        return $this->queue_status !== null;
+    }
+
+    public function isInQueue(): bool
+    {
+        return in_array($this->queue_status, ['waiting', 'called']);
+    }
+
+    public static function nextQueueNumber(int $doctorId, string $date): int
+    {
+        $max = static::where('doctor_id', $doctorId)
+            ->whereDate('appointment_date', $date)
+            ->max('queue_number');
+
+        return ($max ?? 0) + 1;
     }
 }

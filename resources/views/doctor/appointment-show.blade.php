@@ -196,13 +196,21 @@
                 </div>
 
                 {{-- Prescription --}}
+                @php $rxItems = $diagnosis?->prescription?->items ?? collect(); @endphp
                 <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6"
                      x-data="{
                          drugQuery: '',
                          drugResults: [],
-                         selectedDrugs: {{ json_encode($diagnosis?->prescription ? array_filter(array_map('trim', explode("\n", $diagnosis->prescription))) : []) }},
                          searching: false,
                          showResults: false,
+                         rxDrugs: {{ json_encode($rxItems->map(fn($item) => [
+                             'drug_name' => $item->drug_name,
+                             'dosage' => $item->dosage ?? '',
+                             'frequency' => $item->frequency ?? '',
+                             'duration' => $item->duration ?? '',
+                             'instructions' => $item->instructions ?? '',
+                         ])->values()->toArray()) }},
+                         rxNotes: {{ json_encode($diagnosis?->prescription?->notes ?? '') }},
                          async searchDrugs() {
                              if (this.drugQuery.length < 2) { this.drugResults = []; this.showResults = false; return; }
                              this.searching = true;
@@ -214,22 +222,39 @@
                              this.searching = false;
                          },
                          addDrug(drug) {
-                             const entry = drug.name + (drug.name_ar ? ' (' + drug.name_ar + ')' : '');
-                             if (!this.selectedDrugs.includes(entry)) this.selectedDrugs.push(entry);
+                             const name = drug.name + (drug.name_ar ? ' (' + drug.name_ar + ')' : '');
+                             if (this.rxDrugs.find(d => d.drug_name === name)) return;
+                             this.rxDrugs.push({ drug_name: name, dosage: '', frequency: '', duration: '', instructions: '' });
                              this.drugQuery = ''; this.drugResults = []; this.showResults = false;
-                             this.syncPrescription();
+                             this.syncOldPrescription();
                          },
-                         removeDrug(idx) { this.selectedDrugs.splice(idx, 1); this.syncPrescription(); },
-                         syncPrescription() { this.$refs.prescriptionInput.value = this.selectedDrugs.join('\n'); }
+                         addCustomDrug() {
+                             if (this.drugQuery.trim().length < 2) return;
+                             this.rxDrugs.push({ drug_name: this.drugQuery.trim(), dosage: '', frequency: '', duration: '', instructions: '' });
+                             this.drugQuery = ''; this.drugResults = []; this.showResults = false;
+                             this.syncOldPrescription();
+                         },
+                         removeDrug(idx) { this.rxDrugs.splice(idx, 1); this.syncOldPrescription(); },
+                         syncOldPrescription() { this.$refs.prescriptionInput.value = this.rxDrugs.map(d => d.drug_name).join('\n'); }
                      }"
-                     x-init="syncPrescription()"
+                     x-init="syncOldPrescription()"
                      @click.outside="showResults = false">
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('app.prescription') }}</label>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">
+                        <span class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                            {{ __('app.prescription') }}
+                        </span>
+                    </label>
                     <input type="hidden" name="prescription" x-ref="prescriptionInput" value="{{ old('prescription', $diagnosis?->prescription ?? '') }}">
-                    <div class="relative mb-3">
+                    <input type="hidden" name="rx_drugs_json" :value="JSON.stringify(rxDrugs)">
+                    <input type="hidden" name="rx_notes" :value="rxNotes">
+
+                    {{-- Drug Search --}}
+                    <div class="relative mb-4">
                         <div class="relative">
                             <svg class="w-4 h-4 text-gray-400 absolute {{ app()->getLocale() === 'ar' ? 'right-3' : 'left-3' }} top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                             <input type="text" x-model="drugQuery" @input.debounce.400ms="searchDrugs()" @focus="drugQuery.length >= 2 && (showResults = true)"
+                                   @keydown.enter.prevent="addCustomDrug()"
                                    class="w-full bg-gray-50 border border-gray-200 rounded-xl {{ app()->getLocale() === 'ar' ? 'pr-10 pl-4' : 'pl-10 pr-4' }} py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-all"
                                    placeholder="{{ __('app.search_drug') }}">
                         </div>
@@ -252,25 +277,68 @@
                                 </button>
                             </template>
                         </div>
-
-                        {{-- No Results --}}
                         <div x-show="showResults && drugResults.length === 0 && drugQuery.length >= 2 && !searching" x-transition
                              class="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-xl shadow-lg p-4 text-center">
                             <p class="text-sm text-gray-500">{{ __('app.no_drugs_found') }}</p>
+                            <button type="button" @click="addCustomDrug()" class="mt-2 text-sm text-indigo-600 hover:text-indigo-700 font-semibold">{{ __('app.add_custom_drug') }}</button>
                         </div>
                     </div>
-                    <div class="space-y-2">
-                        <template x-for="(drug, idx) in selectedDrugs" :key="idx">
-                            <div class="flex items-center gap-2 bg-indigo-50 border border-indigo-100 rounded-xl px-3 py-2">
-                                <svg class="w-4 h-4 text-indigo-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
-                                <span class="flex-1 text-sm text-indigo-800 font-medium" x-text="drug"></span>
-                                <button type="button" @click="removeDrug(idx)" class="text-indigo-400 hover:text-red-500 transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-                                </button>
+
+                    {{-- Prescription Items --}}
+                    <div class="space-y-3">
+                        <template x-for="(rx, idx) in rxDrugs" :key="idx">
+                            <div class="bg-gray-50 border border-gray-200 rounded-xl p-4">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-6 h-6 bg-indigo-100 text-indigo-700 rounded-lg flex items-center justify-center text-xs font-bold" x-text="idx + 1"></span>
+                                        <span class="text-sm font-semibold text-gray-900" x-text="rx.drug_name"></span>
+                                    </div>
+                                    <button type="button" @click="removeDrug(idx)" class="text-gray-400 hover:text-red-500 transition-colors">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    </button>
+                                </div>
+                                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-1">{{ __('app.dosage') }}</label>
+                                        <input type="text" x-model="rx.dosage" placeholder="{{ __('app.dosage_placeholder') }}"
+                                               class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-1">{{ __('app.frequency') }}</label>
+                                        <select x-model="rx.frequency"
+                                                class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all">
+                                            <option value="">--</option>
+                                            <option value="once_daily">{{ __('app.once_daily') }}</option>
+                                            <option value="twice_daily">{{ __('app.twice_daily') }}</option>
+                                            <option value="three_daily">{{ __('app.three_daily') }}</option>
+                                            <option value="four_daily">{{ __('app.four_daily') }}</option>
+                                            <option value="as_needed">{{ __('app.as_needed') }}</option>
+                                            <option value="before_meals">{{ __('app.before_meals') }}</option>
+                                            <option value="after_meals">{{ __('app.after_meals') }}</option>
+                                            <option value="at_bedtime">{{ __('app.at_bedtime') }}</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-1">{{ __('app.duration') }}</label>
+                                        <input type="text" x-model="rx.duration" placeholder="{{ __('app.duration_placeholder') }}"
+                                               class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-semibold text-gray-500 uppercase mb-1">{{ __('app.instructions') }}</label>
+                                        <input type="text" x-model="rx.instructions" placeholder="{{ __('app.instructions_placeholder') }}"
+                                               class="w-full bg-white border border-gray-200 rounded-lg px-2.5 py-1.5 text-xs text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all">
+                                    </div>
+                                </div>
                             </div>
                         </template>
                     </div>
-                    <p x-show="selectedDrugs.length === 0" class="text-xs text-gray-400 mt-2">{{ __('app.search_drug_hint') }}</p>
+                    <p x-show="rxDrugs.length === 0" class="text-xs text-gray-400 mt-2">{{ __('app.search_drug_hint') }}</p>
+
+                    {{-- Prescription Notes --}}
+                    <div x-show="rxDrugs.length > 0" x-transition class="mt-3">
+                        <input type="text" x-model="rxNotes" placeholder="{{ __('app.prescription_notes_placeholder') }}"
+                               class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-all">
+                    </div>
                 </div>
 
                 {{-- Lab Tests --}}

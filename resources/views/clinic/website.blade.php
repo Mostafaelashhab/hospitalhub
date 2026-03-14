@@ -75,6 +75,7 @@
                     @if($about)<a href="#about" class="px-3 py-2 text-sm font-semibold rounded-lg transition-colors" :class="s ? 'text-gray-600 hover:text-gray-900 hover:bg-gray-50' : 'text-white/60 hover:text-white'">{{ __('app.about_clinic') }}</a>@endif
                     @if(count($services) > 0)<a href="#services" class="px-3 py-2 text-sm font-semibold rounded-lg transition-colors" :class="s ? 'text-gray-600 hover:text-gray-900 hover:bg-gray-50' : 'text-white/60 hover:text-white'">{{ __('app.our_services') }}</a>@endif
                     @if($clinic->website_show_doctors && $doctors->count() > 0)<a href="#doctors" class="px-3 py-2 text-sm font-semibold rounded-lg transition-colors" :class="s ? 'text-gray-600 hover:text-gray-900 hover:bg-gray-50' : 'text-white/60 hover:text-white'">{{ __('app.our_doctors') }}</a>@endif
+                    @if($clinic->website_show_booking)<a href="#booking" class="px-3 py-2 text-sm font-semibold rounded-lg transition-colors" :class="s ? 'text-gray-600 hover:text-gray-900 hover:bg-gray-50' : 'text-white/60 hover:text-white'">{{ __('app.online_booking') }}</a>@endif
                     <a href="#contact" class="px-3 py-2 text-sm font-semibold rounded-lg transition-colors" :class="s ? 'text-gray-600 hover:text-gray-900 hover:bg-gray-50' : 'text-white/60 hover:text-white'">{{ __('app.contact_info') }}</a>
                 </div>
                 <div class="flex items-center gap-3">
@@ -84,8 +85,8 @@
                         {{ $clinic->phone }}
                     </a>
                     @endif
-                    @if($clinic->website_show_booking && !empty($socials['whatsapp']))
-                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $socials['whatsapp']) }}" target="_blank" class="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-white rounded-xl brand-gradient shadow-lg hover:opacity-90 transition-all" style="box-shadow: 0 4px 14px {{ $primary }}40;">
+                    @if($clinic->website_show_booking)
+                    <a href="#booking" class="inline-flex items-center gap-2 px-5 py-2.5 text-xs font-bold text-white rounded-xl brand-gradient shadow-lg hover:opacity-90 transition-all" style="box-shadow: 0 4px 14px {{ $primary }}40;">
                         {{ __('app.book_now') }}
                     </a>
                     @endif
@@ -447,6 +448,121 @@
                     </div>
                 </div>
                 @endforeach
+            </div>
+        </div>
+    </section>
+    @endif
+
+    {{-- ═══════ BOOKING ═══════ --}}
+    @if($clinic->website_show_booking)
+    <section class="py-20 sm:py-28 bg-white" id="booking"
+             x-data="{
+                 submitted: {{ session('booking_success') ? 'true' : 'false' }},
+                 selectedDoctor: '',
+                 minDate: new Date().toISOString().split('T')[0]
+             }">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-14 fade-up">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gray-100 text-xs font-bold uppercase tracking-wider mb-6" style="color: {{ $primary }};">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    {{ __('app.online_booking') }}
+                </div>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4">{{ __('app.book_your_appointment') }}</h2>
+                <p class="text-gray-500 text-lg max-w-xl mx-auto">{{ __('app.booking_desc') }}</p>
+            </div>
+
+            {{-- Success Message --}}
+            <div x-show="submitted" x-transition class="fade-up mb-8">
+                <div class="rounded-2xl p-8 text-center border-2" style="background: {{ $primary }}08; border-color: {{ $primary }}30;">
+                    <div class="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style="background: {{ $primary }}15;">
+                        <svg class="w-8 h-8" style="color: {{ $primary }};" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-2">{{ __('app.booking_success_title') }}</h3>
+                    <p class="text-gray-500">{{ __('app.booking_success_desc') }}</p>
+                </div>
+            </div>
+
+            {{-- Booking Form --}}
+            <div x-show="!submitted" class="fade-up d2">
+                <form method="POST" action="{{ route('clinic.book', $clinic->slug) }}" class="bg-white rounded-2xl border border-gray-200 shadow-xl p-6 sm:p-8 space-y-5">
+                    @csrf
+
+                    @if(session('booking_error'))
+                    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+                        {{ session('booking_error') }}
+                    </div>
+                    @endif
+
+                    @if($errors->any())
+                    <div class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+                        <ul class="list-disc list-inside space-y-1">
+                            @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                    @endif
+
+                    {{-- Doctor Selection --}}
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">{{ __('app.choose_doctor') }} <span class="text-red-500">*</span></label>
+                        <select name="doctor_id" x-model="selectedDoctor" required
+                                class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all">
+                            <option value="">{{ __('app.select_doctor') }}</option>
+                            @foreach($clinic->doctors->where('is_active', true) as $doctor)
+                            <option value="{{ $doctor->id }}" {{ old('doctor_id') == $doctor->id ? 'selected' : '' }}>
+                                {{ $doctor->name }} — {{ $doctor->specialty->{'name_' . $locale} ?? '' }}
+                                @if($doctor->consultation_fee) ({{ number_format($doctor->consultation_fee, 0) }} {{ __('app.currency') }}) @endif
+                            </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    {{-- Patient Info --}}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">{{ __('app.patient_name') }} <span class="text-red-500">*</span></label>
+                            <input type="text" name="patient_name" value="{{ old('patient_name') }}" required
+                                   class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                                   placeholder="{{ __('app.full_name') }}">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">{{ __('app.phone') }} <span class="text-red-500">*</span></label>
+                            <input type="tel" name="patient_phone" value="{{ old('patient_phone') }}" required dir="ltr"
+                                   class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all"
+                                   placeholder="+20xxxxxxxxxx">
+                        </div>
+                    </div>
+
+                    {{-- Date & Time --}}
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">{{ __('app.preferred_date') }} <span class="text-red-500">*</span></label>
+                            <input type="date" name="appointment_date" value="{{ old('appointment_date') }}" required :min="minDate"
+                                   class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-gray-700 mb-2">{{ __('app.preferred_time') }}</label>
+                            <input type="time" name="appointment_time" value="{{ old('appointment_time') }}"
+                                   class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all">
+                        </div>
+                    </div>
+
+                    {{-- Notes --}}
+                    <div>
+                        <label class="block text-sm font-bold text-gray-700 mb-2">{{ __('app.notes') }}</label>
+                        <textarea name="notes" rows="3"
+                                  class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 transition-all resize-none"
+                                  placeholder="{{ __('app.booking_notes_placeholder') }}">{{ old('notes') }}</textarea>
+                    </div>
+
+                    <button type="submit"
+                            class="w-full py-3.5 text-white text-sm font-bold rounded-xl brand-gradient shadow-lg hover:opacity-90 transition-all flex items-center justify-center gap-2"
+                            style="box-shadow: 0 4px 14px {{ $primary }}40;">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        {{ __('app.confirm_booking') }}
+                    </button>
+                </form>
             </div>
         </div>
     </section>

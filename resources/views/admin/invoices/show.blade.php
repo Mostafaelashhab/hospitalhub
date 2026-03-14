@@ -83,6 +83,22 @@
                                 <span class="text-sm text-gray-500">{{ __('app.discount') }}</span>
                                 <span class="text-sm font-medium text-red-500">- {{ number_format($invoice->discount, 2) }} {{ __('app.currency') }}</span>
                             </div>
+                            @if($invoice->insurance_coverage > 0)
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-500 flex items-center gap-1.5">
+                                    <svg class="w-4 h-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                    {{ __('app.insurance_coverage') }}
+                                    @if($invoice->insuranceProvider)
+                                    <span class="text-xs text-gray-400">({{ $invoice->insuranceProvider->name }})</span>
+                                    @endif
+                                </span>
+                                <span class="text-sm font-medium text-blue-600">- {{ number_format($invoice->insurance_coverage, 2) }} {{ __('app.currency') }}</span>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-sm text-gray-500">{{ __('app.patient_share') }}</span>
+                                <span class="text-sm font-medium text-gray-900">{{ number_format($invoice->patient_share, 2) }} {{ __('app.currency') }}</span>
+                            </div>
+                            @endif
                             <div class="border-t border-gray-200 pt-3 flex items-center justify-between">
                                 <span class="text-base font-bold text-gray-900">{{ __('app.total') }}</span>
                                 <span class="text-xl font-bold text-indigo-600">{{ number_format($invoice->total, 2) }} {{ __('app.currency') }}</span>

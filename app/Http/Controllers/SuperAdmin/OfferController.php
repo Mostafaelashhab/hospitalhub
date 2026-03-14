@@ -170,7 +170,11 @@ class OfferController extends Controller
         );
 
         foreach ($admins as $admin) {
-            $admin->notify($notification);
+            try {
+                $admin->notify($notification);
+            } catch (\Exception $e) {
+                // Skip notification failures
+            }
         }
     }
 }

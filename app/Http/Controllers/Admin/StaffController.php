@@ -36,7 +36,7 @@ class StaffController extends Controller
 
     public function create()
     {
-        $roles = collect(config('permissions.roles'))->filter(fn($r) => $r !== 'admin');
+        $roles = collect(config('permissions.roles'))->filter(fn($r) => !in_array($r, ['admin', 'doctor']));
         return view('admin.staff.create', compact('roles'));
     }
 
@@ -74,7 +74,7 @@ class StaffController extends Controller
         $clinic = auth()->user()->clinic;
         abort_if($user->clinic_id !== $clinic->id || $user->role === 'admin', 403);
 
-        $roles = collect(config('permissions.roles'))->filter(fn($r) => $r !== 'admin');
+        $roles = collect(config('permissions.roles'))->filter(fn($r) => !in_array($r, ['admin', 'doctor']));
         return view('admin.staff.edit', compact('user', 'roles'));
     }
 

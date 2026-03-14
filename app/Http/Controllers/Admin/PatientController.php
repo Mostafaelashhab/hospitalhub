@@ -6,6 +6,7 @@ use App\Helpers\BranchHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Diagnosis;
 use App\Models\Patient;
+use App\Models\PlatformSetting;
 use Illuminate\Http\Request;
 
 class PatientController extends Controller
@@ -66,10 +67,28 @@ class PatientController extends Controller
         ]);
 
         $clinic = auth()->user()->clinic;
+        $freeMode = PlatformSetting::isFreeModeActive();
 
-        $clinic->patients()->create(array_merge($validated, [
+        // Check wallet balance (skip if free mode)
+        $pointCost = (int) PlatformSetting::getPointPrice();
+        if (!$freeMode && $pointCost > 0) {
+            $wallet = $clinic->wallet;
+            if ($wallet && !$wallet->hasEnoughBalance($pointCost)) {
+                return back()->withInput()->with('error', __('app.insufficient_points'));
+            }
+        }
+
+        $patient = $clinic->patients()->create(array_merge($validated, [
             'branch_id' => BranchHelper::activeBranchId(),
         ]));
+
+        // Deduct points (skip if free mode)
+        if (!$freeMode && $pointCost > 0) {
+            $wallet = $clinic->wallet ?? null;
+            if ($wallet) {
+                $wallet->debit($pointCost, __('app.point_deducted_patient', ['name' => $patient->name]), 'patient', $patient->id);
+            }
+        }
 
         return redirect()->route('dashboard.patients.index')
             ->with('success', __('app.patient_created'));
@@ -80,11 +99,22 @@ class PatientController extends Controller
         $clinic = auth()->user()->clinic;
         abort_if($patient->clinic_id !== $clinic->id, 403);
 
-        $patient->load(['appointments' => function ($q) {
-            $q->with('doctor')->latest('appointment_date')->limit(10);
-        }]);
+        $patient->load([
+            'appointments' => function ($q) {
+                $q->with('doctor')->latest('appointment_date')->limit(10);
+            },
+            'files' => function ($q) {
+                $q->with('uploader')->latest();
+            },
+            'insurances' => function ($q) {
+                $q->with('provider')->latest();
+            },
+            'activeInsurance.provider',
+        ]);
 
-        return view('admin.patients.show', compact('patient'));
+        $insuranceProviders = $clinic->insuranceProviders()->where('is_active', true)->get();
+
+        return view('admin.patients.show', compact('patient', 'insuranceProviders'));
     }
 
     public function edit(Patient $patient)
