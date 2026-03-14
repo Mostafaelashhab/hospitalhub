@@ -586,4 +586,5 @@ return [
     'notification_body' => 'نص الإشعار...',
     'send' => 'إرسال',
     'notification_sent_to' => 'تم إرسال الإشعار لـ :count مستخدم.',
+    'test_push' => 'تجربة Push',
 ];

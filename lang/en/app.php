@@ -586,4 +586,5 @@ return [
     'notification_body' => 'Notification Message...',
     'send' => 'Send',
     'notification_sent_to' => 'Notification sent to :count users.',
+    'test_push' => 'Test Push',
 ];

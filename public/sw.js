@@ -1,7 +1,6 @@
-const CACHE_NAME = 'hospital-pwa-v1';
+const CACHE_NAME = 'hospital-pwa-v2';
 const OFFLINE_URL = '/offline.html';
 
-// Assets to cache on install
 const PRECACHE_ASSETS = [
     '/',
     '/offline.html',
@@ -10,144 +9,102 @@ const PRECACHE_ASSETS = [
     '/icons/icon-512x512.png',
 ];
 
-// Install - cache core assets
+// Install
 self.addEventListener('install', (event) => {
     event.waitUntil(
-        caches.open(CACHE_NAME).then((cache) => {
-            return cache.addAll(PRECACHE_ASSETS);
-        })
+        caches.open(CACHE_NAME).then((cache) => cache.addAll(PRECACHE_ASSETS))
     );
     self.skipWaiting();
 });
 
-// Activate - clean old caches
+// Activate
 self.addEventListener('activate', (event) => {
     event.waitUntil(
-        caches.keys().then((cacheNames) => {
-            return Promise.all(
-                cacheNames
-                    .filter((name) => name !== CACHE_NAME)
-                    .map((name) => caches.delete(name))
-            );
-        })
+        caches.keys().then((names) =>
+            Promise.all(names.filter((n) => n !== CACHE_NAME).map((n) => caches.delete(n)))
+        )
     );
     self.clients.claim();
 });
 
-// Fetch - network first, fallback to cache, then offline page
-// iOS Safari requires careful handling of opaque responses and range requests
+// Fetch
 self.addEventListener('fetch', (event) => {
-    // Only handle GET requests
     if (event.request.method !== 'GET') return;
-
-    // Skip cross-origin requests (iOS can be strict about these)
     if (!event.request.url.startsWith(self.location.origin)) return;
 
-    // Skip API/auth/CSRF requests
     const url = new URL(event.request.url);
-    if (
-        url.pathname.startsWith('/api') ||
-        url.pathname.startsWith('/login') ||
-        url.pathname.startsWith('/logout') ||
-        url.pathname.startsWith('/sanctum') ||
-        url.pathname.includes('csrf')
-    ) return;
-
-    // iOS Safari: skip range requests (audio/video)
+    if (url.pathname.startsWith('/api') || url.pathname.startsWith('/login') ||
+        url.pathname.startsWith('/logout') || url.pathname.includes('csrf')) return;
     if (event.request.headers.get('range')) return;
 
     event.respondWith(
         fetch(event.request)
             .then((response) => {
-                // Only cache valid responses (not opaque - iOS issue)
                 if (response.ok && response.type === 'basic') {
-                    const responseClone = response.clone();
-                    caches.open(CACHE_NAME).then((cache) => {
-                        cache.put(event.request, responseClone);
-                    });
+                    const clone = response.clone();
+                    caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
                 }
                 return response;
             })
-            .catch(() => {
-                return caches.match(event.request).then((cachedResponse) => {
-                    if (cachedResponse) return cachedResponse;
-
-                    // For navigation requests, show offline page
-                    if (event.request.mode === 'navigate') {
-                        return caches.match(OFFLINE_URL);
-                    }
-
-                    return new Response('Offline', {
-                        status: 503,
-                        statusText: 'Service Unavailable',
-                    });
-                });
-            })
+            .catch(() =>
+                caches.match(event.request).then((cached) => {
+                    if (cached) return cached;
+                    if (event.request.mode === 'navigate') return caches.match(OFFLINE_URL);
+                    return new Response('Offline', { status: 503 });
+                })
+            )
     );
 });
 
-// Push notification received
-// iOS 16.4+ supports web push in standalone PWA mode
+// ===== PUSH - This is what iOS needs to work in background =====
 self.addEventListener('push', (event) => {
-    let data = {
-        title: 'Hospital System',
-        body: 'You have a new notification',
-        icon: '/icons/icon-192x192.png',
-        badge: '/icons/icon-96x96.png',
-        url: '/',
-    };
+    // iOS REQUIRES showing a notification immediately - no async delays
+    let title = 'Hospital System';
+    let body = 'You have a new notification';
+    let icon = '/icons/icon-192x192.png';
+    let badge = '/icons/icon-96x96.png';
+    let url = '/';
 
     if (event.data) {
         try {
             const payload = event.data.json();
-            data = { ...data, ...payload };
+            title = payload.title || title;
+            body = payload.body || body;
+            icon = payload.icon || icon;
+            badge = payload.badge || badge;
+            url = payload.url || payload.data?.url || url;
         } catch (e) {
-            data.body = event.data.text();
+            body = event.data.text() || body;
         }
     }
 
-    // iOS doesn't support notification actions, so we keep it simple
-    const options = {
-        body: data.body,
-        icon: data.icon,
-        badge: data.badge,
-        data: { url: data.url },
-        dir: 'auto',
-    };
+    // Keep it SIMPLE for iOS - minimal options
+    const promise = self.registration.showNotification(title, {
+        body: body,
+        icon: icon,
+        badge: badge,
+        tag: 'hospital-notification-' + Date.now(),
+        renotify: true,
+        data: { url: url },
+    });
 
-    // Only add vibrate and actions for non-iOS (they're ignored on iOS anyway)
-    const isIOS = /iPad|iPhone|iPod/.test(self.navigator?.userAgent || '');
-    if (!isIOS) {
-        options.vibrate = [200, 100, 200];
-        options.actions = [
-            { action: 'open', title: 'Open' },
-            { action: 'close', title: 'Close' },
-        ];
-    }
-
-    event.waitUntil(
-        self.registration.showNotification(data.title, options)
-    );
+    event.waitUntil(promise);
 });
 
-// Notification click handler
+// Notification click
 self.addEventListener('notificationclick', (event) => {
     event.notification.close();
-
-    if (event.action === 'close') return;
 
     const url = event.notification.data?.url || '/';
 
     event.waitUntil(
-        clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-            // Focus existing window if open
-            for (const client of clientList) {
+        clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+            for (const client of windowClients) {
                 if (client.url.includes(self.location.origin) && 'focus' in client) {
                     client.navigate(url);
                     return client.focus();
                 }
             }
-            // Open new window
             return clients.openWindow(url);
         })
     );

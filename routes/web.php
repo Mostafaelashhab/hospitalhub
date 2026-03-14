@@ -165,6 +165,20 @@ Route::middleware('auth')->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])->name('notifications.read-all');
+
+    // Test push notification (send to yourself)
+    Route::post('/push/test', function () {
+        $user = request()->user();
+        $count = $user->pushSubscriptions()->count();
+        if ($count === 0) {
+            return back()->with('error', 'No push subscriptions found. Allow notifications first!');
+        }
+        $user->notify(new \App\Notifications\BroadcastNotification(
+            'Test Push',
+            'This is a test push notification! If you see this, push is working.'
+        ));
+        return back()->with('success', "Test notification sent! (subscriptions: {$count})");
+    })->name('push.test');
 });
 
 require __DIR__.'/auth.php';

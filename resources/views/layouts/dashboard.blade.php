@@ -188,6 +188,19 @@
                                 </a>
                             </template>
                         </div>
+                        {{-- Test push + enable push --}}
+                        <div class="border-t border-gray-100 p-3 flex gap-2">
+                            <button @click="enablePush()" x-show="pushStatus !== 'granted'"
+                                    class="flex-1 text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 py-2 px-3 rounded-lg transition-colors text-center">
+                                {{ __('app.enable_notifications') }}
+                            </button>
+                            <form method="POST" action="{{ route('push.test') }}" class="flex-1" x-show="pushStatus === 'granted'">
+                                @csrf
+                                <button type="submit" class="w-full text-xs font-semibold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 py-2 px-3 rounded-lg transition-colors">
+                                    {{ __('app.test_push') }}
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
 
@@ -314,6 +327,7 @@
             open: false,
             notifications: [],
             unreadCount: 0,
+            pushStatus: ('Notification' in window) ? Notification.permission : 'unsupported',
             init() {
                 this.fetch();
                 setInterval(() => this.fetch(), 30000);
@@ -345,6 +359,12 @@
                     this.notifications.forEach(n => n.read = true);
                     this.unreadCount = 0;
                 } catch (e) {}
+            },
+            async enablePush() {
+                if (window.requestPushPermission) {
+                    const ok = await window.requestPushPermission();
+                    if (ok) this.pushStatus = 'granted';
+                }
             },
         };
     }

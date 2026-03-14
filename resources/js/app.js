@@ -13,10 +13,14 @@ if ('serviceWorker' in navigator) {
             const registration = await navigator.serviceWorker.register('/sw.js');
             console.log('SW registered:', registration.scope);
 
-            // Check for push notification support
-            // iOS 16.4+ supports push only in standalone (installed) PWA mode
-            if ('PushManager' in window) {
-                await initPushNotifications(registration);
+            // Wait for the service worker to be ready
+            const swReg = await navigator.serviceWorker.ready;
+            window.swRegistration = swReg;
+            console.log('SW ready:', swReg.scope);
+
+            // If already granted, auto-subscribe
+            if ('PushManager' in window && Notification.permission === 'granted') {
+                await subscribeToPush();
             }
         } catch (error) {
             console.log('SW registration failed:', error);
@@ -24,52 +28,30 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-// Detect iOS
-function isIOS() {
-    return /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-        (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-}
-
-// Check if running as installed PWA (standalone mode)
-function isStandalone() {
-    return window.matchMedia('(display-mode: standalone)').matches ||
-        window.navigator.standalone === true;
-}
-
-async function initPushNotifications(registration) {
-    const permission = Notification.permission;
-
-    if (permission === 'denied') {
-        console.log('Push notifications are blocked by user.');
-        return;
-    }
-
-    // Store registration globally so we can use it later
-    window.swRegistration = registration;
-
-    // On iOS, push only works in standalone PWA mode
-    if (isIOS() && !isStandalone()) {
-        console.log('iOS: Push notifications require the app to be installed (Add to Home Screen).');
-        window.iosPushRequiresInstall = true;
-    }
-}
-
 // Function to request push notification permission (call from UI)
 window.requestPushPermission = async function () {
-    if (!('Notification' in window)) {
-        if (isIOS() && !isStandalone()) {
+    if (!('Notification' in window) || !('PushManager' in window)) {
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+
+        if (isIOS && !isStandalone) {
             alert('لتفعيل الإشعارات، قم بإضافة التطبيق للشاشة الرئيسية أولاً.\n\nTo enable notifications, add this app to your Home Screen first.');
         } else {
-            alert('This browser does not support notifications.');
+            alert('This browser does not support push notifications.');
         }
         return false;
     }
 
-    const permission = await Notification.requestPermission();
+    try {
+        const permission = await Notification.requestPermission();
+        console.log('Notification permission:', permission);
 
-    if (permission === 'granted') {
-        await subscribeToPush();
-        return true;
+        if (permission === 'granted') {
+            const success = await subscribeToPush();
+            return success;
+        }
+    } catch (error) {
+        console.log('Permission request failed:', error);
     }
 
     return false;
@@ -77,52 +59,79 @@ window.requestPushPermission = async function () {
 
 async function subscribeToPush() {
     try {
-        const registration = window.swRegistration;
-        if (!registration) return;
+        // Wait for SW to be ready
+        let registration = window.swRegistration;
+        if (!registration) {
+            registration = await navigator.serviceWorker.ready;
+            window.swRegistration = registration;
+        }
 
         // Check if already subscribed
         let subscription = await registration.pushManager.getSubscription();
+        console.log('Existing subscription:', subscription ? 'yes' : 'no');
 
         if (!subscription) {
             // Get VAPID public key from meta tag
             const vapidMeta = document.querySelector('meta[name="vapid-public-key"]');
-            if (!vapidMeta) {
-                console.log('VAPID public key not found. Push disabled.');
-                return;
+            if (!vapidMeta || !vapidMeta.content) {
+                console.log('VAPID public key not found in meta tag.');
+                return false;
             }
 
             const vapidPublicKey = vapidMeta.content;
+            console.log('VAPID key found, subscribing...');
             const convertedKey = urlBase64ToUint8Array(vapidPublicKey);
 
             subscription = await registration.pushManager.subscribe({
                 userVisibleOnly: true,
                 applicationServerKey: convertedKey,
             });
+            console.log('Push subscription created:', subscription.endpoint);
         }
 
         // Send subscription to server
         await sendSubscriptionToServer(subscription);
+        return true;
     } catch (error) {
-        console.log('Push subscription failed:', error);
+        console.error('Push subscription failed:', error);
+        return false;
     }
 }
 
 async function sendSubscriptionToServer(subscription) {
     const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content;
+    const subJSON = subscription.toJSON();
+
+    console.log('Sending subscription to server...');
+    console.log('Endpoint:', subJSON.endpoint);
+    console.log('Keys:', subJSON.keys ? 'present' : 'missing');
 
     try {
-        await fetch('/push/subscribe', {
+        const response = await fetch('/push/subscribe', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Accept': 'application/json',
                 'X-CSRF-TOKEN': csrfToken,
                 'X-Requested-With': 'XMLHttpRequest',
             },
-            body: JSON.stringify(subscription),
+            body: JSON.stringify({
+                endpoint: subJSON.endpoint,
+                keys: {
+                    p256dh: subJSON.keys.p256dh,
+                    auth: subJSON.keys.auth,
+                },
+            }),
         });
-        console.log('Push subscription sent to server.');
+
+        if (response.ok) {
+            console.log('Push subscription saved to server!');
+        } else {
+            const text = await response.text();
+            console.error('Server error:', response.status, text);
+        }
     } catch (error) {
-        console.log('Failed to send subscription to server:', error);
+        console.error('Failed to send subscription to server:', error);
     }
 }
 
@@ -136,12 +145,3 @@ function urlBase64ToUint8Array(base64String) {
     }
     return outputArray;
 }
-
-// ===== iOS Install Prompt Helper =====
-// Show a custom "Add to Home Screen" prompt for iOS users
-window.showIOSInstallPrompt = function () {
-    if (!isIOS() || isStandalone()) return false;
-
-    // Return true so the UI can show a banner/modal
-    return true;
-};
