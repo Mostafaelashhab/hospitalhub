@@ -7,9 +7,9 @@
     </x-slot>
 
     {{-- Page Header --}}
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-            <h2 class="text-2xl font-bold text-gray-900">{{ __('app.diagnoses') }}</h2>
+            <h2 class="text-xl sm:text-2xl font-bold text-gray-900">{{ __('app.diagnoses') }}</h2>
             <p class="text-sm text-gray-500 mt-1">{{ __('app.all_diagnoses') }}</p>
         </div>
     </div>
@@ -57,8 +57,8 @@
                             <p class="text-xs text-gray-400 mt-0.5">{{ $diagnosis->patient->phone ?? '' }}</p>
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-700">{{ $diagnosis->doctor->name ?? '-' }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-700 max-w-[200px] truncate">{{ $diagnosis->complaint ?? '-' }}</td>
-                        <td class="px-6 py-4 text-sm text-gray-700 max-w-[200px] truncate">{{ $diagnosis->diagnosis ?? '-' }}</td>
+                        <td class="px-3 sm:px-6 py-4 text-sm text-gray-700 max-w-[120px] sm:max-w-[200px] truncate">{{ $diagnosis->complaint ?? '-' }}</td>
+                        <td class="px-3 sm:px-6 py-4 text-sm text-gray-700 max-w-[120px] sm:max-w-[200px] truncate">{{ $diagnosis->diagnosis ?? '-' }}</td>
                         <td class="px-6 py-4 text-sm text-gray-500">{{ $diagnosis->created_at->format('Y-m-d') }}</td>
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-2">

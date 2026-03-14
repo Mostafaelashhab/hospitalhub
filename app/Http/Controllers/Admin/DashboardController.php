@@ -18,6 +18,7 @@ class DashboardController extends Controller
         }
 
         $clinic->load('wallet');
+        $clinic->seedDefaultPermissions();
         $branchId = BranchHelper::activeBranchId();
 
         $patientsQuery = $clinic->patients();

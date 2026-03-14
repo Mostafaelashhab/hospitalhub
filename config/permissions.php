@@ -32,6 +32,19 @@ return [
             'doctors.view',
         ],
 
+        'doctor' => [
+            'dashboard.view',
+            'appointments.view',
+            'appointments.create',
+            'appointments.edit',
+            'appointments.change_status',
+            'appointments.complete',
+            'patients.view',
+            'patients.create',
+            'patients.edit',
+            'doctors.view',
+        ],
+
         'accountant' => [
             'dashboard.view',
             'appointments.view',

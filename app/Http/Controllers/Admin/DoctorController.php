@@ -8,6 +8,7 @@ use App\Models\Doctor;
 use App\Models\Specialty;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class DoctorController extends Controller
@@ -82,6 +83,8 @@ class DoctorController extends Controller
                 'is_active' => true,
             ]);
             $userId = $user->id;
+
+            $this->ensureDefaultPermissions($clinic->id, 'doctor');
         }
 
         $clinic->doctors()->create([
@@ -151,5 +154,31 @@ class DoctorController extends Controller
         $doctor->update(['is_active' => !$doctor->is_active]);
 
         return back()->with('success', __('app.status_updated'));
+    }
+
+    private function ensureDefaultPermissions(int $clinicId, string $role): void
+    {
+        $defaults = config("permissions.defaults.{$role}", []);
+        if (empty($defaults)) {
+            return;
+        }
+
+        $existing = DB::table('clinic_role_permissions')
+            ->where('clinic_id', $clinicId)
+            ->where('role', $role)
+            ->pluck('permission')
+            ->toArray();
+
+        if (empty($existing)) {
+            $records = collect($defaults)->map(fn($p) => [
+                'clinic_id' => $clinicId,
+                'role' => $role,
+                'permission' => $p,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ])->toArray();
+
+            DB::table('clinic_role_permissions')->insert($records);
+        }
     }
 }

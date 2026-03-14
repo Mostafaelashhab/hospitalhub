@@ -58,8 +58,8 @@
             .derm-label { font-family: system-ui, -apple-system, sans-serif; font-size: 9px; fill: #4b5563; pointer-events: none; text-anchor: middle; font-weight: 500; }
             .derm-title { font-family: system-ui, -apple-system, sans-serif; font-size: 15px; font-weight: 700; fill: #1f2937; text-anchor: middle; letter-spacing: 0.02em; }
             .derm-subtitle { font-family: system-ui, -apple-system, sans-serif; font-size: 12px; font-weight: 600; fill: #6b7280; text-anchor: middle; }
-            .derm-zone { transition: all 0.2s ease; }
-            .derm-zone:hover { filter: brightness(1.05); }
+            .derm-zone { cursor: pointer; transition: all 0.25s cubic-bezier(0.4,0,0.2,1); transform-origin: center; }
+            .derm-zone:hover { filter: brightness(1.08) drop-shadow(0 0 6px rgba(99,102,241,0.3)); transform: scale(1.012); }
             .derm-contour { fill: none; stroke: #c4996e; stroke-width: 0.5; opacity: 0.2; pointer-events: none; }
             .derm-separator { stroke: #d1d5db; stroke-width: 0.5; stroke-dasharray: 2 2; opacity: 0.4; pointer-events: none; }
         </style>

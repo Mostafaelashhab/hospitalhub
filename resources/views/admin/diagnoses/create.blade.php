@@ -80,50 +80,206 @@
         @csrf
         <input type="hidden" name="diagram_data" x-ref="diagramInput" value="">
 
+        {{-- Global Diagram Styles --}}
+        <style>
+            /* Zoom & Pan */
+            .diagram-viewport { overflow: hidden; position: relative; }
+            .diagram-viewport svg { transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); transform-origin: center center; }
+
+            /* Selected zone pulse animation */
+            @keyframes zonePulse { 0%,100%{filter:brightness(1)} 50%{filter:brightness(1.15)} }
+            .diagram-viewport svg [style*="818cf8"], .diagram-viewport svg [fill="#818cf8"] { animation: zonePulse 2s ease-in-out infinite; }
+
+            /* Fullscreen */
+            .diagram-fullscreen { position: fixed !important; inset: 0; z-index: 9999; border-radius: 0 !important; max-height: 100vh; display: flex; flex-direction: column; }
+            .diagram-fullscreen .diagram-viewport { flex: 1; max-height: calc(100vh - 60px); }
+            .diagram-fullscreen .diagram-viewport svg { max-height: calc(100vh - 70px); }
+
+            /* Grid pattern bg */
+            .diagram-grid { background-image: radial-gradient(circle, #e5e7eb 1px, transparent 1px); background-size: 20px 20px; }
+
+            /* Zone hover enhancement - all specialties */
+            .diagram-viewport svg .gen-zone:hover,
+            .diagram-viewport svg .ent-zone:hover,
+            .diagram-viewport svg .bone-zone:hover,
+            .diagram-viewport svg .zone-area:hover,
+            .diagram-viewport svg .uro-zone:hover,
+            .diagram-viewport svg .gyn-zone:hover,
+            .diagram-viewport svg .dig-zone:hover,
+            .diagram-viewport svg .brain-zone:hover,
+            .diagram-viewport svg .derm-zone:hover,
+            .diagram-viewport svg .cursor-pointer:hover { filter: drop-shadow(0 0 8px rgba(99,102,241,0.4)) brightness(1.08); transition: filter 0.2s ease; }
+
+            /* Selected zone glow */
+            .diagram-viewport svg .gen-zone[style*="818cf8"],
+            .diagram-viewport svg .ent-zone[style*="818cf8"],
+            .diagram-viewport svg .bone-zone[style*="818cf8"],
+            .diagram-viewport svg .zone-area[style*="818cf8"],
+            .diagram-viewport svg .uro-zone[style*="818cf8"],
+            .diagram-viewport svg .gyn-zone[style*="818cf8"],
+            .diagram-viewport svg .dig-zone[style*="818cf8"],
+            .diagram-viewport svg .brain-zone[style*="818cf8"],
+            .diagram-viewport svg .derm-zone[style*="818cf8"],
+            .diagram-viewport svg .cursor-pointer[style*="818cf8"] { filter: drop-shadow(0 0 12px rgba(99,102,241,0.5)) drop-shadow(0 0 4px rgba(99,102,241,0.3)); }
+
+            /* Crosshair cursor in diagram */
+            .diagram-viewport svg { cursor: crosshair; }
+            .diagram-viewport svg [class*="zone"]:hover,
+            .diagram-viewport svg .cursor-pointer:hover { cursor: pointer; }
+
+            /* Mini-map */
+            .diagram-minimap { position: absolute; bottom: 12px; {{ app()->getLocale() === 'ar' ? 'left' : 'right' }}: 12px; width: 120px; height: 90px; border: 2px solid rgba(99,102,241,0.3); border-radius: 8px; overflow: hidden; background: rgba(255,255,255,0.9); backdrop-filter: blur(4px); pointer-events: none; opacity: 0; transition: opacity 0.3s ease; }
+            .diagram-viewport:hover .diagram-minimap { opacity: 1; }
+
+            /* Selected zone badge animation */
+            @keyframes badgeIn { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
+            .zone-badge { animation: badgeIn 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+        </style>
+
         <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
             {{-- Diagram Section --}}
-            <div class="xl:col-span-2 space-y-6">
+            <div class="xl:col-span-2 space-y-6"
+                 x-data="{
+                     zoom: 1,
+                     isFullscreen: false,
+                     minZoom: 0.5,
+                     maxZoom: 3,
+                     zoomIn() { this.zoom = Math.min(this.zoom + 0.25, this.maxZoom); },
+                     zoomOut() { this.zoom = Math.max(this.zoom - 0.25, this.minZoom); },
+                     resetZoom() { this.zoom = 1; },
+                     toggleFullscreen() { this.isFullscreen = !this.isFullscreen; if(!this.isFullscreen) this.zoom = 1; }
+                 }"
+                 @keydown.escape.window="isFullscreen = false">
+
                 {{-- Interactive Diagram --}}
-                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-                    <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
-                        <h3 class="text-base font-bold text-gray-900">{{ __('app.interactive_diagram') }}</h3>
-                        <span class="text-xs text-gray-400">{{ __('app.click_to_mark') }}</span>
+                <div class="bg-white rounded-2xl border border-gray-200/80 shadow-lg shadow-gray-200/50 overflow-hidden transition-all duration-300"
+                     :class="{ 'diagram-fullscreen': isFullscreen }">
+
+                    {{-- Toolbar --}}
+                    <div class="px-5 py-3.5 border-b border-gray-100 bg-gradient-to-r from-gray-50/80 to-white flex items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-1.5">
+                                <div class="w-2.5 h-2.5 rounded-full bg-indigo-500"></div>
+                                <h3 class="text-sm font-bold text-gray-900">{{ __('app.interactive_diagram') }}</h3>
+                            </div>
+                            <span class="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold tracking-wide uppercase bg-indigo-50 text-indigo-500">
+                                {{ ucfirst(str_replace('-', ' ', $diagramType)) }}
+                            </span>
+                        </div>
+
+                        <div class="flex items-center gap-1">
+                            {{-- Zone counter --}}
+                            <div x-show="selectedZones.length > 0" x-transition
+                                 class="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-indigo-100 text-indigo-700 {{ app()->getLocale() === 'ar' ? 'ml-2' : 'mr-2' }}">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <span x-text="selectedZones.length"></span>
+                            </div>
+
+                            {{-- Zoom controls --}}
+                            <div class="flex items-center rounded-lg border border-gray-200 bg-white overflow-hidden">
+                                <button type="button" @click="zoomOut()" class="p-1.5 transition-colors hover:bg-gray-50 text-gray-600 disabled:text-gray-300" :disabled="zoom <= minZoom">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 12h14"/></svg>
+                                </button>
+                                <button type="button" @click="resetZoom()" class="px-2 py-1 text-[10px] font-bold border-x border-gray-200 text-gray-600 hover:bg-gray-50 transition-colors min-w-[40px] text-center"
+                                        x-text="Math.round(zoom * 100) + '%'"></button>
+                                <button type="button" @click="zoomIn()" class="p-1.5 transition-colors hover:bg-gray-50 text-gray-600 disabled:text-gray-300" :disabled="zoom >= maxZoom">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14m-7-7h14"/></svg>
+                                </button>
+                            </div>
+
+                            {{-- Fullscreen toggle --}}
+                            <button type="button" @click="toggleFullscreen()" class="p-2 rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 hover:text-gray-700 transition-all">
+                                <svg x-show="!isFullscreen" class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+                                <svg x-show="isFullscreen" x-cloak class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 9V4.5M9 9H4.5M9 9L3.75 3.75M9 15v4.5M9 15H4.5M9 15l-5.25 5.25M15 9h4.5M15 9V4.5M15 9l5.25-5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25"/></svg>
+                            </button>
+                        </div>
                     </div>
-                    <div class="p-6">
-                        <div class="flex justify-center">
-                            @include('components.diagrams.' . $diagramType)
+
+                    {{-- Diagram Viewport --}}
+                    <div class="diagram-viewport diagram-grid p-4 sm:p-6 bg-gradient-to-br from-slate-50 via-white to-slate-50">
+                        <div class="flex justify-center items-center" :style="'min-height:' + (isFullscreen ? 'calc(100vh - 120px)' : '400px')">
+                            <div :style="'transform: scale(' + zoom + '); transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);'" class="w-full">
+                                @include('components.diagrams.' . $diagramType)
+                            </div>
+                        </div>
+
+                        {{-- Mini-map (shows when zoomed in) --}}
+                        <div class="diagram-minimap" x-show="zoom > 1" x-transition.opacity>
+                            <div style="transform: scale(0.15); transform-origin: top left; pointer-events: none; opacity: 0.6;">
+                                @include('components.diagrams.' . $diagramType)
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Bottom status bar --}}
+                    <div class="px-4 py-2 border-t border-gray-100 bg-gray-50/50 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="flex items-center gap-1.5 text-[10px] font-medium text-gray-400">
+                                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                {{ app()->getLocale() === 'ar' ? 'تفاعلي' : 'Interactive' }}
+                            </span>
+                            <span class="text-[10px] text-gray-300">|</span>
+                            <span class="text-[10px] text-gray-400">
+                                {{ app()->getLocale() === 'ar' ? 'اضغط على المنطقة لتحديدها' : 'Click zones to select' }}
+                            </span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <kbd class="hidden sm:inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-mono bg-white text-gray-400 border border-gray-200 shadow-sm">ESC</kbd>
                         </div>
                     </div>
                 </div>
 
                 {{-- Selected Zones --}}
-                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden" x-show="selectedZones.length > 0" x-transition>
-                    <div class="px-6 py-5 border-b border-gray-100">
-                        <h3 class="text-base font-bold text-gray-900">{{ __('app.marked_areas') }} (<span x-text="selectedZones.length"></span>)</h3>
+                <div class="bg-white rounded-2xl border border-gray-200/80 shadow-lg shadow-gray-200/50 overflow-hidden" x-show="selectedZones.length > 0" x-transition>
+                    <div class="px-5 py-4 border-b border-gray-100 bg-gradient-to-r from-indigo-50/50 to-purple-50/30 flex items-center justify-between">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-lg bg-indigo-100 flex items-center justify-center">
+                                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-bold text-gray-900">{{ __('app.marked_areas') }}</h3>
+                                <p class="text-[10px] text-gray-500 mt-0.5"><span x-text="selectedZones.length"></span> {{ app()->getLocale() === 'ar' ? 'منطقة محددة' : 'zones selected' }}</p>
+                            </div>
+                        </div>
+                        <button type="button" @click="selectedZones = []; zoneNotes = {}; activeZone = null; syncDiagramData();"
+                                class="text-xs text-red-500 hover:text-red-700 font-semibold transition-colors px-2 py-1 rounded-md hover:bg-red-50">
+                            {{ app()->getLocale() === 'ar' ? 'مسح الكل' : 'Clear all' }}
+                        </button>
                     </div>
-                    <div class="p-6">
+                    <div class="p-5">
                         <div class="flex flex-wrap gap-2 mb-4">
-                            <template x-for="zone in selectedZones" :key="zone">
+                            <template x-for="(zone, idx) in selectedZones" :key="zone">
                                 <button type="button"
                                         @click="selectZone(zone)"
-                                        :class="activeZone === zone ? 'bg-indigo-100 text-indigo-700 border-indigo-300' : 'bg-gray-50 text-gray-700 border-gray-200'"
-                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all">
-                                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
-                                    <span x-text="zone.replace(/_/g, ' ')"></span>
-                                    <span x-show="zoneNotes[zone]" class="text-indigo-400">*</span>
+                                        :class="activeZone === zone
+                                            ? 'bg-indigo-600 text-white border-indigo-600 shadow-lg shadow-indigo-500/25 scale-105'
+                                            : 'bg-white text-gray-700 border-gray-200 hover:border-indigo-300 hover:bg-indigo-50 shadow-sm'"
+                                        class="zone-badge inline-flex items-center gap-2 px-3.5 py-2 text-xs font-semibold rounded-xl border transition-all duration-200">
+                                    <span class="w-5 h-5 rounded-md flex items-center justify-center text-[9px] font-bold"
+                                          :class="activeZone === zone ? 'bg-white/20 text-white' : 'bg-indigo-100 text-indigo-600'"
+                                          x-text="idx + 1"></span>
+                                    <span x-text="zone.replace(/_/g, ' ')" class="capitalize"></span>
+                                    <span x-show="zoneNotes[zone]" class="w-1.5 h-1.5 rounded-full" :class="activeZone === zone ? 'bg-yellow-300' : 'bg-amber-400'"></span>
+                                    <svg @click.stop="toggleZone(zone)" class="w-3.5 h-3.5 opacity-50 hover:opacity-100 transition-opacity"
+                                         :class="activeZone === zone ? 'text-white' : 'text-gray-400 hover:text-red-500'"
+                                         fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                                 </button>
                             </template>
                         </div>
 
                         {{-- Zone Note Input --}}
                         <div x-show="activeZone" x-transition class="border-t border-gray-100 pt-4">
-                            <label class="block text-xs font-semibold text-gray-600 mb-2">
-                                {{ __('app.note_for') }} <span x-text="activeZone ? activeZone.replace(/_/g, ' ') : ''" class="text-indigo-600"></span>
+                            <label class="flex items-center gap-2 text-xs font-semibold text-gray-600 mb-2.5">
+                                <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                {{ __('app.note_for') }} <span x-text="activeZone ? activeZone.replace(/_/g, ' ') : ''" class="text-indigo-600 capitalize"></span>
                             </label>
                             <div class="flex gap-2">
-                                <input type="text" x-model="activeNote" @input.debounce.500ms="saveNote()"
-                                       class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-all"
-                                       :placeholder="'{{ __('app.add_note_for_area') }}'">
+                                <div class="relative flex-1">
+                                    <input type="text" x-model="activeNote" @input.debounce.500ms="saveNote()"
+                                           class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 focus:bg-white transition-all {{ app()->getLocale() === 'ar' ? 'pr-10' : 'pl-10' }}"
+                                           :placeholder="'{{ __('app.add_note_for_area') }}'">
+                                    <svg class="w-4 h-4 text-gray-400 absolute top-1/2 -translate-y-1/2 {{ app()->getLocale() === 'ar' ? 'right-3.5' : 'left-3.5' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z"/></svg>
+                                </div>
                             </div>
                         </div>
                     </div>

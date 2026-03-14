@@ -4,8 +4,8 @@
 <svg viewBox="0 0 480 720" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto max-w-lg mx-auto">
     <defs>
         <style>
-            .dig-zone { cursor: pointer; transition: fill 0.2s ease, opacity 0.2s ease; }
-            .dig-zone:hover { opacity: 0.85; }
+            .dig-zone { cursor: pointer; transition: fill 0.25s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease, transform 0.25s ease, filter 0.25s ease; transform-origin: center; }
+            .dig-zone:hover { opacity: 0.88; filter: drop-shadow(0 0 6px rgba(99,102,241,0.3)); transform: scale(1.015); }
             .dig-label { font-family: sans-serif; font-size: 10px; fill: #374151; pointer-events: none; font-weight: 500; }
             .dig-label-sm { font-family: sans-serif; font-size: 8px; fill: #6b7280; pointer-events: none; }
         </style>

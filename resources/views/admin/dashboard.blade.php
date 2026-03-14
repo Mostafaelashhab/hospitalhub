@@ -32,13 +32,13 @@
 
     {{-- Welcome Section --}}
     <div class="mb-8">
-        <div class="flex items-center gap-4 mb-2">
-            <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xl font-bold text-white shadow-lg shadow-indigo-500/25">
+        <div class="flex items-center gap-3 sm:gap-4 mb-2">
+            <div class="w-11 h-11 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-lg sm:text-xl font-bold text-white shadow-lg shadow-indigo-500/25 shrink-0">
                 {{ mb_substr(auth()->user()->name, 0, 1) }}
             </div>
-            <div>
-                <h2 class="text-2xl font-bold text-gray-900">{{ __('app.welcome_back') }}, {{ auth()->user()->name }}!</h2>
-                <p class="text-gray-500 mt-0.5">{{ $clinic->name_en ?? $clinic->name_ar }} &mdash; {{ now()->format('l, F j, Y') }}</p>
+            <div class="min-w-0">
+                <h2 class="text-lg sm:text-2xl font-bold text-gray-900 truncate">{{ __('app.welcome_back') }}, {{ auth()->user()->name }}!</h2>
+                <p class="text-gray-500 mt-0.5 text-sm truncate">{{ $clinic->name_en ?? $clinic->name_ar }} &mdash; {{ now()->format('l, F j, Y') }}</p>
             </div>
         </div>
     </div>

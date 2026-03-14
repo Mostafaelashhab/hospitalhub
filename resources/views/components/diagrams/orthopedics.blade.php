@@ -53,8 +53,8 @@
             .bone-label { font-family: system-ui, -apple-system, sans-serif; font-size: 8px; fill: #94a3b8; pointer-events: none; text-anchor: middle; font-weight: 500; letter-spacing: 0.03em; }
             .bone-label-light { font-family: system-ui, -apple-system, sans-serif; font-size: 7.5px; fill: #64748b; pointer-events: none; text-anchor: middle; }
             .orth-title { font-family: system-ui, -apple-system, sans-serif; font-size: 14px; font-weight: 700; fill: #cbd5e1; text-anchor: middle; letter-spacing: 0.04em; }
-            .bone-zone { transition: all 0.2s ease; }
-            .bone-zone:hover { filter: brightness(1.15); }
+            .bone-zone { cursor: pointer; transition: all 0.25s cubic-bezier(0.4,0,0.2,1); transform-origin: center; }
+            .bone-zone:hover { filter: brightness(1.2) drop-shadow(0 0 6px rgba(148,163,184,0.4)); transform: scale(1.015); }
             .bone-detail { fill: none; stroke: #8a9ab0; stroke-width: 0.4; opacity: 0.3; pointer-events: none; }
             .bone-outline { fill: none; stroke: #6b7d92; stroke-width: 0.6; opacity: 0.2; pointer-events: none; }
             .conn-bone { fill: none; stroke: #5a6878; stroke-width: 1.8; stroke-linecap: round; opacity: 0.25; pointer-events: none; }

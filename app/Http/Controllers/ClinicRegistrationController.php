@@ -59,10 +59,18 @@ class ClinicRegistrationController extends Controller
         ]);
 
         $result = DB::transaction(function () use ($validated) {
+            // Generate unique slug before insert
+            $slug = Str::slug($validated['clinic_name_en']);
+            $originalSlug = $slug;
+            $counter = 1;
+            while (Clinic::where('slug', $slug)->exists()) {
+                $slug = $originalSlug . '-' . $counter++;
+            }
+
             $clinic = Clinic::create([
                 'name_en' => $validated['clinic_name_en'],
                 'name_ar' => $validated['clinic_name_ar'],
-                'slug' => Str::slug($validated['clinic_name_en']),
+                'slug' => $slug,
                 'specialty_id' => $validated['specialty_id'],
                 'phone' => $validated['clinic_phone'],
                 'email' => $validated['clinic_email'] ?? null,
@@ -83,14 +91,6 @@ class ClinicRegistrationController extends Controller
                 'notes' => $validated['notes'] ?? null,
                 'status' => 'pending',
             ]);
-
-            // Ensure unique slug
-            $originalSlug = $clinic->slug;
-            $counter = 1;
-            while (Clinic::where('slug', $clinic->slug)->where('id', '!=', $clinic->id)->exists()) {
-                $clinic->slug = $originalSlug . '-' . $counter++;
-                $clinic->save();
-            }
 
             $admin = User::create([
                 'name' => $validated['admin_name'],

@@ -73,8 +73,8 @@
         </pattern>
 
         <style>
-            .ent-zone { cursor: pointer; transition: all 0.2s ease; }
-            .ent-zone:hover { filter: brightness(1.08); }
+            .ent-zone { cursor: pointer; transition: all 0.25s cubic-bezier(0.4,0,0.2,1); transform-origin: center; }
+            .ent-zone:hover { filter: brightness(1.1) drop-shadow(0 0 6px rgba(99,102,241,0.3)); transform: scale(1.015); }
             .ent-label { font-family: system-ui, -apple-system, sans-serif; font-size: 9px; fill: #374151; pointer-events: none; font-weight: 500; }
             .ent-label-sm { font-family: system-ui, -apple-system, sans-serif; font-size: 7.5px; fill: #6b7280; pointer-events: none; }
             .ent-title { font-family: system-ui, -apple-system, sans-serif; font-size: 15px; font-weight: 700; fill: #1f2937; text-anchor: middle; }

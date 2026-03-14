@@ -6,8 +6,8 @@
         <style>
             .ped-label { font-family: sans-serif; font-size: 8.5px; fill: #374151; pointer-events: none; }
             .ped-label-sm { font-family: sans-serif; font-size: 7px; fill: #374151; pointer-events: none; }
-            .zone-area { cursor: pointer; transition: fill 0.2s ease, stroke 0.2s ease; }
-            .zone-area:hover { filter: brightness(0.92); }
+            .zone-area { cursor: pointer; transition: fill 0.25s cubic-bezier(0.4,0,0.2,1), stroke 0.25s ease, transform 0.25s ease, filter 0.25s ease; transform-origin: center; }
+            .zone-area:hover { filter: brightness(0.93) drop-shadow(0 0 6px rgba(99,102,241,0.3)); transform: scale(1.012); }
         </style>
 
         <!-- Skin gradient -->

@@ -123,7 +123,7 @@
            Q 210 318 178 300 Q 148 280 130 270 Z"
         :fill="selectedZones.includes('frontal_lobe') ? '#818cf8' : 'url(#frontal-gradient)'"
         stroke="#475569" stroke-width="2"
-        class="cursor-pointer transition-colors duration-200"
+        class="cursor-pointer transition-all duration-300 ease-out"
         @click="toggleZone('frontal_lobe')"
         filter="url(#inner-shadow)"
     >
@@ -153,7 +153,7 @@
            L 272 275 L 292 210 L 318 145 L 342 95 Z"
         :fill="selectedZones.includes('parietal_lobe') ? '#818cf8' : 'url(#parietal-gradient)'"
         stroke="#475569" stroke-width="2"
-        class="cursor-pointer transition-colors duration-200"
+        class="cursor-pointer transition-all duration-300 ease-out"
         @click="toggleZone('parietal_lobe')"
         filter="url(#inner-shadow)"
     >
@@ -184,7 +184,7 @@
            Q 222 365 235 345 Q 245 335 255 330 Z"
         :fill="selectedZones.includes('temporal_lobe') ? '#818cf8' : 'url(#temporal-gradient)'"
         stroke="#475569" stroke-width="2"
-        class="cursor-pointer transition-colors duration-200"
+        class="cursor-pointer transition-all duration-300 ease-out"
         @click="toggleZone('temporal_lobe')"
         filter="url(#inner-shadow)"
     >
@@ -212,7 +212,7 @@
            L 435 265 L 500 228 L 555 198 Z"
         :fill="selectedZones.includes('occipital_lobe') ? '#818cf8' : 'url(#occipital-gradient)'"
         stroke="#475569" stroke-width="2"
-        class="cursor-pointer transition-colors duration-200"
+        class="cursor-pointer transition-all duration-300 ease-out"
         @click="toggleZone('occipital_lobe')"
         filter="url(#inner-shadow)"
     >
@@ -257,7 +257,7 @@
            Q 475 318 420 322 Q 355 326 300 330 Q 270 332 255 332 Z"
         :fill="selectedZones.includes('corpus_callosum') ? '#818cf8' : 'url(#corpus-gradient)'"
         stroke="#991b1b" stroke-width="1.5"
-        class="cursor-pointer transition-colors duration-200"
+        class="cursor-pointer transition-all duration-300 ease-out"
         @click="toggleZone('corpus_callosum')"
     >
         <title>Corpus Callosum</title>
@@ -274,7 +274,7 @@
         cx="410" cy="348" rx="35" ry="20"
         :fill="selectedZones.includes('thalamus') ? '#818cf8' : 'url(#thalamus-gradient)'"
         stroke="#92400e" stroke-width="1.5"
-        class="cursor-pointer transition-colors duration-200"
+        class="cursor-pointer transition-all duration-300 ease-out"
         @click="toggleZone('thalamus')"
     >
         <title>Thalamus</title>
@@ -290,7 +290,7 @@
         cx="370" cy="382" rx="30" ry="16"
         :fill="selectedZones.includes('hypothalamus') ? '#818cf8' : 'url(#hypothalamus-gradient)'"
         stroke="#be123c" stroke-width="1.5"
-        class="cursor-pointer transition-colors duration-200"
+        class="cursor-pointer transition-all duration-300 ease-out"
         @click="toggleZone('hypothalamus')"
     >
         <title>Hypothalamus</title>
@@ -308,7 +308,7 @@
            Q 422 465 430 442 Q 438 430 450 425 Z"
         :fill="selectedZones.includes('brainstem') ? '#818cf8' : 'url(#brainstem-gradient)'"
         stroke="#475569" stroke-width="2"
-        class="cursor-pointer transition-colors duration-200"
+        class="cursor-pointer transition-all duration-300 ease-out"
         @click="toggleZone('brainstem')"
         filter="url(#inner-shadow)"
     >
@@ -339,7 +339,7 @@
            Q 442 475 450 452 Q 458 435 478 425 Z"
         :fill="selectedZones.includes('cerebellum') ? '#818cf8' : 'url(#cerebellum-gradient)'"
         stroke="#475569" stroke-width="2"
-        class="cursor-pointer transition-colors duration-200"
+        class="cursor-pointer transition-all duration-300 ease-out"
         @click="toggleZone('cerebellum')"
         filter="url(#inner-shadow)"
     >
@@ -370,7 +370,7 @@
            L 444 590 Q 444 572 448 558 Z"
         :fill="selectedZones.includes('spinal_cord') ? '#818cf8' : 'url(#spinal-gradient)'"
         stroke="#475569" stroke-width="1.5"
-        class="cursor-pointer transition-colors duration-200"
+        class="cursor-pointer transition-all duration-300 ease-out"
         @click="toggleZone('spinal_cord')"
     >
         <title>Spinal Cord</title>

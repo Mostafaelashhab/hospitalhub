@@ -8,7 +8,7 @@
 
     {{-- Page Header --}}
     <div class="mb-6">
-        <h2 class="text-2xl font-bold text-gray-900">{{ __('app.permissions') }}</h2>
+        <h2 class="text-xl sm:text-2xl font-bold text-gray-900">{{ __('app.permissions') }}</h2>
         <p class="text-sm text-gray-500 mt-1">{{ __('app.permissions_desc') }}</p>
     </div>
 

@@ -33,6 +33,17 @@ class Clinic extends Model
         'existing_system_name',
         'referral_source',
         'notes',
+        'website_enabled',
+        'website_primary_color',
+        'website_secondary_color',
+        'website_about_en',
+        'website_about_ar',
+        'website_services',
+        'website_social_links',
+        'website_hero_image',
+        'website_meta_description',
+        'website_show_doctors',
+        'website_show_booking',
     ];
 
     protected function casts(): array
@@ -41,6 +52,11 @@ class Clinic extends Model
             'working_days' => 'array',
             'working_schedule' => 'array',
             'has_existing_system' => 'boolean',
+            'website_enabled' => 'boolean',
+            'website_services' => 'array',
+            'website_social_links' => 'array',
+            'website_show_doctors' => 'boolean',
+            'website_show_booking' => 'boolean',
         ];
     }
 

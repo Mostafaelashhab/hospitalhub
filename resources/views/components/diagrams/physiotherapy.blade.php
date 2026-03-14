@@ -67,6 +67,9 @@
         <filter id="selectedGlow" x="-15%" y="-15%" width="130%" height="130%">
             <feDropShadow dx="0" dy="0" stdDeviation="3" flood-color="#6366f1" flood-opacity="0.5"/>
         </filter>
+        <style>
+            .cursor-pointer { transition: opacity 0.25s cubic-bezier(0.4,0,0.2,1), filter 0.25s ease, transform 0.25s ease; transform-origin: center; }
+        </style>
     </defs>
 
     <!-- Title -->

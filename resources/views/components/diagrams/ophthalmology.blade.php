@@ -143,7 +143,7 @@
            Q 195 135 175 155 Z"
         :fill="selectedZones.includes('sclera') ? '#818cf8' : 'url(#sclera-gradient)'"
         stroke="#64748b" stroke-width="2.5"
-        class="cursor-pointer transition-colors duration-200"
+        class="cursor-pointer transition-all duration-300 ease-out"
         @click="toggleZone('sclera')"
         filter="url(#eye-shadow)"
     >
@@ -173,7 +173,7 @@
            Q 470 110 315 128 Z"
         :fill="selectedZones.includes('choroid') ? '#818cf8' : 'url(#choroid-gradient)'"
         stroke="#475569" stroke-width="0.8"
-        class="cursor-pointer transition-colors duration-200"
+        class="cursor-pointer transition-all duration-300 ease-out"
         @click="toggleZone('choroid')"
         clip-path="url(#eye-outline-clip)"
         opacity="0.7"
@@ -207,7 +207,7 @@
            Q 462 122 295 142 Z"
         :fill="selectedZones.includes('retina') ? '#818cf8' : 'url(#retina-gradient)'"
         stroke="#92400e" stroke-width="0.8"
-        class="cursor-pointer transition-colors duration-200"
+        class="cursor-pointer transition-all duration-300 ease-out"
         @click="toggleZone('retina')"
         clip-path="url(#eye-outline-clip)"
         opacity="0.8"
@@ -227,7 +227,7 @@
         cx="430" cy="295" rx="190" ry="155"
         :fill="selectedZones.includes('vitreous') ? '#818cf8' : 'url(#vitreous-gradient)'"
         stroke="none"
-        class="cursor-pointer transition-colors duration-200"
+        class="cursor-pointer transition-all duration-300 ease-out"
         @click="toggleZone('vitreous')"
         clip-path="url(#eye-outline-clip)"
     >
@@ -245,7 +245,7 @@
         cx="610" cy="295" rx="26" ry="22"
         :fill="selectedZones.includes('macula') ? '#818cf8' : 'url(#macula-gradient)'"
         stroke="#92400e" stroke-width="1.5"
-        class="cursor-pointer transition-colors duration-200"
+        class="cursor-pointer transition-all duration-300 ease-out"
         @click="toggleZone('macula')"
     >
         <title>Macula</title>
@@ -272,7 +272,7 @@
                Q 648 285 652 278 Z"
             :fill="selectedZones.includes('optic_nerve') ? '#818cf8' : 'url(#optic-nerve-gradient)'"
             stroke="#92400e" stroke-width="1.2"
-            class="transition-colors duration-200"
+            class="transition-all duration-300 ease-out"
         >
             <title>Optic Nerve</title>
         </path>
@@ -295,7 +295,7 @@
            Q 150 210 162 180 Q 170 168 180 158 Z"
         :fill="selectedZones.includes('conjunctiva') ? '#818cf8' : 'url(#conjunctiva-gradient)'"
         stroke="#475569" stroke-width="0.8"
-        class="cursor-pointer transition-colors duration-200"
+        class="cursor-pointer transition-all duration-300 ease-out"
         @click="toggleZone('conjunctiva')"
         clip-path="url(#eye-outline-clip)"
     >
@@ -312,7 +312,7 @@
            Q 160 172 175 155 Z"
         :fill="selectedZones.includes('cornea') ? '#818cf8' : 'url(#cornea-gradient)'"
         stroke="#2563eb" stroke-width="2"
-        class="cursor-pointer transition-colors duration-200"
+        class="cursor-pointer transition-all duration-300 ease-out"
         @click="toggleZone('cornea')"
         opacity="0.9"
     >
@@ -332,7 +332,7 @@
            L 185 395 Q 190 350 192 295 Q 190 240 185 200 Z"
         :fill="selectedZones.includes('aqueous') ? '#818cf8' : 'url(#aqueous-gradient)'"
         stroke="none"
-        class="cursor-pointer transition-colors duration-200"
+        class="cursor-pointer transition-all duration-300 ease-out"
         @click="toggleZone('aqueous')"
         clip-path="url(#eye-outline-clip)"
     >
@@ -348,7 +348,7 @@
         d="M 200 180 Q 190 200 186 235 L 196 235 Q 200 208 208 192 Z"
         :fill="selectedZones.includes('iris') ? '#818cf8' : 'url(#iris-gradient)'"
         stroke="#065f46" stroke-width="1.2"
-        class="cursor-pointer transition-colors duration-200"
+        class="cursor-pointer transition-all duration-300 ease-out"
         @click="toggleZone('iris')"
     >
         <title>Iris (upper)</title>
@@ -358,7 +358,7 @@
         d="M 200 420 Q 190 400 186 365 L 196 365 Q 200 392 208 408 Z"
         :fill="selectedZones.includes('iris') ? '#818cf8' : 'url(#iris-gradient)'"
         stroke="#065f46" stroke-width="1.2"
-        class="cursor-pointer transition-colors duration-200"
+        class="cursor-pointer transition-all duration-300 ease-out"
         @click="toggleZone('iris')"
     >
         <title>Iris (lower)</title>
@@ -378,7 +378,7 @@
         cx="192" cy="300" rx="9" ry="62"
         :fill="selectedZones.includes('pupil') ? '#818cf8' : '#0f172a'"
         stroke="#1e293b" stroke-width="1"
-        class="cursor-pointer transition-colors duration-200"
+        class="cursor-pointer transition-all duration-300 ease-out"
         @click="toggleZone('pupil')"
     >
         <title>Pupil</title>
@@ -396,7 +396,7 @@
            Q 250 175 238 182 Q 225 188 215 185 Z"
         :fill="selectedZones.includes('ciliary_body') ? '#818cf8' : 'url(#ciliary-gradient)'"
         stroke="#4c1d95" stroke-width="1"
-        class="cursor-pointer transition-colors duration-200"
+        class="cursor-pointer transition-all duration-300 ease-out"
         @click="toggleZone('ciliary_body')"
         clip-path="url(#eye-outline-clip)"
     >
@@ -409,7 +409,7 @@
            Q 250 425 238 418 Q 225 412 215 415 Z"
         :fill="selectedZones.includes('ciliary_body') ? '#818cf8' : 'url(#ciliary-gradient)'"
         stroke="#4c1d95" stroke-width="1"
-        class="cursor-pointer transition-colors duration-200"
+        class="cursor-pointer transition-all duration-300 ease-out"
         @click="toggleZone('ciliary_body')"
         clip-path="url(#eye-outline-clip)"
     >
@@ -438,7 +438,7 @@
         cx="242" cy="300" rx="32" ry="70"
         :fill="selectedZones.includes('lens') ? '#818cf8' : 'url(#lens-gradient)'"
         stroke="#6366f1" stroke-width="1.5"
-        class="cursor-pointer transition-colors duration-200"
+        class="cursor-pointer transition-all duration-300 ease-out"
         @click="toggleZone('lens')"
         opacity="0.88"
     >

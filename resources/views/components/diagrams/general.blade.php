@@ -4,8 +4,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 820" class="w-full h-auto max-w-md mx-auto">
     <defs>
         <style>
-            .gen-zone { cursor: pointer; transition: fill 0.2s ease, opacity 0.2s ease, stroke 0.2s ease; }
-            .gen-zone:hover { opacity: 0.85; filter: url(#gen-hover-glow); }
+            .gen-zone { cursor: pointer; transition: fill 0.25s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease, stroke 0.25s ease, transform 0.25s ease, filter 0.25s ease; transform-origin: center; }
+            .gen-zone:hover { opacity: 0.88; filter: url(#gen-hover-glow); transform: scale(1.015); }
             .zone-label { font-family: system-ui, -apple-system, sans-serif; font-size: 10px; fill: #4b5563; pointer-events: none; text-anchor: middle; font-weight: 500; }
             .gen-label-line { stroke: #9CA3AF; stroke-width: 0.75; fill: none; stroke-dasharray: 2,2; pointer-events: none; }
             .gen-detail { pointer-events: none; }

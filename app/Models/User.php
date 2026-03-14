@@ -109,10 +109,6 @@ class User extends Authenticatable
             return true;
         }
 
-        if ($this->role === 'doctor' && $this->isSoloDoctorAdmin()) {
-            return true;
-        }
-
         if (!$this->clinic_id) {
             return false;
         }
@@ -126,7 +122,7 @@ class User extends Authenticatable
 
     public function getPermissions(): array
     {
-        if ($this->role === 'admin' || ($this->role === 'doctor' && $this->isSoloDoctorAdmin())) {
+        if ($this->role === 'admin') {
             return ['*'];
         }
 

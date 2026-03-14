@@ -4,8 +4,8 @@
 <svg viewBox="0 0 480 620" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto max-w-lg mx-auto">
     <defs>
         <style>
-            .uro-zone { cursor: pointer; transition: fill 0.2s ease, opacity 0.2s ease, stroke 0.2s ease; }
-            .uro-zone:hover { opacity: 0.85; filter: url(#uro-hover-glow); }
+            .uro-zone { cursor: pointer; transition: fill 0.25s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease, stroke 0.25s ease, transform 0.25s ease, filter 0.25s ease; transform-origin: center; }
+            .uro-zone:hover { opacity: 0.88; filter: url(#uro-hover-glow); transform: scale(1.015); }
             .uro-label { font-family: system-ui, -apple-system, sans-serif; font-size: 10px; fill: #374151; pointer-events: none; font-weight: 500; }
             .uro-label-line { stroke: #9CA3AF; stroke-width: 0.75; fill: none; stroke-dasharray: 2,2; pointer-events: none; }
             .uro-detail { pointer-events: none; }

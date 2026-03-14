@@ -136,7 +136,7 @@
             <g
                 @click="toggleZone('{{ $zoneId }}')"
                 :filter="selectedZones.includes('{{ $zoneId }}') ? 'url(#toothGlow)' : 'url(#toothShadow)'"
-                class="cursor-pointer transition-all duration-150"
+                class="cursor-pointer transition-all duration-300 ease-out"
                 style="transform-origin: {{ $cx }}px {{ $cy }}px;"
             >
                 {{-- Roots (drawn first, behind crown) --}}
@@ -409,7 +409,7 @@
             <g
                 @click="toggleZone('{{ $zoneId }}')"
                 :filter="selectedZones.includes('{{ $zoneId }}') ? 'url(#toothGlow)' : 'url(#toothShadow)'"
-                class="cursor-pointer transition-all duration-150"
+                class="cursor-pointer transition-all duration-300 ease-out"
                 style="transform-origin: {{ $cx }}px {{ $cy }}px;"
             >
                 {{-- Roots (extend upward for lower teeth) --}}

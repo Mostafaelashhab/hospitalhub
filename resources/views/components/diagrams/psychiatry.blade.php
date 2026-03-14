@@ -7,8 +7,8 @@
             .brain-label { font-family: sans-serif; font-size: 8.5px; fill: #1e293b; pointer-events: none; }
             .brain-label-sm { font-family: sans-serif; font-size: 7px; fill: #475569; pointer-events: none; }
             .brain-label-line { stroke: #64748b; stroke-width: 0.6; fill: none; pointer-events: none; }
-            .brain-zone { cursor: pointer; transition: fill 0.2s ease, stroke 0.2s ease; }
-            .brain-zone:hover { filter: brightness(0.90); }
+            .brain-zone { cursor: pointer; transition: fill 0.25s cubic-bezier(0.4,0,0.2,1), stroke 0.25s ease, transform 0.25s ease, filter 0.25s ease; transform-origin: center; }
+            .brain-zone:hover { filter: brightness(0.92) drop-shadow(0 0 6px rgba(99,102,241,0.3)); transform: scale(1.012); }
         </style>
 
         <!-- Brain tissue base gradient -->

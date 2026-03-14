@@ -4,8 +4,8 @@
 <svg viewBox="0 0 500 520" xmlns="http://www.w3.org/2000/svg" class="w-full h-auto max-w-lg mx-auto">
     <defs>
         <style>
-            .gyn-zone { cursor: pointer; transition: fill 0.2s ease, opacity 0.2s ease, stroke 0.2s ease; }
-            .gyn-zone:hover { opacity: 0.85; filter: url(#gyn-hover-glow); }
+            .gyn-zone { cursor: pointer; transition: fill 0.25s cubic-bezier(0.4,0,0.2,1), opacity 0.25s ease, stroke 0.25s ease, transform 0.25s ease, filter 0.25s ease; transform-origin: center; }
+            .gyn-zone:hover { opacity: 0.88; filter: url(#gyn-hover-glow); transform: scale(1.015); }
             .gyn-label { font-family: system-ui, -apple-system, sans-serif; font-size: 10px; fill: #374151; pointer-events: none; font-weight: 500; }
             .gyn-label-line { stroke: #9CA3AF; stroke-width: 0.75; fill: none; stroke-dasharray: 2,2; pointer-events: none; }
             .gyn-detail { pointer-events: none; }

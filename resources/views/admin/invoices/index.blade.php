@@ -7,15 +7,15 @@
     </x-slot>
 
     {{-- Page Header --}}
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
         <div>
-            <h2 class="text-2xl font-bold text-gray-900">{{ __('app.invoices') }}</h2>
+            <h2 class="text-xl sm:text-2xl font-bold text-gray-900">{{ __('app.invoices') }}</h2>
             <p class="text-sm text-gray-500 mt-1">{{ __('app.all_invoices') }}</p>
         </div>
     </div>
 
     {{-- Stats Cards --}}
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
             <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">

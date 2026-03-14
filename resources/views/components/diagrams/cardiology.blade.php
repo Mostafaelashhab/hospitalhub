@@ -144,7 +144,7 @@
            L 218 178 Q 228 182 232 172 L 244 88 Q 246 72 236 68 Z"
         :fill="selectedZones.includes('superior_vena_cava') ? '#818cf8' : 'url(#deoxy-vessel)'"
         stroke="#475569" stroke-width="1.5"
-        class="cursor-pointer transition-colors duration-200"
+        class="cursor-pointer transition-all duration-300 ease-out"
         @click="toggleZone('superior_vena_cava')"
     >
         <title>Superior Vena Cava</title>
@@ -165,7 +165,7 @@
            L 290 105 Q 294 90 310 88 Z"
         :fill="selectedZones.includes('aorta') ? '#818cf8' : 'url(#aorta-gradient)'"
         stroke="#991b1b" stroke-width="1.2"
-        class="cursor-pointer transition-colors duration-200"
+        class="cursor-pointer transition-all duration-300 ease-out"
         @click="toggleZone('aorta')"
         filter="url(#cardio-shadow)"
     >
@@ -187,7 +187,7 @@
            L 328 194 Q 318 188 320 182 Z"
         :fill="selectedZones.includes('pulmonary_artery') ? '#818cf8' : 'url(#pulm-artery-gradient)'"
         stroke="#6b21a8" stroke-width="1.2"
-        class="cursor-pointer transition-colors duration-200"
+        class="cursor-pointer transition-all duration-300 ease-out"
         @click="toggleZone('pulmonary_artery')"
     >
         <title>Pulmonary Artery</title>
@@ -206,7 +206,7 @@
            L 292 218 Q 292 202 275 202 Z"
         :fill="selectedZones.includes('right_atrium') ? '#818cf8' : 'url(#deoxy-gradient)'"
         stroke="#475569" stroke-width="1.8"
-        class="cursor-pointer transition-colors duration-200"
+        class="cursor-pointer transition-all duration-300 ease-out"
         @click="toggleZone('right_atrium')"
     >
         <title>Right Atrium</title>
@@ -227,7 +227,7 @@
            Q 428 380 420 374 L 308 382 Q 302 382 302 372 Z"
         :fill="selectedZones.includes('left_atrium') ? '#818cf8' : 'url(#oxy-light)'"
         stroke="#475569" stroke-width="1.8"
-        class="cursor-pointer transition-colors duration-200"
+        class="cursor-pointer transition-all duration-300 ease-out"
         @click="toggleZone('left_atrium')"
     >
         <title>Left Atrium</title>
@@ -254,7 +254,7 @@
                L 288 390 Q 280 402 262 410 Q 245 402 235 390 Z"
             :fill="selectedZones.includes('tricuspid_valve') ? '#818cf8' : 'url(#valve-gradient)'"
             stroke="#92400e" stroke-width="1.5"
-            class="transition-colors duration-200"
+            class="transition-all duration-300 ease-out"
         >
             <title>Tricuspid Valve</title>
         </path>
@@ -276,7 +276,7 @@
                L 430 388 Q 420 400 402 408 Q 385 400 375 388 Z"
             :fill="selectedZones.includes('mitral_valve') ? '#818cf8' : 'url(#valve-gradient)'"
             stroke="#92400e" stroke-width="1.5"
-            class="transition-colors duration-200"
+            class="transition-all duration-300 ease-out"
         >
             <title>Mitral Valve</title>
         </path>
@@ -297,7 +297,7 @@
             d="M 298 185 L 310 198 L 298 212 L 285 198 Z"
             :fill="selectedZones.includes('aortic_valve') ? '#818cf8' : 'url(#valve-gradient)'"
             stroke="#92400e" stroke-width="1.5"
-            class="transition-colors duration-200"
+            class="transition-all duration-300 ease-out"
         >
             <title>Aortic Valve</title>
         </path>
@@ -316,7 +316,7 @@
             d="M 340 180 L 354 194 L 340 208 L 326 194 Z"
             :fill="selectedZones.includes('pulmonary_valve') ? '#818cf8' : 'url(#valve-gradient)'"
             stroke="#92400e" stroke-width="1.5"
-            class="transition-colors duration-200"
+            class="transition-all duration-300 ease-out"
         >
             <title>Pulmonary Valve</title>
         </path>
@@ -334,7 +334,7 @@
            L 330 415 Q 330 405 318 405 L 275 398 Z"
         :fill="selectedZones.includes('right_ventricle') ? '#818cf8' : 'url(#deoxy-dark)'"
         stroke="#475569" stroke-width="1.8"
-        class="cursor-pointer transition-colors duration-200"
+        class="cursor-pointer transition-all duration-300 ease-out"
         @click="toggleZone('right_ventricle')"
     >
         <title>Right Ventricle</title>
@@ -359,7 +359,7 @@
            Q 335 646 335 632 Z"
         :fill="selectedZones.includes('left_ventricle') ? '#818cf8' : 'url(#oxy-gradient)'"
         stroke="#475569" stroke-width="1.8"
-        class="cursor-pointer transition-colors duration-200"
+        class="cursor-pointer transition-all duration-300 ease-out"
         @click="toggleZone('left_ventricle')"
     >
         <title>Left Ventricle</title>
@@ -387,7 +387,7 @@
            L 162 382 Q 158 375 150 378 Z"
         :fill="selectedZones.includes('inferior_vena_cava') ? '#818cf8' : 'url(#deoxy-vessel)'"
         stroke="#475569" stroke-width="1.5"
-        class="cursor-pointer transition-colors duration-200"
+        class="cursor-pointer transition-all duration-300 ease-out"
         @click="toggleZone('inferior_vena_cava')"
     >
         <title>Inferior Vena Cava</title>
@@ -406,7 +406,7 @@
                Q 339 550 340 600"
             :stroke="selectedZones.includes('coronary_arteries') ? '#818cf8' : '#dc2626'"
             stroke-width="3.5" fill="none" stroke-linecap="round"
-            class="transition-colors duration-200"
+            class="transition-all duration-300 ease-out"
             opacity="0.7"
         >
             <title>Coronary Arteries</title>
@@ -417,7 +417,7 @@
                Q 485 225 492 260 Q 495 290 488 330"
             :stroke="selectedZones.includes('coronary_arteries') ? '#818cf8' : '#dc2626'"
             stroke-width="3" fill="none" stroke-linecap="round"
-            class="transition-colors duration-200"
+            class="transition-all duration-300 ease-out"
             opacity="0.6"
         />
         {{-- Right coronary artery (RCA) --}}
@@ -426,7 +426,7 @@
                Q 165 265 155 320 Q 150 360 155 400"
             :stroke="selectedZones.includes('coronary_arteries') ? '#818cf8' : '#dc2626'"
             stroke-width="3" fill="none" stroke-linecap="round"
-            class="transition-colors duration-200"
+            class="transition-all duration-300 ease-out"
             opacity="0.6"
         />
         {{-- Diagonal branches --}}

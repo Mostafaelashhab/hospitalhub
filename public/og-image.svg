@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1e1b4b"/>
+      <stop offset="50%" style="stop-color:#312e81"/>
+      <stop offset="100%" style="stop-color:#4c1d95"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#6366f1"/>
+      <stop offset="100%" style="stop-color:#a855f7"/>
+    </linearGradient>
+  </defs>
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <!-- Grid pattern -->
+  <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
+    <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
+  </pattern>
+  <rect width="1200" height="630" fill="url(#grid)"/>
+  <!-- Glow orbs -->
+  <circle cx="200" cy="300" r="250" fill="rgba(99,102,241,0.15)"/>
+  <circle cx="900" cy="400" r="200" fill="rgba(168,85,247,0.1)"/>
+  <!-- Logo icon -->
+  <rect x="80" y="220" width="80" height="80" rx="20" fill="url(#accent)"/>
+  <text x="120" y="275" text-anchor="middle" font-family="Arial,sans-serif" font-weight="bold" font-size="48" fill="white">H</text>
+  <!-- Text -->
+  <text x="180" y="270" font-family="Arial,sans-serif" font-weight="bold" font-size="52" fill="white">Healthy Hub</text>
+  <!-- Tagline -->
+  <text x="82" y="340" font-family="Arial,sans-serif" font-size="28" fill="rgba(255,255,255,0.7)">Manage Your Clinic Smartly</text>
+  <text x="82" y="380" font-family="Arial,sans-serif" font-size="28" fill="rgba(255,255,255,0.7)">أدر عيادتك بذكاء</text>
+  <!-- Features pills -->
+  <rect x="82" y="420" width="200" height="40" rx="20" fill="rgba(99,102,241,0.3)" stroke="rgba(99,102,241,0.5)" stroke-width="1"/>
+  <text x="182" y="446" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="rgba(255,255,255,0.9)">Appointments</text>
+  <rect x="300" y="420" width="160" height="40" rx="20" fill="rgba(168,85,247,0.3)" stroke="rgba(168,85,247,0.5)" stroke-width="1"/>
+  <text x="380" y="446" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="rgba(255,255,255,0.9)">Patients</text>
+  <rect x="478" y="420" width="160" height="40" rx="20" fill="rgba(236,72,153,0.3)" stroke="rgba(236,72,153,0.5)" stroke-width="1"/>
+  <text x="558" y="446" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="rgba(255,255,255,0.9)">Invoices</text>
+  <rect x="656" y="420" width="180" height="40" rx="20" fill="rgba(34,197,94,0.3)" stroke="rgba(34,197,94,0.5)" stroke-width="1"/>
+  <text x="746" y="446" text-anchor="middle" font-family="Arial,sans-serif" font-size="16" fill="rgba(255,255,255,0.9)">Diagnoses</text>
+  <!-- Bottom bar -->
+  <rect x="0" y="600" width="1200" height="30" fill="url(#accent)" opacity="0.8"/>
+  <text x="600" y="621" text-anchor="middle" font-family="Arial,sans-serif" font-size="14" fill="white">Free for a limited time — Start now!</text>
+</svg>

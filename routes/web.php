@@ -12,6 +12,9 @@ use App\Http\Controllers\Admin\BranchController;
 use App\Http\Controllers\Admin\DrugSearchController;
 use App\Http\Controllers\Doctor\DoctorDashboardController;
 use App\Http\Controllers\ClinicRegistrationController;
+use App\Http\Controllers\ClinicPageController;
+use App\Http\Controllers\Admin\ClinicWebsiteController;
+use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SuperAdmin\ClinicManagementController;
@@ -32,6 +35,9 @@ Route::middleware('guest')->group(function () {
     Route::post('/register-clinic', [ClinicRegistrationController::class, 'register'])->name('register.clinic.store');
 });
 Route::get('/register-clinic/success', [ClinicRegistrationController::class, 'success'])->name('register.clinic.success');
+
+// Public clinic website
+Route::get('/clinic/{slug}', [ClinicPageController::class, 'show'])->name('clinic.page');
 
 // Clinic suspended page
 Route::get('/clinic-suspended', function () {
@@ -115,6 +121,14 @@ Route::middleware(['auth', 'role:admin,doctor,accountant,secretary', 'clinic.act
 
     // Drug Search
     Route::get('/drugs/search', [DrugSearchController::class, 'search'])->name('.drugs.search');
+
+    // Clinic Website Settings (admin only)
+    Route::get('/website', [ClinicWebsiteController::class, 'edit'])->name('.website.edit');
+    Route::put('/website', [ClinicWebsiteController::class, 'update'])->name('.website.update');
+
+    // Settings
+    Route::get('/settings', [SettingsController::class, 'index'])->name('.settings.index');
+    Route::put('/settings', [SettingsController::class, 'update'])->name('.settings.update');
 });
 
 // ===== Doctor Portal Routes =====
