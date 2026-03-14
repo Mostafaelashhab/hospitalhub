@@ -587,4 +587,5 @@ return [
     'send' => 'Send',
     'notification_sent_to' => 'Notification sent to :count users.',
     'test_push' => 'Test Push',
+    'more' => 'More',
 ];

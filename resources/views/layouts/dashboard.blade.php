@@ -91,13 +91,8 @@
     <div class="min-h-screen" id="main-content">
         {{-- Top Header Bar --}}
         <header class="sticky top-0 z-30 glass-header border-b border-gray-200 flex items-center {{ app()->getLocale() === 'ar' ? 'flex-row-reverse' : '' }} justify-between px-4 lg:px-8 pwa-safe-top" style="min-height: calc(3.5rem + env(safe-area-inset-top, 0px)); padding-top: env(safe-area-inset-top, 0px);">
-            {{-- Mobile menu button --}}
-            <button @click="sidebarOpen = true" class="lg:hidden text-gray-500 hover:text-gray-900 transition-colors">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
-            </button>
-
-            {{-- Spacer for desktop --}}
-            <div class="hidden lg:block"></div>
+            {{-- Spacer (hamburger removed - bottom nav handles mobile) --}}
+            <div class="block"></div>
 
             {{-- Branch + Lang (left in RTL, right in LTR) --}}
             <div class="flex items-center gap-3">
@@ -314,6 +309,9 @@
             </div>
         </div>
     </div>
+
+    {{-- Bottom Navigation Bar (Mobile) --}}
+    @include('partials.bottom-nav', ['active' => $active ?? ''])
 
     <script>
     function notificationBell() {

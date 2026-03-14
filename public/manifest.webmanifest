@@ -1,7 +1,7 @@
 {
-    "name": "Hospital Management System",
-    "short_name": "Hospital",
-    "description": "Hospital Management System - PWA",
+    "name": "Healthy Hub",
+    "short_name": "Healthy Hub",
+    "description": "Healthy Hub - PWA",
     "start_url": "/dashboard",
     "scope": "/",
     "id": "/dashboard",

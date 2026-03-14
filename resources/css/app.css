@@ -89,3 +89,25 @@ main {
 * {
     -webkit-tap-highlight-color: transparent;
 }
+
+/* ===== Bottom Navigation Bar ===== */
+.bottom-nav-item {
+    @apply flex flex-col items-center justify-center gap-0.5 flex-1 py-1.5 text-gray-400 transition-colors duration-200;
+}
+.bottom-nav-item span {
+    @apply text-[10px] font-semibold;
+}
+.bottom-nav-item.bottom-nav-active {
+    @apply text-indigo-600;
+}
+.bottom-nav-item.bottom-nav-active svg {
+    @apply scale-110;
+    transition: transform 0.2s ease;
+}
+
+/* Space for bottom nav on mobile */
+@media (max-width: 1023px) {
+    #main-content {
+        padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
+    }
+}

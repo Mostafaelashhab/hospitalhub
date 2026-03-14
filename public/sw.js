@@ -59,7 +59,7 @@ self.addEventListener('fetch', (event) => {
 // ===== PUSH - This is what iOS needs to work in background =====
 self.addEventListener('push', (event) => {
     // iOS REQUIRES showing a notification immediately - no async delays
-    let title = 'Hospital System';
+    let title = 'Healthy Hub';
     let body = 'You have a new notification';
     let icon = '/icons/icon-192x192.png';
     let badge = '/icons/icon-96x96.png';
