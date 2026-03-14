@@ -7,6 +7,7 @@ use App\Models\ClinicWallet;
 use App\Models\Doctor;
 use App\Models\Specialty;
 use App\Models\User;
+use App\Notifications\NewClinicRegistered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -125,6 +126,12 @@ class ClinicRegistrationController extends Controller
 
             return ['clinic' => $clinic, 'admin' => $admin];
         });
+
+        // Notify all super admins about the new clinic
+        $superAdmins = User::where('role', 'super_admin')->get();
+        foreach ($superAdmins as $superAdmin) {
+            $superAdmin->notify(new NewClinicRegistered($result['clinic']));
+        }
 
         Auth::login($result['admin']);
 

@@ -148,6 +148,46 @@
             </div>
         </div>
 
+        {{-- Send Notification --}}
+        <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm" x-data="{ target: 'all' }">
+            <h3 class="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
+                {{ __('app.send_notification') }}
+            </h3>
+            <form method="POST" action="{{ route('super.send-notification') }}" class="space-y-3">
+                @csrf
+                <div>
+                    <select name="target" x-model="target" class="w-full text-sm border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-indigo-500">
+                        <option value="all">{{ __('app.all_clinic_admins') }}</option>
+                        <option value="clinic">{{ __('app.specific_clinic') }}</option>
+                    </select>
+                </div>
+                <div x-show="target === 'clinic'" x-transition>
+                    <select name="clinic_id" class="w-full text-sm border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-indigo-500">
+                        <option value="">{{ __('app.select_clinic') }}</option>
+                        @foreach(\App\Models\Clinic::orderBy('name_' . app()->getLocale())->get() as $c)
+                            <option value="{{ $c->id }}">{{ app()->getLocale() === 'ar' ? $c->name_ar : $c->name_en }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <input type="text" name="title" placeholder="{{ __('app.notification_title') }}" required
+                           class="w-full text-sm border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-indigo-500">
+                </div>
+                <div>
+                    <textarea name="body" rows="3" placeholder="{{ __('app.notification_body') }}" required
+                              class="w-full text-sm border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-indigo-500 resize-none"></textarea>
+                </div>
+                <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-semibold rounded-xl hover:shadow-lg hover:shadow-indigo-500/25 transition-all flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5"/></svg>
+                    {{ __('app.send') }}
+                </button>
+            </form>
+        </div>
+    </div>
+
+    {{-- System Info + Recent Clinics --}}
+    <div class="grid grid-cols-1 gap-5 mb-8">
         {{-- System Info --}}
         <div class="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-6 shadow-lg shadow-indigo-500/20 text-white relative overflow-hidden">
             <div class="absolute top-0 {{ app()->getLocale() === 'ar' ? 'left-0' : 'right-0' }} w-32 h-32 bg-white/10 rounded-full -translate-y-1/2 {{ app()->getLocale() === 'ar' ? '-translate-x-1/2' : 'translate-x-1/2' }}"></div>

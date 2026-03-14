@@ -574,4 +574,16 @@ return [
     'enable_notifications_desc' => 'Get notified about new appointments, status changes, and important updates.',
     'allow' => 'Allow',
     'later' => 'Later',
+
+    // Super Admin Notifications
+    'new_clinic_registered' => 'New Clinic Registered',
+    'clinic_registered_message' => 'A new clinic ":name" has registered and is pending approval.',
+    'send_notification' => 'Send Notification',
+    'all_clinic_admins' => 'All Clinic Admins',
+    'specific_clinic' => 'Specific Clinic',
+    'select_clinic' => 'Select Clinic',
+    'notification_title' => 'Notification Title',
+    'notification_body' => 'Notification Message...',
+    'send' => 'Send',
+    'notification_sent_to' => 'Notification sent to :count users.',
 ];

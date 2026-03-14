@@ -574,4 +574,16 @@ return [
     'enable_notifications_desc' => 'احصل على إشعارات المواعيد الجديدة وتحديثات الحالة والتحديثات المهمة.',
     'allow' => 'السماح',
     'later' => 'لاحقاً',
+
+    // Super Admin Notifications
+    'new_clinic_registered' => 'عيادة جديدة مسجلة',
+    'clinic_registered_message' => 'تم تسجيل عيادة جديدة ":name" وهي في انتظار الموافقة.',
+    'send_notification' => 'إرسال إشعار',
+    'all_clinic_admins' => 'كل مديري العيادات',
+    'specific_clinic' => 'عيادة محددة',
+    'select_clinic' => 'اختر العيادة',
+    'notification_title' => 'عنوان الإشعار',
+    'notification_body' => 'نص الإشعار...',
+    'send' => 'إرسال',
+    'notification_sent_to' => 'تم إرسال الإشعار لـ :count مستخدم.',
 ];

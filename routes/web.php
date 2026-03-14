@@ -54,6 +54,7 @@ Route::middleware(['auth', 'role:super_admin'])->prefix('super-admin')->name('su
     Route::patch('/clinics/{clinic}/status', [ClinicManagementController::class, 'updateStatus'])->name('clinics.status');
     Route::post('/clinics/{clinic}/add-points', [ClinicManagementController::class, 'addPoints'])->name('clinics.add-points');
     Route::post('/clinics/{clinic}/deduct-points', [ClinicManagementController::class, 'deductPoints'])->name('clinics.deduct-points');
+    Route::post('/send-notification', [ClinicManagementController::class, 'sendNotification'])->name('send-notification');
 });
 
 // ===== Clinic Dashboard Routes =====

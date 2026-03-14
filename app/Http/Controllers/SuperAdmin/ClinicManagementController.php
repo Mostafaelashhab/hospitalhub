@@ -4,6 +4,8 @@ namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Clinic;
+use App\Models\User;
+use App\Notifications\BroadcastNotification;
 use Illuminate\Http\Request;
 
 class ClinicManagementController extends Controller
@@ -86,5 +88,37 @@ class ClinicManagementController extends Controller
         );
 
         return back()->with('success', __('app.points_deducted'));
+    }
+
+    public function sendNotification(Request $request)
+    {
+        $validated = $request->validate([
+            'title' => 'required|string|max:255',
+            'body' => 'required|string|max:1000',
+            'target' => 'required|in:all,clinic',
+            'clinic_id' => 'required_if:target,clinic|nullable|exists:clinics,id',
+        ]);
+
+        $notification = new BroadcastNotification($validated['title'], $validated['body']);
+
+        if ($validated['target'] === 'all') {
+            // Send to all clinic admins
+            $admins = User::where('role', 'admin')->whereNotNull('clinic_id')->get();
+            foreach ($admins as $admin) {
+                $admin->notify($notification);
+            }
+            $count = $admins->count();
+        } else {
+            // Send to specific clinic staff
+            $staff = User::where('clinic_id', $validated['clinic_id'])
+                ->whereIn('role', ['admin', 'doctor', 'accountant', 'secretary'])
+                ->get();
+            foreach ($staff as $user) {
+                $user->notify($notification);
+            }
+            $count = $staff->count();
+        }
+
+        return back()->with('success', __('app.notification_sent_to', ['count' => $count]));
     }
 }
