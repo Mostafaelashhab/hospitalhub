@@ -7,7 +7,7 @@
 <link rel="manifest" href="{{ asset('manifest.webmanifest') }}">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="{{ __('app.app_name') }}">
 {{-- iOS Apple Touch Icons (all sizes for different devices) --}}
 <link rel="apple-touch-icon" href="{{ asset('icons/icon-192x192.png') }}">

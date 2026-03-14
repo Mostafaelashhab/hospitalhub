@@ -3,3 +3,89 @@
 @tailwind utilities;
 
 [x-cloak] { display: none !important; }
+
+/* ===== Native Mobile App Feel ===== */
+
+/* Safe area insets for notched devices (iPhone X+) */
+:root {
+    --sat: env(safe-area-inset-top, 0px);
+    --sab: env(safe-area-inset-bottom, 0px);
+    --sal: env(safe-area-inset-left, 0px);
+    --sar: env(safe-area-inset-right, 0px);
+}
+
+/* Disable overscroll bounce (rubber-banding) */
+html, body {
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Faster taps - remove 300ms delay */
+* {
+    touch-action: manipulation;
+}
+
+/* Disable text selection on UI elements (not content) */
+nav, header, aside, button, a, label, .no-select {
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
+/* Allow text selection on actual content */
+main p, main span, main td, main th, main li, main h1, main h2, main h3, main h4, main h5, main h6,
+input, textarea, [contenteditable] {
+    -webkit-user-select: text;
+    user-select: text;
+}
+
+/* Disable pull-to-refresh in standalone PWA */
+@media all and (display-mode: standalone) {
+    body {
+        overscroll-behavior-y: contain;
+    }
+}
+
+/* Hide scrollbars on mobile but keep scrolling */
+@media (max-width: 1023px) {
+    ::-webkit-scrollbar {
+        display: none;
+    }
+    * {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+}
+
+/* Standalone PWA: safe area padding */
+@media all and (display-mode: standalone) {
+    .pwa-safe-top {
+        padding-top: var(--sat);
+    }
+    .pwa-safe-bottom {
+        padding-bottom: var(--sab);
+    }
+}
+
+/* Smooth page transitions */
+main {
+    animation: fadeIn 0.2s ease-out;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Active state feedback for touch (like native buttons) */
+@media (hover: none) {
+    button:active, a:active, [role="button"]:active {
+        transform: scale(0.97);
+        transition: transform 0.1s ease;
+    }
+}
+
+/* Disable highlight on tap (iOS) */
+* {
+    -webkit-tap-highlight-color: transparent;
+}

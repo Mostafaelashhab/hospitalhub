@@ -2,7 +2,7 @@
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>{{ $title ?? __('app.app_name') }}</title>
     @include('partials.meta')
@@ -31,7 +31,7 @@
         }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-50 text-gray-900" x-data="{ sidebarOpen: false }">
+<body class="font-sans antialiased bg-gray-50 text-gray-900 pwa-safe-bottom" x-data="{ sidebarOpen: false }">
 
     {{-- Mobile sidebar overlay --}}
     <div x-show="sidebarOpen" x-transition:enter="transition-opacity ease-linear duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-linear duration-300" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-40 bg-black/30 lg:hidden" @click="sidebarOpen = false"></div>
@@ -41,7 +41,7 @@
            class="fixed inset-y-0 {{ app()->getLocale() === 'ar' ? 'right-0' : 'left-0' }} z-50 w-[280px] bg-white border-{{ app()->getLocale() === 'ar' ? 'l' : 'r' }} border-gray-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 flex flex-col">
 
         {{-- Logo --}}
-        <div class="flex items-center justify-between h-[72px] px-6 border-b border-gray-100">
+        <div class="flex items-center justify-between px-6 border-b border-gray-100 pwa-safe-top" style="min-height: calc(72px + env(safe-area-inset-top, 0px)); padding-top: env(safe-area-inset-top, 0px);">
             <a href="{{ route('home') }}" class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/25">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -90,7 +90,7 @@
     {{-- Main content --}}
     <div class="min-h-screen" id="main-content">
         {{-- Top Header Bar --}}
-        <header class="sticky top-0 z-30 h-14 glass-header border-b border-gray-200 flex items-center {{ app()->getLocale() === 'ar' ? 'flex-row-reverse' : '' }} justify-between px-4 lg:px-8">
+        <header class="sticky top-0 z-30 glass-header border-b border-gray-200 flex items-center {{ app()->getLocale() === 'ar' ? 'flex-row-reverse' : '' }} justify-between px-4 lg:px-8 pwa-safe-top" style="min-height: calc(3.5rem + env(safe-area-inset-top, 0px)); padding-top: env(safe-area-inset-top, 0px);">
             {{-- Mobile menu button --}}
             <button @click="sidebarOpen = true" class="lg:hidden text-gray-500 hover:text-gray-900 transition-colors">
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -188,18 +188,12 @@
                                 </a>
                             </template>
                         </div>
-                        {{-- Test push + enable push --}}
-                        <div class="border-t border-gray-100 p-3 flex gap-2">
-                            <button @click="enablePush()" x-show="pushStatus !== 'granted'"
-                                    class="flex-1 text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 py-2 px-3 rounded-lg transition-colors text-center">
+                        {{-- Enable push --}}
+                        <div x-show="pushStatus !== 'granted'" class="border-t border-gray-100 p-3">
+                            <button @click="enablePush()"
+                                    class="w-full text-xs font-semibold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 py-2 px-3 rounded-lg transition-colors text-center">
                                 {{ __('app.enable_notifications') }}
                             </button>
-                            <form method="POST" action="{{ route('push.test') }}" class="flex-1" x-show="pushStatus === 'granted'">
-                                @csrf
-                                <button type="submit" class="w-full text-xs font-semibold text-emerald-600 bg-emerald-50 hover:bg-emerald-100 py-2 px-3 rounded-lg transition-colors">
-                                    {{ __('app.test_push') }}
-                                </button>
-                            </form>
                         </div>
                     </div>
                 </div>
