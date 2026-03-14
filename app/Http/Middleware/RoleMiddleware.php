@@ -13,6 +13,9 @@ class RoleMiddleware
         $user = $request->user();
 
         if (!$user || !in_array($user->role, $roles)) {
+            if ($user && $user->role === 'super_admin') {
+                return redirect('/super-admin/dashboard');
+            }
             abort(403, 'Unauthorized.');
         }
 
