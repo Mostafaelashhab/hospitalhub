@@ -1,6 +1,6 @@
 @php
     $user = auth()->user();
-    $isSuperAdmin = $user->hasRole('super_admin');
+    $isSuperAdmin = $user->role === 'super_admin';
     $isDoctor = request()->is('doctor*');
     $currentRoute = request()->route()?->getName() ?? '';
 
