@@ -31,26 +31,19 @@
         }
     </style>
 </head>
-<body class="font-sans antialiased bg-gray-50 text-gray-900 pwa-safe-bottom" x-data="{ sidebarOpen: false }">
+<body class="font-sans antialiased bg-gray-50 text-gray-900 pwa-safe-bottom">
 
-    {{-- Mobile sidebar overlay --}}
-    <div x-show="sidebarOpen" x-transition:enter="transition-opacity ease-linear duration-300" x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100" x-transition:leave="transition-opacity ease-linear duration-300" x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0" class="fixed inset-0 z-40 bg-black/30 lg:hidden" @click="sidebarOpen = false"></div>
-
-    {{-- Sidebar --}}
-    <aside :class="sidebarOpen ? 'translate-x-0' : (document.dir === 'rtl' ? 'translate-x-full' : '-translate-x-full')"
-           class="fixed inset-y-0 {{ app()->getLocale() === 'ar' ? 'right-0' : 'left-0' }} z-50 w-[280px] bg-white border-{{ app()->getLocale() === 'ar' ? 'l' : 'r' }} border-gray-200 transform transition-transform duration-300 ease-in-out lg:translate-x-0 flex flex-col">
+    {{-- Sidebar (Desktop only) --}}
+    <aside class="hidden lg:flex fixed inset-y-0 {{ app()->getLocale() === 'ar' ? 'right-0' : 'left-0' }} z-50 w-[280px] bg-white border-{{ app()->getLocale() === 'ar' ? 'l' : 'r' }} border-gray-200 flex-col">
 
         {{-- Logo --}}
-        <div class="flex items-center justify-between px-6 border-b border-gray-100 pwa-safe-top" style="min-height: calc(72px + env(safe-area-inset-top, 0px)); padding-top: env(safe-area-inset-top, 0px);">
+        <div class="flex items-center justify-between h-[72px] px-6 border-b border-gray-100">
             <a href="{{ route('home') }}" class="flex items-center gap-3">
                 <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/25">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                 </div>
                 <span class="text-xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">{{ __('app.app_name') }}</span>
             </a>
-            <button @click="sidebarOpen = false" class="lg:hidden text-gray-400 hover:text-gray-600 transition-colors">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-            </button>
         </div>
 
         {{-- Navigation --}}
@@ -193,8 +186,8 @@
                     </div>
                 </div>
 
-                {{-- Language Switcher --}}
-                <div class="flex items-center border border-gray-200 rounded-xl overflow-hidden">
+                {{-- Language Switcher (desktop only, mobile has it in bottom sheet) --}}
+                <div class="hidden lg:flex items-center border border-gray-200 rounded-xl overflow-hidden">
                     <a href="{{ route('lang.switch', 'ar') }}"
                        class="px-3 py-1.5 text-xs font-semibold transition-all {{ app()->getLocale() === 'ar' ? 'bg-indigo-600 text-white' : 'bg-white text-gray-500 hover:bg-gray-50' }}">
                         عربي
