@@ -150,6 +150,55 @@
                 </div>
                 @endif
 
+                {{-- Notification Bell --}}
+                <div x-data="notificationBell()" x-init="init()" class="relative">
+                    <button @click="toggle()" class="relative p-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-all">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
+                        <span x-show="unreadCount > 0" x-text="unreadCount" class="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center text-[10px] font-bold text-white bg-red-500 rounded-full px-1"></span>
+                    </button>
+
+                    {{-- Dropdown --}}
+                    <div x-show="open" @click.away="open = false" x-transition
+                         class="absolute {{ app()->getLocale() === 'ar' ? 'left-0' : 'right-0' }} mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden">
+                        <div class="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+                            <h3 class="text-sm font-bold text-gray-900">{{ __('app.notifications') }}</h3>
+                            <button x-show="unreadCount > 0" @click="markAllRead()" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium">{{ __('app.mark_all_read') }}</button>
+                        </div>
+                        <div class="max-h-80 overflow-y-auto">
+                            <template x-if="notifications.length === 0">
+                                <div class="px-4 py-8 text-center text-sm text-gray-400">{{ __('app.no_notifications') }}</div>
+                            </template>
+                            <template x-for="notification in notifications" :key="notification.id">
+                                <a :href="notification.url" @click="markRead(notification.id)"
+                                   :class="notification.read ? 'bg-white' : 'bg-indigo-50/50'"
+                                   class="block px-4 py-3 hover:bg-gray-50 border-b border-gray-50 transition-colors">
+                                    <div class="flex items-start gap-3">
+                                        <div class="shrink-0 mt-0.5">
+                                            <div :class="notification.read ? 'bg-gray-100' : 'bg-indigo-100'" class="w-8 h-8 rounded-lg flex items-center justify-center">
+                                                <svg :class="notification.read ? 'text-gray-400' : 'text-indigo-600'" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
+                                            </div>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-sm font-semibold text-gray-900 truncate" x-text="notification.title"></p>
+                                            <p class="text-xs text-gray-500 mt-0.5 line-clamp-2" x-text="notification.body"></p>
+                                            <p class="text-[10px] text-gray-400 mt-1" x-text="notification.created_at"></p>
+                                        </div>
+                                        <div x-show="!notification.read" class="w-2 h-2 bg-indigo-500 rounded-full shrink-0 mt-2"></div>
+                                    </div>
+                                </a>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Push Notification Permission Button --}}
+                <div x-data="{ canAsk: Notification.permission === 'default' }" x-show="canAsk" x-cloak>
+                    <button @click="window.requestPushPermission().then(r => { if(r) canAsk = false })"
+                            class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all" title="{{ __('app.enable_notifications') }}">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.143 17.082a24.248 24.248 0 005.714 0m-5.714 0a3 3 0 115.714 0M3.124 15.772A8.966 8.966 0 016 9.75V9a6 6 0 0112 0v.75a8.966 8.966 0 012.876 6.022M3.124 15.772a23.85 23.85 0 005.454 1.31m8.844 0a23.85 23.85 0 005.454-1.31M12 3v1.5"/></svg>
+                    </button>
+                </div>
+
                 {{-- Language Switcher --}}
                 <div class="flex items-center border border-gray-200 rounded-xl overflow-hidden">
                     <a href="{{ route('lang.switch', 'ar') }}"
@@ -165,7 +214,7 @@
         </header>
 
         {{-- Flash messages --}}
-        {{-- @if(session('success'))
+        @if(session('success'))
         <div x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 4000)" x-transition
              class="mx-6 lg:mx-8 mt-4 px-5 py-3.5 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-700 text-sm flex items-center justify-between">
             <div class="flex items-center gap-3">
@@ -188,7 +237,7 @@
             </div>
             <button @click="show = false" class="text-red-400 hover:text-red-600 transition-colors"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
         </div>
-        @endif --}}
+        @endif
 
         {{-- Page content --}}
         <main class="p-6 lg:p-8">
@@ -196,5 +245,47 @@
         </main>
     </div>
 
+    <script>
+    function notificationBell() {
+        return {
+            open: false,
+            notifications: [],
+            unreadCount: 0,
+            init() {
+                this.fetch();
+                // Poll every 30 seconds
+                setInterval(() => this.fetch(), 30000);
+            },
+            async fetch() {
+                try {
+                    const res = await window.axios.get('/notifications');
+                    this.notifications = res.data.notifications;
+                    this.unreadCount = res.data.unread_count;
+                } catch (e) {}
+            },
+            toggle() {
+                this.open = !this.open;
+                if (this.open) this.fetch();
+            },
+            async markRead(id) {
+                try {
+                    await window.axios.post(`/notifications/${id}/read`);
+                    const n = this.notifications.find(n => n.id === id);
+                    if (n && !n.read) {
+                        n.read = true;
+                        this.unreadCount = Math.max(0, this.unreadCount - 1);
+                    }
+                } catch (e) {}
+            },
+            async markAllRead() {
+                try {
+                    await window.axios.post('/notifications/read-all');
+                    this.notifications.forEach(n => n.read = true);
+                    this.unreadCount = 0;
+                } catch (e) {}
+            },
+        };
+    }
+    </script>
 </body>
 </html>

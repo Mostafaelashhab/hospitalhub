@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Helpers\BranchHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Invoice;
+use App\Models\User;
+use App\Notifications\InvoiceUpdated;
 use Illuminate\Http\Request;
 
 class InvoiceController extends Controller
@@ -86,6 +88,15 @@ class InvoiceController extends Controller
             'total' => max(0, $total),
             'notes' => $validated['notes'] ?? $invoice->notes,
         ]);
+
+        // Notify clinic admins about invoice update
+        $admins = User::where('clinic_id', $clinic->id)
+            ->where('id', '!=', request()->user()->id)
+            ->whereIn('role', ['admin', 'accountant'])
+            ->get();
+        foreach ($admins as $admin) {
+            $admin->notify(new InvoiceUpdated($invoice, $validated['status']));
+        }
 
         return redirect()->route('dashboard.invoices.show', $invoice)
             ->with('success', __('app.invoice_updated'));

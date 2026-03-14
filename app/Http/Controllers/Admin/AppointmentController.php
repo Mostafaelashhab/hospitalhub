@@ -8,6 +8,9 @@ use App\Models\Appointment;
 use App\Models\Invoice;
 use App\Models\Doctor;
 use App\Models\Patient;
+use App\Models\User;
+use App\Notifications\AppointmentCreated;
+use App\Notifications\AppointmentStatusChanged;
 use Illuminate\Http\Request;
 
 class AppointmentController extends Controller
@@ -87,7 +90,7 @@ class AppointmentController extends Controller
 
         $clinic = auth()->user()->clinic;
 
-        Appointment::create([
+        $appointment = Appointment::create([
             'clinic_id' => $clinic->id,
             'branch_id' => BranchHelper::activeBranchId(),
             'patient_id' => $request->patient_id,
@@ -97,6 +100,12 @@ class AppointmentController extends Controller
             'notes' => $request->notes,
             'status' => 'scheduled',
         ]);
+
+        // Notify the doctor
+        $doctorUser = Doctor::find($request->doctor_id)?->user;
+        if ($doctorUser) {
+            $doctorUser->notify(new AppointmentCreated($appointment));
+        }
 
         return redirect()->route('dashboard.appointments.index')
             ->with('success', __('app.appointment_created'));
@@ -130,6 +139,15 @@ class AppointmentController extends Controller
         $validated = $request->validate($rules);
 
         $appointment->update(['status' => $validated['status']]);
+
+        // Notify clinic staff about status change
+        $clinicStaff = User::where('clinic_id', $clinic->id)
+            ->where('id', '!=', request()->user()->id)
+            ->whereIn('role', ['admin', 'doctor', 'secretary'])
+            ->get();
+        foreach ($clinicStaff as $staff) {
+            $staff->notify(new AppointmentStatusChanged($appointment, $validated['status']));
+        }
 
         if ($validated['status'] === 'completed') {
             $amount = $validated['amount'];

@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\Diagnosis;
 use App\Models\Patient;
+use App\Models\User;
+use App\Notifications\AppointmentStatusChanged;
+use App\Notifications\DiagnosisRecorded;
 use Illuminate\Http\Request;
 
 class DoctorDashboardController extends Controller
@@ -137,6 +140,14 @@ class DoctorDashboardController extends Controller
             $data
         );
 
+        // Notify clinic admins about diagnosis
+        $admins = User::where('clinic_id', $clinic->id)
+            ->where('role', 'admin')
+            ->get();
+        foreach ($admins as $admin) {
+            $admin->notify(new DiagnosisRecorded($appointment));
+        }
+
         return redirect()->route('doctor.appointment.show', $appointment)
             ->with('success', __('app.diagnosis_saved'));
     }
@@ -151,6 +162,15 @@ class DoctorDashboardController extends Controller
         ]);
 
         $appointment->update(['status' => $validated['status']]);
+
+        // Notify clinic admins
+        $clinic = $request->user()->clinic;
+        $admins = User::where('clinic_id', $clinic->id)
+            ->where('role', 'admin')
+            ->get();
+        foreach ($admins as $admin) {
+            $admin->notify(new AppointmentStatusChanged($appointment, $validated['status']));
+        }
 
         return back()->with('success', __('app.status_updated'));
     }
