@@ -563,4 +563,15 @@ return [
     'status_unpaid' => 'Unpaid',
     'status_partial' => 'Partial',
     'status_refunded' => 'Refunded',
+
+    // PWA Install
+    'install_app' => 'Install the App',
+    'install_app_desc' => 'Install the hospital app on your device for faster access and push notifications.',
+    'install_now' => 'Install Now',
+    'ios_install_steps' => 'How to install:',
+    'ios_step_1' => 'Tap the Share button',
+    'ios_step_2' => 'Tap "Add to Home Screen"',
+    'enable_notifications_desc' => 'Get notified about new appointments, status changes, and important updates.',
+    'allow' => 'Allow',
+    'later' => 'Later',
 ];

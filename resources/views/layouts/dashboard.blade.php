@@ -191,14 +191,6 @@
                     </div>
                 </div>
 
-                {{-- Push Notification Permission Button --}}
-                <div x-data="{ canAsk: Notification.permission === 'default' }" x-show="canAsk" x-cloak>
-                    <button @click="window.requestPushPermission().then(r => { if(r) canAsk = false })"
-                            class="p-2 text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all" title="{{ __('app.enable_notifications') }}">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.143 17.082a24.248 24.248 0 005.714 0m-5.714 0a3 3 0 115.714 0M3.124 15.772A8.966 8.966 0 016 9.75V9a6 6 0 0112 0v.75a8.966 8.966 0 012.876 6.022M3.124 15.772a23.85 23.85 0 005.454 1.31m8.844 0a23.85 23.85 0 005.454-1.31M12 3v1.5"/></svg>
-                    </button>
-                </div>
-
                 {{-- Language Switcher --}}
                 <div class="flex items-center border border-gray-200 rounded-xl overflow-hidden">
                     <a href="{{ route('lang.switch', 'ar') }}"
@@ -245,6 +237,77 @@
         </main>
     </div>
 
+    {{-- PWA Install Prompt --}}
+    <div x-data="pwaInstallPrompt()" x-show="showBanner" x-transition x-cloak
+         class="fixed bottom-4 {{ app()->getLocale() === 'ar' ? 'left-4 right-4' : 'left-4 right-4' }} lg:left-auto lg:right-4 lg:w-96 z-50">
+        <div class="bg-white border border-gray-200 rounded-2xl shadow-2xl p-5">
+            <div class="flex items-start gap-4">
+                <div class="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-indigo-500/25">
+                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3m0 0v3m0-3h3m-3 0H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="text-sm font-bold text-gray-900">{{ __('app.install_app') }}</h3>
+                    <p class="text-xs text-gray-500 mt-1">{{ __('app.install_app_desc') }}</p>
+
+                    {{-- iOS Instructions --}}
+                    <template x-if="isIOS">
+                        <div class="mt-3 bg-gray-50 rounded-xl p-3">
+                            <p class="text-xs font-semibold text-gray-700 mb-2">{{ __('app.ios_install_steps') }}</p>
+                            <div class="space-y-2">
+                                <div class="flex items-center gap-2 text-xs text-gray-600">
+                                    <span class="w-5 h-5 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center font-bold text-[10px]">1</span>
+                                    <span>{{ __('app.ios_step_1') }}</span>
+                                    <svg class="w-4 h-4 text-indigo-500 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                </div>
+                                <div class="flex items-center gap-2 text-xs text-gray-600">
+                                    <span class="w-5 h-5 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center font-bold text-[10px]">2</span>
+                                    <span>{{ __('app.ios_step_2') }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </template>
+
+                    {{-- Android/Desktop Install Button --}}
+                    <template x-if="!isIOS && deferredPrompt">
+                        <button @click="installApp()" class="mt-3 w-full py-2 px-4 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-sm font-semibold rounded-xl hover:shadow-lg hover:shadow-indigo-500/25 transition-all">
+                            {{ __('app.install_now') }}
+                        </button>
+                    </template>
+                </div>
+                <button @click="dismiss()" class="text-gray-400 hover:text-gray-600 transition-colors shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {{-- Push Notification Permission Popup --}}
+    <div x-data="pushPermissionPrompt()" x-show="showPrompt" x-transition x-cloak
+         class="fixed bottom-4 {{ app()->getLocale() === 'ar' ? 'left-4 right-4' : 'left-4 right-4' }} lg:left-auto lg:right-4 lg:w-96 z-50">
+        <div class="bg-white border border-gray-200 rounded-2xl shadow-2xl p-5">
+            <div class="flex items-start gap-4">
+                <div class="w-12 h-12 bg-gradient-to-br from-amber-400 to-orange-500 rounded-xl flex items-center justify-center shrink-0 shadow-lg shadow-orange-500/25">
+                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h3 class="text-sm font-bold text-gray-900">{{ __('app.enable_notifications') }}</h3>
+                    <p class="text-xs text-gray-500 mt-1">{{ __('app.enable_notifications_desc') }}</p>
+                    <div class="flex gap-2 mt-3">
+                        <button @click="allowPush()" class="flex-1 py-2 px-3 bg-gradient-to-r from-indigo-600 to-purple-600 text-white text-xs font-semibold rounded-xl hover:shadow-lg transition-all">
+                            {{ __('app.allow') }}
+                        </button>
+                        <button @click="dismiss()" class="flex-1 py-2 px-3 bg-gray-100 text-gray-600 text-xs font-semibold rounded-xl hover:bg-gray-200 transition-all">
+                            {{ __('app.later') }}
+                        </button>
+                    </div>
+                </div>
+                <button @click="dismiss()" class="text-gray-400 hover:text-gray-600 transition-colors shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
     function notificationBell() {
         return {
@@ -253,7 +316,6 @@
             unreadCount: 0,
             init() {
                 this.fetch();
-                // Poll every 30 seconds
                 setInterval(() => this.fetch(), 30000);
             },
             async fetch() {
@@ -283,6 +345,92 @@
                     this.notifications.forEach(n => n.read = true);
                     this.unreadCount = 0;
                 } catch (e) {}
+            },
+        };
+    }
+
+    function pwaInstallPrompt() {
+        return {
+            showBanner: false,
+            deferredPrompt: null,
+            isIOS: false,
+            init() {
+                // Check if already installed
+                const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+                if (isStandalone) return;
+
+                // Check if dismissed recently (don't show for 3 days)
+                const dismissed = localStorage.getItem('pwa-install-dismissed');
+                if (dismissed && (Date.now() - parseInt(dismissed)) < 3 * 24 * 60 * 60 * 1000) return;
+
+                // Detect iOS
+                this.isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+
+                if (this.isIOS) {
+                    // Show iOS banner after 2 seconds
+                    setTimeout(() => { this.showBanner = true; }, 2000);
+                } else {
+                    // Listen for Android/Desktop beforeinstallprompt
+                    window.addEventListener('beforeinstallprompt', (e) => {
+                        e.preventDefault();
+                        this.deferredPrompt = e;
+                        setTimeout(() => { this.showBanner = true; }, 2000);
+                    });
+                }
+            },
+            async installApp() {
+                if (!this.deferredPrompt) return;
+                this.deferredPrompt.prompt();
+                const { outcome } = await this.deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    this.showBanner = false;
+                }
+                this.deferredPrompt = null;
+            },
+            dismiss() {
+                this.showBanner = false;
+                localStorage.setItem('pwa-install-dismissed', Date.now().toString());
+            },
+        };
+    }
+
+    function pushPermissionPrompt() {
+        return {
+            showPrompt: false,
+            init() {
+                // Don't show if notifications not supported
+                if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
+
+                // Don't show if already granted or denied
+                if (Notification.permission !== 'default') return;
+
+                // Don't show if dismissed recently (1 day)
+                const dismissed = localStorage.getItem('push-prompt-dismissed');
+                if (dismissed && (Date.now() - parseInt(dismissed)) < 24 * 60 * 60 * 1000) return;
+
+                // Show after 5 seconds (after install prompt if shown)
+                setTimeout(() => {
+                    // Only show if install prompt is not visible
+                    if (!document.querySelector('[x-data="pwaInstallPrompt()"]')?.querySelector('[x-show="showBanner"][style*="display: block"]')) {
+                        this.showPrompt = true;
+                    } else {
+                        // Wait for install prompt to be dismissed
+                        const interval = setInterval(() => {
+                            this.showPrompt = true;
+                            clearInterval(interval);
+                        }, 10000);
+                    }
+                }, 5000);
+            },
+            async allowPush() {
+                this.showPrompt = false;
+                if (window.requestPushPermission) {
+                    await window.requestPushPermission();
+                }
+            },
+            dismiss() {
+                this.showPrompt = false;
+                localStorage.setItem('push-prompt-dismissed', Date.now().toString());
             },
         };
     }

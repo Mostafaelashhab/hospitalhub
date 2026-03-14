@@ -6,7 +6,6 @@ use App\Helpers\BranchHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\Invoice;
-use App\Models\Doctor;
 use App\Models\Patient;
 use App\Models\User;
 use App\Notifications\AppointmentCreated;
@@ -101,10 +100,13 @@ class AppointmentController extends Controller
             'status' => 'scheduled',
         ]);
 
-        // Notify the doctor
-        $doctorUser = Doctor::find($request->doctor_id)?->user;
-        if ($doctorUser) {
-            $doctorUser->notify(new AppointmentCreated($appointment));
+        // Notify all clinic staff (doctors, admins, secretaries)
+        $staffToNotify = User::where('clinic_id', $clinic->id)
+            ->where('id', '!=', request()->user()->id)
+            ->whereIn('role', ['admin', 'doctor', 'secretary'])
+            ->get();
+        foreach ($staffToNotify as $staff) {
+            $staff->notify(new AppointmentCreated($appointment));
         }
 
         return redirect()->route('dashboard.appointments.index')
