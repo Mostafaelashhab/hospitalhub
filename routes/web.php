@@ -19,8 +19,10 @@ use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PushSubscriptionController;
+use App\Http\Controllers\Admin\OfferController as AdminOfferController;
 use App\Http\Controllers\SuperAdmin\ClinicManagementController;
 use App\Http\Controllers\SuperAdmin\DashboardController as SuperDashboardController;
+use App\Http\Controllers\SuperAdmin\OfferController as SuperOfferController;
 use Illuminate\Support\Facades\Route;
 
 // Landing page
@@ -55,6 +57,15 @@ Route::middleware(['auth', 'role:super_admin'])->prefix('super-admin')->name('su
     Route::post('/clinics/{clinic}/add-points', [ClinicManagementController::class, 'addPoints'])->name('clinics.add-points');
     Route::post('/clinics/{clinic}/deduct-points', [ClinicManagementController::class, 'deductPoints'])->name('clinics.deduct-points');
     Route::post('/send-notification', [ClinicManagementController::class, 'sendNotification'])->name('send-notification');
+
+    // Offers
+    Route::get('/offers', [SuperOfferController::class, 'index'])->name('offers.index');
+    Route::get('/offers/create', [SuperOfferController::class, 'create'])->name('offers.create');
+    Route::post('/offers', [SuperOfferController::class, 'store'])->name('offers.store');
+    Route::get('/offers/{offer}/edit', [SuperOfferController::class, 'edit'])->name('offers.edit');
+    Route::put('/offers/{offer}', [SuperOfferController::class, 'update'])->name('offers.update');
+    Route::patch('/offers/{offer}/toggle', [SuperOfferController::class, 'toggleStatus'])->name('offers.toggle');
+    Route::delete('/offers/{offer}', [SuperOfferController::class, 'destroy'])->name('offers.destroy');
 });
 
 // ===== Clinic Dashboard Routes =====
@@ -124,6 +135,9 @@ Route::middleware(['auth', 'role:admin,doctor,accountant,secretary', 'clinic.act
 
     // Drug Search
     Route::get('/drugs/search', [DrugSearchController::class, 'search'])->name('.drugs.search');
+
+    // Offers (view only for clinic admins)
+    Route::get('/offers', [AdminOfferController::class, 'index'])->name('.offers.index');
 
     // Clinic Website Settings (admin only)
     Route::get('/website', [ClinicWebsiteController::class, 'edit'])->name('.website.edit');
