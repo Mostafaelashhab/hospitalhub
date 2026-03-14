@@ -7,7 +7,8 @@
     // Detect active tab from current route
     if ($isSuperAdmin) {
         if (str_contains($currentRoute, 'clinics')) $active = 'clinics';
-        elseif (str_contains($currentRoute, 'offers')) $active = 'offers';
+        elseif (str_contains($currentRoute, 'recharge')) $active = 'recharge';
+        elseif (str_contains($currentRoute, 'offers') || str_contains($currentRoute, 'settings')) $active = 'more';
         else $active = 'dashboard';
     } elseif ($isDoctor) {
         if (str_contains($currentRoute, 'queue')) $active = 'queue';
@@ -53,7 +54,14 @@
         {{-- Menu Items --}}
         <div class="py-2 px-3 max-h-[60vh] overflow-y-auto">
             @if($isSuperAdmin)
-                {{-- Super Admin has no extra items --}}
+                <a href="{{ route('super.offers.index') }}" class="bottom-sheet-item">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                    {{ __('app.offers') }}
+                </a>
+                <a href="{{ route('super.settings.index') }}" class="bottom-sheet-item">
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    {{ __('app.settings') }}
+                </a>
             @elseif($isDoctor)
                 @if($user->isSoloDoctorAdmin())
                 <a href="{{ route('dashboard') }}" class="bottom-sheet-item">
@@ -161,9 +169,13 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                     <span>{{ __('app.clinics') }}</span>
                 </a>
-                <a href="{{ route('super.offers.index') }}" class="bottom-nav-item {{ $active === 'offers' ? 'bottom-nav-active' : '' }}">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
-                    <span>{{ __('app.offers') }}</span>
+                <a href="{{ route('super.recharge.index') }}" class="bottom-nav-item {{ $active === 'recharge' ? 'bottom-nav-active' : '' }} relative">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                    <span>{{ __('app.recharge') }}</span>
+                    @php $pendingRecharges = \App\Models\RechargeRequest::where('status', 'pending')->count(); @endphp
+                    @if($pendingRecharges > 0)
+                    <span class="absolute top-0 {{ app()->getLocale() === 'ar' ? 'left-1/2 -translate-x-3' : 'right-1/2 translate-x-3' }} -translate-y-0.5 w-4 h-4 text-[9px] font-bold text-white bg-red-500 rounded-full flex items-center justify-center">{{ $pendingRecharges > 9 ? '9+' : $pendingRecharges }}</span>
+                    @endif
                 </a>
 
             @elseif($isDoctor)
