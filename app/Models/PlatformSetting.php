@@ -19,8 +19,14 @@ class PlatformSetting extends Model
         static::updateOrCreate(['key' => $key], ['value' => $value]);
     }
 
-    public static function isFreeModeActive(): bool
+    public static function isFreeModeActive(?Clinic $clinic = null): bool
     {
+        // Per-clinic free mode
+        if ($clinic && $clinic->free_mode) {
+            return true;
+        }
+
+        // Global free mode
         $enabled = static::get('free_mode_enabled', '0');
         if ($enabled !== '1') {
             return false;

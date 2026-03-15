@@ -22,6 +22,7 @@ class Clinic extends Model
         'tax_number',
         'points_per_patient',
         'status',
+        'free_mode',
         'doctors_count',
         'expected_patients_monthly',
         'clinic_size',
@@ -51,6 +52,7 @@ class Clinic extends Model
         return [
             'working_days' => 'array',
             'working_schedule' => 'array',
+            'free_mode' => 'boolean',
             'has_existing_system' => 'boolean',
             'website_enabled' => 'boolean',
             'website_services' => 'array',

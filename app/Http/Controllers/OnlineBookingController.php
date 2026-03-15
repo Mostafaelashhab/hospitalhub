@@ -41,7 +41,7 @@ class OnlineBookingController extends Controller
             ->first();
 
         if (!$patient) {
-            $freeMode = PlatformSetting::isFreeModeActive();
+            $freeMode = PlatformSetting::isFreeModeActive($clinic);
             $pointCost = (int) PlatformSetting::getPointPrice();
 
             // Check wallet balance for new patient (skip if free mode)

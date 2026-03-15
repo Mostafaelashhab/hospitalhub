@@ -891,6 +891,17 @@ return [
     'account_number' => 'Account Number',
     'payment_account_not_configured' => 'Payment account details not configured yet.',
 
+    // Per-Clinic Free Mode & Settings Tabs
+    'free_mode_toggled' => 'Free mode updated successfully.',
+    'free_mode_per_clinic_hint' => 'You can also enable free mode for individual clinics from the clinic details page.',
+    'enabled' => 'Enabled',
+    'disabled' => 'Disabled',
+    'general' => 'General',
+    'whatsapp' => 'WhatsApp',
+    'sms' => 'SMS',
+    'under_maintenance' => 'Under Maintenance',
+    'under_maintenance_desc' => 'This feature is currently being developed and will be available soon.',
+
     // Landing Page Dynamic
     'landing_badge_paid' => 'Start managing your clinic today',
     'landing_start_now' => 'Get Started Now',

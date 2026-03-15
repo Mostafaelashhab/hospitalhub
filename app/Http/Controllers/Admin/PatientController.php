@@ -67,7 +67,7 @@ class PatientController extends Controller
         ]);
 
         $clinic = auth()->user()->clinic;
-        $freeMode = PlatformSetting::isFreeModeActive();
+        $freeMode = PlatformSetting::isFreeModeActive($clinic);
 
         // Check wallet balance (skip if free mode)
         $pointCost = (int) PlatformSetting::getPointPrice();

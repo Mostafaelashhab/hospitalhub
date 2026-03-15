@@ -271,6 +271,29 @@
 
         {{-- Wallet sidebar --}}
         <div class="space-y-6">
+            {{-- Free Mode Toggle --}}
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-lg flex items-center justify-center {{ $clinic->free_mode ? 'bg-emerald-50' : 'bg-gray-100' }}">
+                            <svg class="w-4 h-4 {{ $clinic->free_mode ? 'text-emerald-600' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v13m0-13V6a2 2 0 112 2h-2zm0 0V5.5A2.5 2.5 0 109.5 8H12zm-7 4h14M5 12a2 2 0 110-4h14a2 2 0 110 4M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg>
+                        </div>
+                        <div>
+                            <p class="text-sm font-semibold text-gray-900">{{ __('app.free_mode') }}</p>
+                            <p class="text-xs {{ $clinic->free_mode ? 'text-emerald-600 font-medium' : 'text-gray-400' }}">
+                                {{ $clinic->free_mode ? __('app.enabled') : __('app.disabled') }}
+                            </p>
+                        </div>
+                    </div>
+                    <form method="POST" action="{{ route('super.clinics.free-mode', $clinic) }}">
+                        @csrf @method('PATCH')
+                        <button type="submit" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {{ $clinic->free_mode ? 'bg-emerald-500' : 'bg-gray-300' }}">
+                            <span class="inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform {{ $clinic->free_mode ? 'translate-x-6' : 'translate-x-1' }}"></span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
             {{-- Balance Card --}}
             <div class="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-6 shadow-lg shadow-indigo-500/20 relative overflow-hidden">
                 <div class="absolute top-0 {{ app()->getLocale() === 'ar' ? 'left-0' : 'right-0' }} w-24 h-24 bg-white/10 rounded-full -translate-y-1/2 {{ app()->getLocale() === 'ar' ? '-translate-x-1/2' : 'translate-x-1/2' }}"></div>

@@ -172,6 +172,13 @@ class ClinicManagementController extends Controller
         return view('super-admin.recharge-requests', compact('rechargeRequests', 'pendingCount'));
     }
 
+    public function toggleFreeMode(Clinic $clinic)
+    {
+        $clinic->update(['free_mode' => !$clinic->free_mode]);
+
+        return back()->with('success', __('app.free_mode_toggled'));
+    }
+
     public function sendNotification(Request $request)
     {
         $validated = $request->validate([

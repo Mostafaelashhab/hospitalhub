@@ -891,6 +891,17 @@ return [
     'account_number' => 'رقم الحساب',
     'payment_account_not_configured' => 'بيانات حساب الدفع لسه مش متضافة.',
 
+    // الخطة المجانية لكل عيادة و تابات الإعدادات
+    'free_mode_toggled' => 'تم تحديث الوضع المجاني بنجاح.',
+    'free_mode_per_clinic_hint' => 'تقدر كمان تفعّل الوضع المجاني لعيادات معينة من صفحة تفاصيل العيادة.',
+    'enabled' => 'مفعّل',
+    'disabled' => 'متوقف',
+    'general' => 'عام',
+    'whatsapp' => 'واتساب',
+    'sms' => 'رسائل SMS',
+    'under_maintenance' => 'تحت الصيانة',
+    'under_maintenance_desc' => 'الميزة دي قيد التطوير وهتكون متاحة قريباً.',
+
     // الصفحة الرئيسية ديناميك
     'landing_badge_paid' => 'ابدأ في إدارة عيادتك اليوم',
     'landing_start_now' => 'ابدأ دلوقتي',

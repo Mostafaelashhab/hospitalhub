@@ -226,7 +226,7 @@
         @php
             $walletBalance = auth()->user()->clinic?->wallet?->balance ?? 0;
             $userRole = auth()->user()->role;
-            $isFreeMode = \App\Models\PlatformSetting::isFreeModeActive();
+            $isFreeMode = \App\Models\PlatformSetting::isFreeModeActive(auth()->user()->clinic);
         @endphp
         @if(!$isFreeMode && in_array($userRole, ['admin', 'accountant', 'secretary']) && $walletBalance <= 10 && $walletBalance > 0)
         <div class="mx-4 lg:mx-8 mt-4 bg-amber-50 border border-amber-200 rounded-xl px-5 py-3 flex items-center gap-3">

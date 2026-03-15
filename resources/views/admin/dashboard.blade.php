@@ -9,7 +9,7 @@
     </x-slot>
 
     {{-- Free Mode Banner --}}
-    @if(\App\Models\PlatformSetting::isFreeModeActive())
+    @if(\App\Models\PlatformSetting::isFreeModeActive($clinic))
     <div class="mb-6 bg-emerald-50 border border-emerald-200 rounded-2xl p-5">
         <div class="flex items-start gap-4">
             <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center shrink-0">
