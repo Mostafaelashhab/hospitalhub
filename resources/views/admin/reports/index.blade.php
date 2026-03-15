@@ -21,6 +21,43 @@
         </form>
     </div>
 
+    {{-- Financial Summary Cards --}}
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+        <div class="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl p-5 shadow-sm text-white">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 11l5-5m0 0l5 5m-5-5v12"/></svg>
+                </div>
+                <div>
+                    <p class="text-xs text-white/70 font-medium">{{ __('app.total_income') }}</p>
+                    <p class="text-lg font-bold">{{ number_format($stats['total_revenue'], 0) }} {{ __('app.egp') }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-gradient-to-br from-red-500 to-rose-600 rounded-2xl p-5 shadow-sm text-white">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 13l-5 5m0 0l-5-5m5 5V6"/></svg>
+                </div>
+                <div>
+                    <p class="text-xs text-white/70 font-medium">{{ __('app.total_expenses') }}</p>
+                    <p class="text-lg font-bold">{{ number_format($stats['total_expenses'], 0) }} {{ __('app.egp') }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="bg-gradient-to-br {{ $stats['net_profit'] >= 0 ? 'from-indigo-500 to-purple-600' : 'from-gray-600 to-gray-700' }} rounded-2xl p-5 shadow-sm text-white">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                </div>
+                <div>
+                    <p class="text-xs text-white/70 font-medium">{{ __('app.net_profit') }}</p>
+                    <p class="text-lg font-bold">{{ number_format($stats['net_profit'], 0) }} {{ __('app.egp') }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     {{-- Overview Stats --}}
     <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
         <div class="stat-card bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
@@ -144,8 +181,8 @@
         <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
             <h3 class="text-sm font-bold text-gray-900 mb-4">{{ __('app.payment_methods') }}</h3>
             @php
-                $payColors = ['cash' => 'from-emerald-500 to-green-500', 'card' => 'from-blue-500 to-indigo-500', 'bank_transfer' => 'from-purple-500 to-pink-500'];
-                $payIcons = ['cash' => 'M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z', 'card' => 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z', 'bank_transfer' => 'M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z'];
+                $payColors = ['cash' => 'from-emerald-500 to-green-500', 'card' => 'from-blue-500 to-indigo-500', 'bank_transfer' => 'from-purple-500 to-pink-500', 'instapay' => 'from-orange-500 to-amber-500'];
+                $payIcons = ['cash' => 'M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z', 'card' => 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z', 'bank_transfer' => 'M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10h16v11H4V10z', 'instapay' => 'M13 10V3L4 14h7v7l9-11h-7z'];
                 $totalPay = max($paymentMethods->sum('total'), 1);
             @endphp
             <div class="space-y-4">
@@ -163,6 +200,55 @@
                             <div class="h-full rounded-full bg-gradient-to-r {{ $payColors[$pm->payment_method] ?? 'from-gray-400 to-gray-500' }}" style="width: {{ ($pm->total / $totalPay) * 100 }}%"></div>
                         </div>
                         <p class="text-[10px] text-gray-400 mt-0.5">{{ $pm->count }} {{ __('app.invoices') }}</p>
+                    </div>
+                </div>
+                @empty
+                <p class="text-center text-sm text-gray-400 py-8">{{ __('app.no_data') }}</p>
+                @endforelse
+            </div>
+        </div>
+    </div>
+
+    {{-- Expenses Row: Monthly Expenses + By Category --}}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
+        {{-- Monthly Expenses Chart --}}
+        <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+            <h3 class="text-sm font-bold text-gray-900 mb-4">{{ __('app.monthly_expenses') }}</h3>
+            <div class="space-y-3">
+                @php $maxExp = $expensesChart->max('total') ?: 1; @endphp
+                @foreach($expensesChart as $month)
+                <div>
+                    <div class="flex items-center justify-between text-xs mb-1">
+                        <span class="text-gray-600 font-medium">{{ \Carbon\Carbon::parse($month->month . '-01')->translatedFormat('M Y') }}</span>
+                        <span class="text-gray-900 font-semibold">{{ number_format($month->total, 0) }} {{ __('app.egp') }}</span>
+                    </div>
+                    <div class="w-full bg-gray-100 rounded-full h-2.5 overflow-hidden">
+                        <div class="h-full rounded-full bg-gradient-to-r from-red-500 to-rose-500 transition-all duration-500" style="width: {{ ($month->total / $maxExp) * 100 }}%"></div>
+                    </div>
+                </div>
+                @endforeach
+                @if($expensesChart->isEmpty())
+                <p class="text-center text-sm text-gray-400 py-8">{{ __('app.no_data') }}</p>
+                @endif
+            </div>
+        </div>
+
+        {{-- Expenses by Category --}}
+        <div class="bg-white rounded-2xl p-6 border border-gray-100 shadow-sm">
+            <h3 class="text-sm font-bold text-gray-900 mb-4">{{ __('app.expenses_by_category') }}</h3>
+            @php $totalCatExp = max($expensesByCategory->sum('total'), 1); @endphp
+            <div class="space-y-3">
+                @forelse($expensesByCategory as $cat)
+                <div class="flex items-center gap-3">
+                    <span class="w-3 h-3 rounded-full shrink-0" style="background-color: {{ $cat->color }}"></span>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center justify-between mb-0.5">
+                            <span class="text-sm text-gray-700">{{ app()->getLocale() === 'ar' ? $cat->name_ar : $cat->name_en }}</span>
+                            <span class="text-sm font-bold text-gray-900">{{ number_format($cat->total, 0) }} {{ __('app.egp') }}</span>
+                        </div>
+                        <div class="w-full bg-gray-100 rounded-full h-1.5">
+                            <div class="h-full rounded-full" style="width: {{ ($cat->total / $totalCatExp) * 100 }}%; background-color: {{ $cat->color }}"></div>
+                        </div>
                     </div>
                 </div>
                 @empty

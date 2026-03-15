@@ -19,6 +19,9 @@ class Patient extends Model
         'allergies',
         'blood_type',
         'national_id',
+        'emergency_contact_name',
+        'emergency_contact_phone',
+        'emergency_contact_relation',
     ];
 
     protected function casts(): array
@@ -71,5 +74,40 @@ class Patient extends Model
                 $q->whereNull('expiry_date')->orWhere('expiry_date', '>=', now());
             })
             ->latest();
+    }
+
+    public function vitalSigns()
+    {
+        return $this->hasMany(VitalSign::class);
+    }
+
+    public function chronicDiseases()
+    {
+        return $this->hasMany(ChronicDisease::class);
+    }
+
+    public function medications()
+    {
+        return $this->hasMany(PatientMedication::class);
+    }
+
+    public function medicalNotes()
+    {
+        return $this->hasMany(MedicalNote::class);
+    }
+
+    public function latestVitals()
+    {
+        return $this->hasOne(VitalSign::class)->latest();
+    }
+
+    public function activeChronicDiseases()
+    {
+        return $this->hasMany(ChronicDisease::class)->where('is_active', true);
+    }
+
+    public function activeMedications()
+    {
+        return $this->hasMany(PatientMedication::class)->where('is_active', true);
     }
 }

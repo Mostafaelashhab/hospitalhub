@@ -44,7 +44,7 @@
                             class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-all">
                         <option value="">{{ __('app.select_patient') }}</option>
                         @foreach($patients as $patient)
-                        <option value="{{ $patient->id }}" {{ old('patient_id') == $patient->id ? 'selected' : '' }}>{{ $patient->name }} - {{ $patient->phone }}</option>
+                        <option value="{{ $patient->id }}" {{ (old('patient_id', request('patient_id')) == $patient->id) ? 'selected' : '' }}>{{ $patient->name }} - {{ $patient->phone }}</option>
                         @endforeach
                     </select>
                 </div>

@@ -64,6 +64,9 @@ class PatientController extends Controller
             'allergies' => 'nullable|string|max:1000',
             'blood_type' => 'nullable|in:A+,A-,B+,B-,AB+,AB-,O+,O-',
             'national_id' => 'nullable|string|max:20',
+            'emergency_contact_name' => 'nullable|string|max:255',
+            'emergency_contact_phone' => 'nullable|string|max:20',
+            'emergency_contact_relation' => 'nullable|string|max:100',
         ]);
 
         $clinic = auth()->user()->clinic;
@@ -110,6 +113,11 @@ class PatientController extends Controller
                 $q->with('provider')->latest();
             },
             'activeInsurance.provider',
+            'latestVitals',
+            'activeChronicDiseases',
+            'activeMedications',
+            'vitalSigns' => fn($q) => $q->with('recorder')->latest()->limit(10),
+            'medicalNotes' => fn($q) => $q->with('creator')->latest()->limit(20),
         ]);
 
         $insuranceProviders = $clinic->insuranceProviders()->where('is_active', true)->get();
@@ -141,6 +149,9 @@ class PatientController extends Controller
             'allergies' => 'nullable|string|max:1000',
             'blood_type' => 'nullable|in:A+,A-,B+,B-,AB+,AB-,O+,O-',
             'national_id' => 'nullable|string|max:20',
+            'emergency_contact_name' => 'nullable|string|max:255',
+            'emergency_contact_phone' => 'nullable|string|max:20',
+            'emergency_contact_relation' => 'nullable|string|max:100',
         ]);
 
         $patient->update($validated);

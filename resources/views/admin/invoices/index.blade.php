@@ -84,6 +84,7 @@
                 <option value="cash" {{ request('payment_method') === 'cash' ? 'selected' : '' }}>{{ __('app.cash') }}</option>
                 <option value="card" {{ request('payment_method') === 'card' ? 'selected' : '' }}>{{ __('app.card') }}</option>
                 <option value="bank_transfer" {{ request('payment_method') === 'bank_transfer' ? 'selected' : '' }}>{{ __('app.bank_transfer') }}</option>
+                <option value="instapay" {{ request('payment_method') === 'instapay' ? 'selected' : '' }}>{{ __('app.instapay') }}</option>
             </select>
             <button type="submit" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-sm shadow-indigo-500/20 transition-all">
                 {{ __('app.search') }}

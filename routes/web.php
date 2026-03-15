@@ -25,6 +25,9 @@ use App\Http\Controllers\Admin\PrescriptionController;
 use App\Http\Controllers\Admin\InsuranceController;
 use App\Http\Controllers\Admin\PatientFileController;
 use App\Http\Controllers\Admin\QueueController;
+use App\Http\Controllers\Admin\ExpenseController;
+use App\Http\Controllers\Admin\PatientLedgerController;
+use App\Http\Controllers\Admin\PatientMedicalController;
 use App\Http\Controllers\Admin\RechargeController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\SuperAdmin\ClinicManagementController;
@@ -135,6 +138,17 @@ Route::middleware(['auth', 'role:admin,doctor,accountant,secretary', 'clinic.act
     Route::post('/patients/{patient}/insurance', [InsuranceController::class, 'assignToPatient'])->name('.patients.insurance.store')->middleware('permission:patients.edit');
     Route::patch('/patient-insurance/{insurance}/remove', [InsuranceController::class, 'removeFromPatient'])->name('.patients.insurance.remove')->middleware('permission:patients.edit');
 
+    // Patient Medical Features
+    Route::post('/patients/{patient}/vitals', [PatientMedicalController::class, 'storeVitals'])->name('.patients.vitals.store')->middleware('permission:patients.edit');
+    Route::post('/patients/{patient}/diseases', [PatientMedicalController::class, 'storeDisease'])->name('.patients.diseases.store')->middleware('permission:patients.edit');
+    Route::patch('/chronic-diseases/{disease}/toggle', [PatientMedicalController::class, 'toggleDisease'])->name('.patients.diseases.toggle')->middleware('permission:patients.edit');
+    Route::delete('/chronic-diseases/{disease}', [PatientMedicalController::class, 'destroyDisease'])->name('.patients.diseases.destroy')->middleware('permission:patients.edit');
+    Route::post('/patients/{patient}/medications', [PatientMedicalController::class, 'storeMedication'])->name('.patients.medications.store')->middleware('permission:patients.edit');
+    Route::patch('/medications/{medication}/toggle', [PatientMedicalController::class, 'toggleMedication'])->name('.patients.medications.toggle')->middleware('permission:patients.edit');
+    Route::delete('/medications/{medication}', [PatientMedicalController::class, 'destroyMedication'])->name('.patients.medications.destroy')->middleware('permission:patients.edit');
+    Route::post('/patients/{patient}/notes', [PatientMedicalController::class, 'storeNote'])->name('.patients.notes.store')->middleware('permission:patients.edit');
+    Route::delete('/medical-notes/{note}', [PatientMedicalController::class, 'destroyNote'])->name('.patients.notes.destroy')->middleware('permission:patients.edit');
+
     // Staff Management (admin only)
     Route::get('/staff', [StaffController::class, 'index'])->name('.staff.index')->middleware('permission:staff.view');
     Route::get('/staff/create', [StaffController::class, 'create'])->name('.staff.create')->middleware('permission:staff.create');
@@ -178,6 +192,22 @@ Route::middleware(['auth', 'role:admin,doctor,accountant,secretary', 'clinic.act
 
     // Reports
     Route::get('/reports', [ReportController::class, 'index'])->name('.reports.index');
+
+    // Expenses
+    Route::get('/expenses', [ExpenseController::class, 'index'])->name('.expenses.index')->middleware('permission:invoices.view');
+    Route::get('/expenses/create', [ExpenseController::class, 'create'])->name('.expenses.create')->middleware('permission:invoices.edit');
+    Route::post('/expenses', [ExpenseController::class, 'store'])->name('.expenses.store')->middleware('permission:invoices.edit');
+    Route::get('/expenses/{expense}/edit', [ExpenseController::class, 'edit'])->name('.expenses.edit')->middleware('permission:invoices.edit');
+    Route::put('/expenses/{expense}', [ExpenseController::class, 'update'])->name('.expenses.update')->middleware('permission:invoices.edit');
+    Route::delete('/expenses/{expense}', [ExpenseController::class, 'destroy'])->name('.expenses.destroy')->middleware('permission:invoices.edit');
+    Route::post('/expenses/categories', [ExpenseController::class, 'storeCategory'])->name('.expenses.categories.store')->middleware('permission:invoices.edit');
+    Route::delete('/expenses/categories/{category}', [ExpenseController::class, 'destroyCategory'])->name('.expenses.categories.destroy')->middleware('permission:invoices.edit');
+
+    // Patient Ledger (Debt Tracking)
+    Route::get('/ledger', [PatientLedgerController::class, 'index'])->name('.ledger.index')->middleware('permission:invoices.view');
+    Route::get('/ledger/{patient}', [PatientLedgerController::class, 'show'])->name('.ledger.show')->middleware('permission:invoices.view');
+    Route::post('/ledger/{patient}/payment', [PatientLedgerController::class, 'addPayment'])->name('.ledger.payment')->middleware('permission:invoices.edit');
+    Route::post('/ledger/{patient}/debt', [PatientLedgerController::class, 'addDebt'])->name('.ledger.debt')->middleware('permission:invoices.edit');
 
     // Queue Management
     Route::get('/queue', [QueueController::class, 'index'])->name('.queue.index')->middleware('permission:appointments.view');

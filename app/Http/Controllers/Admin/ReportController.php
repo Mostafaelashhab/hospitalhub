@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\Diagnosis;
+use App\Models\Expense;
 use App\Models\Invoice;
 use App\Models\Patient;
 use Illuminate\Http\Request;
@@ -106,9 +107,34 @@ class ReportController extends Controller
             ->get()
             ->pluck('count', 'status');
 
+        // === Expenses Data ===
+        $baseExpenses = Expense::where('expenses.clinic_id', $clinicId)
+            ->when($branchId, fn ($q) => $q->where('expenses.branch_id', $branchId))
+            ->whereBetween('expense_date', [$from, $to]);
+
+        $stats['total_expenses'] = (clone $baseExpenses)->sum('amount');
+        $stats['net_profit'] = $stats['total_revenue'] - $stats['total_expenses'];
+
+        // Expense by category
+        $expensesByCategory = (clone $baseExpenses)
+            ->join('expense_categories', 'expenses.expense_category_id', '=', 'expense_categories.id')
+            ->selectRaw('expense_categories.name_en, expense_categories.name_ar, expense_categories.color, SUM(expenses.amount) as total')
+            ->groupBy('expense_categories.id', 'expense_categories.name_en', 'expense_categories.name_ar', 'expense_categories.color')
+            ->orderByDesc('total')
+            ->get();
+
+        // Monthly Expenses Chart (last 6 months)
+        $expensesChart = Expense::where('clinic_id', $clinicId)
+            ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
+            ->where('expense_date', '>=', now()->subMonths(6)->startOfMonth())
+            ->selectRaw("DATE_FORMAT(expense_date, '%Y-%m') as month, SUM(amount) as total")
+            ->groupBy('month')
+            ->orderBy('month')
+            ->get();
+
         return view('admin.reports.index', compact(
-            'stats', 'appointmentsChart', 'revenueChart', 'doctorPerformance',
-            'topDiagnoses', 'paymentMethods', 'appointmentStatuses', 'from', 'to'
+            'stats', 'appointmentsChart', 'revenueChart', 'expensesChart', 'doctorPerformance',
+            'topDiagnoses', 'paymentMethods', 'appointmentStatuses', 'expensesByCategory', 'from', 'to'
         ));
     }
 }

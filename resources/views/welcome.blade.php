@@ -791,6 +791,51 @@
                 </div>
             </div>
 
+            {{-- Feature 3b: New Features - Medical, Financial, Insurance --}}
+            <div class="grid md:grid-cols-3 gap-8 mb-16 md:mb-24">
+                {{-- Vital Signs & Medical Records --}}
+                <div class="fade-up card-lift bg-gradient-to-br from-rose-50 to-red-50 rounded-3xl p-8 border border-rose-100">
+                    <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center mb-5 shadow-sm">
+                        <svg class="w-7 h-7 text-rose-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">{{ app()->getLocale()==='ar' ? 'السجل الطبي الشامل' : 'Complete Medical Records' }}</h3>
+                    <p class="text-gray-500 leading-relaxed mb-4">{{ app()->getLocale()==='ar' ? 'تتبع العلامات الحيوية، الأمراض المزمنة، الأدوية، والملاحظات الطبية لكل مريض في مكان واحد.' : 'Track vital signs, chronic diseases, medications, and medical notes for every patient in one place.' }}</p>
+                    <ul class="space-y-2">
+                        <li class="flex items-center gap-2"><svg class="w-4 h-4 text-rose-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span class="text-xs text-gray-500">{{ app()->getLocale()==='ar' ? 'ضغط الدم، الحرارة، السكر، الأكسجين' : 'BP, Temperature, Sugar, O₂ Saturation' }}</span></li>
+                        <li class="flex items-center gap-2"><svg class="w-4 h-4 text-rose-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span class="text-xs text-gray-500">{{ app()->getLocale()==='ar' ? 'أمراض مزمنة وتاريخ الأدوية' : 'Chronic diseases & medication history' }}</span></li>
+                        <li class="flex items-center gap-2"><svg class="w-4 h-4 text-rose-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span class="text-xs text-gray-500">{{ app()->getLocale()==='ar' ? 'رمز QR لملف المريض' : 'Patient QR code for quick access' }}</span></li>
+                    </ul>
+                </div>
+
+                {{-- Financial Management --}}
+                <div class="fade-up d1 card-lift bg-gradient-to-br from-green-50 to-emerald-50 rounded-3xl p-8 border border-green-100">
+                    <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center mb-5 shadow-sm">
+                        <svg class="w-7 h-7 text-emerald-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">{{ app()->getLocale()==='ar' ? 'الإدارة المالية المتكاملة' : 'Integrated Financial Management' }}</h3>
+                    <p class="text-gray-500 leading-relaxed mb-4">{{ app()->getLocale()==='ar' ? 'تتبع المصروفات، الإيرادات، وصافي الأرباح مع تقارير مالية تفصيلية وسجل ديون المرضى.' : 'Track expenses, revenue, and net profit with detailed financial reports and patient debt ledger.' }}</p>
+                    <ul class="space-y-2">
+                        <li class="flex items-center gap-2"><svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span class="text-xs text-gray-500">{{ app()->getLocale()==='ar' ? 'مصروفات مصنفة (إيجار، رواتب، مستلزمات)' : 'Categorized expenses (rent, salaries, supplies)' }}</span></li>
+                        <li class="flex items-center gap-2"><svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span class="text-xs text-gray-500">{{ app()->getLocale()==='ar' ? 'سجل ديون ومدفوعات المرضى' : 'Patient debt & payment ledger' }}</span></li>
+                        <li class="flex items-center gap-2"><svg class="w-4 h-4 text-emerald-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span class="text-xs text-gray-500">{{ app()->getLocale()==='ar' ? 'دفع بكاش، فيزا، تحويل، انستاباي' : 'Cash, Card, Transfer & InstaPay payments' }}</span></li>
+                    </ul>
+                </div>
+
+                {{-- Insurance Companies --}}
+                <div class="fade-up d2 card-lift bg-gradient-to-br from-blue-50 to-sky-50 rounded-3xl p-8 border border-blue-100">
+                    <div class="w-14 h-14 bg-white rounded-2xl flex items-center justify-center mb-5 shadow-sm">
+                        <svg class="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-900 mb-3">{{ app()->getLocale()==='ar' ? 'إدارة شركات التأمين' : 'Insurance Companies Management' }}</h3>
+                    <p class="text-gray-500 leading-relaxed mb-4">{{ app()->getLocale()==='ar' ? 'أضف شركات التأمين، حدد نسب التغطية، واربط كل مريض ببوليصة التأمين الخاصة به مع حساب تلقائي للخصم.' : 'Add insurance providers, set coverage percentages, and link patients to their policies with automatic discount calculation.' }}</p>
+                    <ul class="space-y-2">
+                        <li class="flex items-center gap-2"><svg class="w-4 h-4 text-blue-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span class="text-xs text-gray-500">{{ app()->getLocale()==='ar' ? 'إضافة شركات تأمين متعددة' : 'Multiple insurance providers' }}</span></li>
+                        <li class="flex items-center gap-2"><svg class="w-4 h-4 text-blue-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span class="text-xs text-gray-500">{{ app()->getLocale()==='ar' ? 'نسبة تغطية وتاريخ انتهاء البوليصة' : 'Coverage percentage & policy expiry tracking' }}</span></li>
+                        <li class="flex items-center gap-2"><svg class="w-4 h-4 text-blue-500 shrink-0" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg><span class="text-xs text-gray-500">{{ app()->getLocale()==='ar' ? 'خصم تلقائي على الفواتير' : 'Auto-discount on invoices' }}</span></li>
+                    </ul>
+                </div>
+            </div>
+
             {{-- Feature 4: Patient Portal (Coming Soon) --}}
             <div class="fade-up card-lift relative bg-gradient-to-br from-indigo-950 via-indigo-900 to-purple-950 rounded-3xl overflow-hidden border border-indigo-800/30">
                 <div class="absolute inset-0 opacity-[0.05]" style="background-image:linear-gradient(rgba(255,255,255,.3) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.3) 1px,transparent 1px);background-size:30px 30px"></div>

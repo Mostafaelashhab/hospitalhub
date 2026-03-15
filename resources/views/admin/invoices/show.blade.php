@@ -157,6 +157,7 @@
                             <option value="cash" {{ $invoice->payment_method === 'cash' ? 'selected' : '' }}>{{ __('app.cash') }}</option>
                             <option value="card" {{ $invoice->payment_method === 'card' ? 'selected' : '' }}>{{ __('app.card') }}</option>
                             <option value="bank_transfer" {{ $invoice->payment_method === 'bank_transfer' ? 'selected' : '' }}>{{ __('app.bank_transfer') }}</option>
+                            <option value="instapay" {{ $invoice->payment_method === 'instapay' ? 'selected' : '' }}>{{ __('app.instapay') }}</option>
                         </select>
                     </div>
 

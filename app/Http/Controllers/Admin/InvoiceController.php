@@ -73,7 +73,7 @@ class InvoiceController extends Controller
 
         $validated = $request->validate([
             'status' => 'required|in:unpaid,paid,partial,refunded',
-            'payment_method' => 'nullable|in:cash,card,bank_transfer',
+            'payment_method' => 'nullable|in:cash,card,bank_transfer,instapay',
             'discount' => 'nullable|numeric|min:0',
             'notes' => 'nullable|string|max:1000',
         ]);

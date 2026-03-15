@@ -101,6 +101,29 @@
                 </div>
             </div>
 
+            {{-- Emergency Contact --}}
+            <div class="pt-4 border-t border-gray-100">
+                <h3 class="text-sm font-bold text-gray-900 uppercase tracking-wider mb-5">{{ __('app.emergency_contact') }}</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('app.contact_name') }}</label>
+                        <input type="text" name="emergency_contact_name" value="{{ old('emergency_contact_name') }}"
+                               class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('app.contact_phone') }}</label>
+                        <input type="text" name="emergency_contact_phone" value="{{ old('emergency_contact_phone') }}" dir="ltr"
+                               class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-all">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('app.contact_relation') }}</label>
+                        <input type="text" name="emergency_contact_relation" value="{{ old('emergency_contact_relation') }}"
+                               class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-all"
+                               placeholder="{{ __('app.relation_placeholder') }}">
+                    </div>
+                </div>
+            </div>
+
             {{-- Actions --}}
             <div class="flex items-center gap-3 pt-4 border-t border-gray-100">
                 <button type="submit" class="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-sm shadow-indigo-500/20 transition-all">
