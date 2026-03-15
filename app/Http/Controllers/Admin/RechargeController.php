@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\PlatformSetting;
 use App\Models\RechargeRequest;
 use App\Models\User;
 use App\Notifications\RechargeRequested;
@@ -19,7 +20,14 @@ class RechargeController extends Controller
             ->latest()
             ->paginate(15);
 
-        return view('admin.recharge.index', compact('clinic', 'requests'));
+        $paymentAccounts = [
+            'instapay_name' => PlatformSetting::get('instapay_account_name'),
+            'instapay_number' => PlatformSetting::get('instapay_account_number'),
+            'vodafone_name' => PlatformSetting::get('vodafone_account_name'),
+            'vodafone_number' => PlatformSetting::get('vodafone_account_number'),
+        ];
+
+        return view('admin.recharge.index', compact('clinic', 'requests', 'paymentAccounts'));
     }
 
     public function store(Request $request)

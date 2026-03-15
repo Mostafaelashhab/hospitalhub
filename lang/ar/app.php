@@ -879,6 +879,18 @@ return [
     'free_mode_banner_title' => 'الوضع المجاني مفعّل!',
     'free_mode_banner_desc' => 'إضافة المرضى الجداد دلوقتي ببلاش — مش هيتخصم نقاط.',
 
+    // إعدادات حسابات الدفع
+    'payment_accounts' => 'حسابات الدفع',
+    'payment_accounts_desc' => 'بيانات الحسابات اللي بتظهر للعيادات لما يختاروا طريقة الدفع.',
+    'instapay_account_name' => 'اسم حساب إنستاباي',
+    'instapay_account_number' => 'رقم حساب إنستاباي',
+    'vodafone_account_name' => 'اسم حساب فودافون كاش',
+    'vodafone_account_number' => 'رقم فودافون كاش',
+    'transfer_to_account' => 'حوّل على الحساب ده:',
+    'account_name' => 'اسم الحساب',
+    'account_number' => 'رقم الحساب',
+    'payment_account_not_configured' => 'بيانات حساب الدفع لسه مش متضافة.',
+
     // الصفحة الرئيسية ديناميك
     'landing_badge_paid' => 'ابدأ في إدارة عيادتك اليوم',
     'landing_start_now' => 'ابدأ دلوقتي',

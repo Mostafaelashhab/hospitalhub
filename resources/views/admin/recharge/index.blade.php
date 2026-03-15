@@ -179,6 +179,54 @@
                             </label>
                         </div>
 
+                        {{-- InstaPay Account Info --}}
+                        <div x-show="method === 'instapay'" x-transition class="mt-3">
+                            @if($paymentAccounts['instapay_name'] || $paymentAccounts['instapay_number'])
+                            <div class="p-3 rounded-xl bg-indigo-50 border border-indigo-100">
+                                <p class="text-sm font-semibold text-indigo-800 mb-2 flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    {{ __('app.transfer_to_account') }}
+                                </p>
+                                <div class="space-y-1 {{ app()->getLocale() === 'ar' ? 'pr-6' : 'pl-6' }}">
+                                    @if($paymentAccounts['instapay_name'])
+                                    <p class="text-sm text-indigo-700"><span class="font-medium">{{ __('app.account_name') }}:</span> {{ $paymentAccounts['instapay_name'] }}</p>
+                                    @endif
+                                    @if($paymentAccounts['instapay_number'])
+                                    <p class="text-sm text-indigo-700"><span class="font-medium">{{ __('app.account_number') }}:</span> <span dir="ltr">{{ $paymentAccounts['instapay_number'] }}</span></p>
+                                    @endif
+                                </div>
+                            </div>
+                            @else
+                            <div class="p-3 rounded-xl bg-gray-50 border border-gray-200">
+                                <p class="text-sm text-gray-500">{{ __('app.payment_account_not_configured') }}</p>
+                            </div>
+                            @endif
+                        </div>
+
+                        {{-- Vodafone Cash Account Info --}}
+                        <div x-show="method === 'vodafone_cash'" x-transition class="mt-3">
+                            @if($paymentAccounts['vodafone_name'] || $paymentAccounts['vodafone_number'])
+                            <div class="p-3 rounded-xl bg-red-50 border border-red-100">
+                                <p class="text-sm font-semibold text-red-800 mb-2 flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-red-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    {{ __('app.transfer_to_account') }}
+                                </p>
+                                <div class="space-y-1 {{ app()->getLocale() === 'ar' ? 'pr-6' : 'pl-6' }}">
+                                    @if($paymentAccounts['vodafone_name'])
+                                    <p class="text-sm text-red-700"><span class="font-medium">{{ __('app.account_name') }}:</span> {{ $paymentAccounts['vodafone_name'] }}</p>
+                                    @endif
+                                    @if($paymentAccounts['vodafone_number'])
+                                    <p class="text-sm text-red-700"><span class="font-medium">{{ __('app.account_number') }}:</span> <span dir="ltr">{{ $paymentAccounts['vodafone_number'] }}</span></p>
+                                    @endif
+                                </div>
+                            </div>
+                            @else
+                            <div class="p-3 rounded-xl bg-gray-50 border border-gray-200">
+                                <p class="text-sm text-gray-500">{{ __('app.payment_account_not_configured') }}</p>
+                            </div>
+                            @endif
+                        </div>
+
                         {{-- Collector Info Notice --}}
                         <div x-show="method === 'collector'" x-transition class="mt-3 space-y-2">
                             <div class="p-3 rounded-xl bg-amber-50 border border-amber-100">

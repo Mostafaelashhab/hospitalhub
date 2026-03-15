@@ -86,6 +86,61 @@
             </div>
         </div>
 
+        {{-- Payment Accounts --}}
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <h3 class="text-base font-bold text-gray-900 mb-2 flex items-center gap-2">
+                <div class="w-8 h-8 bg-blue-50 rounded-lg flex items-center justify-center">
+                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+                </div>
+                {{ __('app.payment_accounts') }}
+            </h3>
+            <p class="text-xs text-gray-400 mb-5">{{ __('app.payment_accounts_desc') }}</p>
+
+            <div class="space-y-5">
+                {{-- InstaPay --}}
+                <div class="p-4 rounded-xl bg-gray-50 border border-gray-100 space-y-3">
+                    <p class="text-sm font-semibold text-gray-900">{{ __('app.payment_instapay') }}</p>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">{{ __('app.instapay_account_name') }}</label>
+                        <input type="text" name="instapay_account_name" value="{{ old('instapay_account_name', $settings['instapay_account_name']) }}"
+                               class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all">
+                        @error('instapay_account_name')
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">{{ __('app.instapay_account_number') }}</label>
+                        <input type="text" name="instapay_account_number" value="{{ old('instapay_account_number', $settings['instapay_account_number']) }}" dir="ltr"
+                               class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all">
+                        @error('instapay_account_number')
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
+
+                {{-- Vodafone Cash --}}
+                <div class="p-4 rounded-xl bg-gray-50 border border-gray-100 space-y-3">
+                    <p class="text-sm font-semibold text-gray-900">{{ __('app.payment_vodafone_cash') }}</p>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">{{ __('app.vodafone_account_name') }}</label>
+                        <input type="text" name="vodafone_account_name" value="{{ old('vodafone_account_name', $settings['vodafone_account_name']) }}"
+                               class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all">
+                        @error('vodafone_account_name')
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600 mb-1">{{ __('app.vodafone_account_number') }}</label>
+                        <input type="text" name="vodafone_account_number" value="{{ old('vodafone_account_number', $settings['vodafone_account_number']) }}" dir="ltr"
+                               class="w-full bg-white border border-gray-200 rounded-xl px-4 py-2.5 text-sm focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all">
+                        @error('vodafone_account_number')
+                        <p class="text-xs text-red-500 mt-1">{{ $message }}</p>
+                        @enderror
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <button type="submit" class="px-8 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl shadow-sm shadow-indigo-500/20 transition-all flex items-center gap-2">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
             {{ __('app.save_settings') }}

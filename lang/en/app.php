@@ -879,6 +879,18 @@ return [
     'free_mode_banner_title' => 'Free Mode Active!',
     'free_mode_banner_desc' => 'Adding new patients is currently free — no points will be deducted.',
 
+    // Payment Account Settings
+    'payment_accounts' => 'Payment Accounts',
+    'payment_accounts_desc' => 'Account details shown to clinics when they select a payment method.',
+    'instapay_account_name' => 'InstaPay Account Name',
+    'instapay_account_number' => 'InstaPay Account Number',
+    'vodafone_account_name' => 'Vodafone Cash Account Name',
+    'vodafone_account_number' => 'Vodafone Cash Number',
+    'transfer_to_account' => 'Transfer to this account:',
+    'account_name' => 'Account Name',
+    'account_number' => 'Account Number',
+    'payment_account_not_configured' => 'Payment account details not configured yet.',
+
     // Landing Page Dynamic
     'landing_badge_paid' => 'Start managing your clinic today',
     'landing_start_now' => 'Get Started Now',
