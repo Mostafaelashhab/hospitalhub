@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Helpers\BranchHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
+use App\Models\Doctor;
 use App\Models\Invoice;
 use App\Models\Patient;
 use App\Models\PatientInsurance;
+use App\Models\Service;
 use App\Models\User;
 use App\Notifications\AppointmentCreated;
 use App\Notifications\AppointmentStatusChanged;
@@ -23,7 +25,7 @@ class AppointmentController extends Controller
 
         $branchId = BranchHelper::activeBranchId();
 
-        $query = $clinic->appointments()->with(['patient', 'doctor']);
+        $query = $clinic->appointments()->with(['patient', 'doctor', 'service']);
 
         if ($branchId) {
             $query->where('branch_id', $branchId);
@@ -87,6 +89,7 @@ class AppointmentController extends Controller
             'doctor_id' => 'required|exists:doctors,id',
             'appointment_date' => 'required|date|after_or_equal:today',
             'appointment_time' => 'required',
+            'service_id' => 'nullable|exists:services,id',
             'notes' => 'nullable|string|max:1000',
             'recurrence_type' => 'nullable|in:none,daily,weekly,biweekly,monthly',
             'recurrence_count' => 'nullable|integer|min:2|max:52',
@@ -122,6 +125,7 @@ class AppointmentController extends Controller
                 'branch_id' => $branchId,
                 'patient_id' => $request->patient_id,
                 'doctor_id' => $request->doctor_id,
+                'service_id' => $request->service_id,
                 'appointment_date' => $date,
                 'appointment_time' => $request->appointment_time,
                 'notes' => $request->notes,
@@ -154,12 +158,28 @@ class AppointmentController extends Controller
             ->with('success', $message);
     }
 
+    public function servicesByDoctor(Doctor $doctor)
+    {
+        $clinic = auth()->user()->clinic;
+        abort_if($doctor->clinic_id !== $clinic->id, 403);
+
+        $services = Service::where('specialty_id', $doctor->specialty_id)
+            ->where('is_active', true)
+            ->get()
+            ->map(fn($s) => [
+                'id' => $s->id,
+                'name' => app()->getLocale() === 'ar' ? $s->name_ar : $s->name_en,
+            ]);
+
+        return response()->json($services);
+    }
+
     public function show(Appointment $appointment)
     {
         $clinic = auth()->user()->clinic;
         abort_if($appointment->clinic_id !== $clinic->id, 403);
 
-        $appointment->load(['patient', 'doctor', 'diagnosis', 'invoice']);
+        $appointment->load(['patient', 'doctor', 'diagnosis', 'invoice', 'service']);
 
         return view('admin.appointments.show', compact('appointment'));
     }

@@ -91,8 +91,7 @@ class DoctorDashboardController extends Controller
 
         $appointment->load(['patient', 'diagnosis.prescription.items']);
 
-        $clinic = $request->user()->clinic;
-        $specialty = $clinic->specialty ?? $doctor->specialty;
+        $specialty = $doctor->specialty ?? $request->user()->clinic?->specialty;
         $diagramType = $this->getDiagramType($specialty?->name_en);
 
         return view('doctor.appointment-show', compact('doctor', 'appointment', 'diagramType'));
@@ -340,6 +339,7 @@ class DoctorDashboardController extends Controller
             'ENT' => 'ent', 'Gynecology' => 'gynecology', 'Urology' => 'urology',
             'Neurology' => 'neurology', 'General Medicine' => 'general', 'Psychiatry' => 'psychiatry',
             'Internal Medicine' => 'internal-medicine', 'Physiotherapy' => 'physiotherapy', 'Nutrition' => 'nutrition',
+            'Plastic Surgery' => 'plastic-surgery', 'Cosmetic Dermatology' => 'cosmetic-dermatology',
         ];
         return $map[$specialtyName] ?? 'general';
     }

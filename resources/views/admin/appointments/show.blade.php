@@ -72,6 +72,14 @@
                             <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">{{ __('app.consultation_fee') }}</p>
                             <p class="text-sm font-semibold text-gray-900">{{ number_format($appointment->doctor->consultation_fee ?? 0) }} {{ __('app.points') }}</p>
                         </div>
+                        @if($appointment->service)
+                        <div>
+                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">{{ __('app.service') }}</p>
+                            <span class="inline-flex items-center px-3 py-1 text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg">
+                                {{ app()->getLocale() === 'ar' ? $appointment->service->name_ar : $appointment->service->name_en }}
+                            </span>
+                        </div>
+                        @endif
                         <div>
                             <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">{{ __('app.status') }}</p>
                             <span class="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-lg border {{ $statusStyles[$appointment->status] ?? 'bg-gray-50 text-gray-600 border-gray-200' }}">

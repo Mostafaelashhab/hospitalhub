@@ -36,7 +36,7 @@
         </div>
         <form method="POST" action="{{ route('dashboard.appointments.store') }}" class="p-6">
             @csrf
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6" x-data="appointmentForm()">
                 {{-- Patient --}}
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('app.patient') }} <span class="text-red-500">*</span></label>
@@ -52,12 +52,24 @@
                 {{-- Doctor --}}
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('app.doctor') }} <span class="text-red-500">*</span></label>
-                    <select name="doctor_id" required
+                    <select name="doctor_id" required x-model="doctorId" @change="fetchServices()"
                             class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-all">
                         <option value="">{{ __('app.select_doctor') }}</option>
                         @foreach($doctors as $doctor)
                         <option value="{{ $doctor->id }}" {{ old('doctor_id') == $doctor->id ? 'selected' : '' }}>{{ $doctor->name }} ({{ number_format($doctor->consultation_fee) }} {{ __('app.points') }})</option>
                         @endforeach
+                    </select>
+                </div>
+
+                {{-- Service --}}
+                <div x-show="services.length > 0" x-transition>
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('app.service') }}</label>
+                    <select name="service_id" x-model="serviceId"
+                            class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-all">
+                        <option value="">{{ __('app.select_service') }}</option>
+                        <template x-for="service in services" :key="service.id">
+                            <option :value="service.id" x-text="service.name"></option>
+                        </template>
                     </select>
                 </div>
 
@@ -132,4 +144,28 @@
             </div>
         </form>
     </div>
+
+    <script>
+        function appointmentForm() {
+            return {
+                doctorId: '{{ old('doctor_id') }}',
+                serviceId: '{{ old('service_id') }}',
+                services: [],
+                init() {
+                    if (this.doctorId) this.fetchServices();
+                },
+                async fetchServices() {
+                    this.services = [];
+                    this.serviceId = '';
+                    if (!this.doctorId) return;
+                    try {
+                        const res = await fetch(`/dashboard/doctors/${this.doctorId}/services`);
+                        this.services = await res.json();
+                    } catch (e) {
+                        this.services = [];
+                    }
+                }
+            }
+        }
+    </script>
 </x-dashboard-layout>

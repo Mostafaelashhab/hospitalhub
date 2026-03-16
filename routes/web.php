@@ -184,6 +184,9 @@ Route::middleware(['auth', 'role:admin,doctor,accountant,secretary', 'clinic.act
     // Drug Search
     Route::get('/drugs/search', [DrugSearchController::class, 'search'])->name('.drugs.search');
 
+    // Services by Doctor
+    Route::get('/doctors/{doctor}/services', [AppointmentController::class, 'servicesByDoctor'])->name('.doctors.services');
+
     // Offers (view only for clinic admins)
     Route::get('/offers', [AdminOfferController::class, 'index'])->name('.offers.index');
 

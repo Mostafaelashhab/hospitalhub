@@ -50,7 +50,7 @@ class DiagnosisController extends Controller
 
         $appointment->load(['patient', 'doctor.specialty']);
 
-        $specialty = $clinic->specialty ?? $appointment->doctor->specialty;
+        $specialty = $appointment->doctor->specialty ?? $clinic->specialty;
         $diagramType = $this->getDiagramType($specialty?->name_en);
 
         $diagnosis = $appointment->diagnosis;
@@ -143,7 +143,7 @@ class DiagnosisController extends Controller
 
         $diagnosis->load(['appointment', 'patient', 'doctor.specialty', 'prescription.items']);
 
-        $specialty = $clinic->specialty ?? $diagnosis->doctor->specialty;
+        $specialty = $diagnosis->doctor->specialty ?? $clinic->specialty;
         $diagramType = $this->getDiagramType($specialty?->name_en);
 
         return view('admin.diagnoses.show', compact('diagnosis', 'diagramType'));
@@ -167,6 +167,8 @@ class DiagnosisController extends Controller
             'Internal Medicine' => 'internal-medicine',
             'Physiotherapy' => 'physiotherapy',
             'Nutrition' => 'nutrition',
+            'Plastic Surgery' => 'plastic-surgery',
+            'Cosmetic Dermatology' => 'cosmetic-dermatology',
         ];
 
         return $map[$specialtyName] ?? 'general';
