@@ -72,12 +72,21 @@
                             <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">{{ __('app.consultation_fee') }}</p>
                             <p class="text-sm font-semibold text-gray-900">{{ number_format($appointment->doctor->consultation_fee ?? 0) }} {{ __('app.points') }}</p>
                         </div>
-                        @if($appointment->service)
-                        <div>
-                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">{{ __('app.service') }}</p>
-                            <span class="inline-flex items-center px-3 py-1 text-xs font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg">
-                                {{ app()->getLocale() === 'ar' ? $appointment->service->name_ar : $appointment->service->name_en }}
-                            </span>
+                        @if($appointment->services->isNotEmpty())
+                        <div class="sm:col-span-2">
+                            <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">{{ __('app.services') }}</p>
+                            <div class="space-y-1.5">
+                                @foreach($appointment->services as $service)
+                                <div class="flex items-center justify-between px-3 py-2 bg-indigo-50/50 border border-indigo-100 rounded-lg">
+                                    <span class="text-sm font-medium text-gray-800">{{ app()->getLocale() === 'ar' ? $service->name_ar : $service->name_en }}</span>
+                                    <span class="text-sm font-bold text-indigo-700" dir="ltr">{{ number_format($service->pivot->price, 2) }} {{ __('app.currency') }}</span>
+                                </div>
+                                @endforeach
+                                <div class="flex items-center justify-between px-3 py-2 bg-indigo-100 rounded-lg">
+                                    <span class="text-sm font-bold text-gray-900">{{ __('app.total') }}</span>
+                                    <span class="text-sm font-bold text-indigo-800" dir="ltr">{{ number_format($appointment->servicesTotal(), 2) }} {{ __('app.currency') }}</span>
+                                </div>
+                            </div>
                         </div>
                         @endif
                         <div>

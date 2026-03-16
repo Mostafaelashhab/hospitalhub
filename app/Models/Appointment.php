@@ -11,7 +11,6 @@ class Appointment extends Model
         'branch_id',
         'patient_id',
         'doctor_id',
-        'service_id',
         'appointment_date',
         'appointment_time',
         'status',
@@ -55,9 +54,16 @@ class Appointment extends Model
         return $this->belongsTo(Doctor::class);
     }
 
-    public function service()
+    public function services()
     {
-        return $this->belongsTo(Service::class);
+        return $this->belongsToMany(Service::class, 'appointment_service')
+            ->withPivot('price')
+            ->withTimestamps();
+    }
+
+    public function servicesTotal(): float
+    {
+        return (float) $this->services->sum('pivot.price');
     }
 
     public function diagnosis()

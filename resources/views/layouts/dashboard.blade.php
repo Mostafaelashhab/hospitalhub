@@ -100,11 +100,10 @@
             <div class="flex items-center gap-3">
                 {{-- Branch Switcher --}}
                 @php
-                    $clinic = auth()->user()->clinic;
-                    $branches = $clinic ? $clinic->branches()->where('is_active', true)->get() : collect();
-                    $activeBranchId = session('active_branch_id');
+                    $branches = \App\Helpers\BranchHelper::accessibleBranches();
+                    $activeBranchId = \App\Helpers\BranchHelper::activeBranchId();
                     $currentBranch = $activeBranchId ? $branches->firstWhere('id', $activeBranchId) : null;
-                    $currentBranch = $currentBranch ?? $branches->firstWhere('is_main', true) ?? $branches->first();
+                    $currentBranch = $currentBranch ?? $branches->first();
                 @endphp
                 @if($branches->count() > 0)
                 <div x-data="{ open: false }" class="relative">

@@ -31,8 +31,9 @@
             <select name="role" onchange="this.form.submit()"
                     class="bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-all">
                 <option value="">{{ __('app.all_roles') }}</option>
-                <option value="accountant" {{ request('role') === 'accountant' ? 'selected' : '' }}>{{ __('app.accountant') }}</option>
-                <option value="secretary" {{ request('role') === 'secretary' ? 'selected' : '' }}>{{ __('app.secretary') }}</option>
+                @foreach($staffRoles as $role)
+                <option value="{{ $role->slug }}" {{ request('role') === $role->slug ? 'selected' : '' }}>{{ $role->localizedName() }}</option>
+                @endforeach
             </select>
             <button type="submit" class="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-sm shadow-indigo-500/20 transition-all">
                 {{ __('app.search') }}
@@ -46,13 +47,19 @@
         <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 hover:shadow-md transition-all">
             <div class="flex items-start justify-between mb-4">
                 <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br {{ $member->role === 'accountant' ? 'from-amber-400 to-orange-500' : 'from-sky-400 to-blue-500' }} flex items-center justify-center shadow-md">
+                    @php
+                        $roleColors = ['accountant' => 'from-amber-400 to-orange-500', 'secretary' => 'from-sky-400 to-blue-500', 'admin' => 'from-purple-500 to-indigo-600'];
+                        $badgeColors = ['accountant' => 'bg-amber-50 text-amber-700', 'secretary' => 'bg-sky-50 text-sky-700', 'admin' => 'bg-purple-50 text-purple-700'];
+                        $clinicRole = $staffRoles->firstWhere('slug', $member->role);
+                        $roleName = $clinicRole ? $clinicRole->localizedName() : $member->role;
+                    @endphp
+                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br {{ $roleColors[$member->role] ?? 'from-indigo-400 to-violet-500' }} flex items-center justify-center shadow-md">
                         <span class="text-white font-bold text-lg">{{ mb_substr($member->name, 0, 1) }}</span>
                     </div>
                     <div>
                         <h3 class="text-sm font-bold text-gray-900">{{ $member->name }}</h3>
-                        <span class="inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-md {{ $member->role === 'accountant' ? 'bg-amber-50 text-amber-700' : 'bg-sky-50 text-sky-700' }}">
-                            {{ __('app.' . $member->role) }}
+                        <span class="inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-md {{ $badgeColors[$member->role] ?? 'bg-indigo-50 text-indigo-700' }}">
+                            {{ $roleName }}
                         </span>
                     </div>
                 </div>

@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Helpers\BranchHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Doctor;
+use App\Models\Service;
 use App\Models\Specialty;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -110,8 +111,16 @@ class DoctorController extends Controller
         abort_if($doctor->clinic_id !== $clinic->id, 403);
 
         $specialties = Specialty::where('is_active', true)->get();
+        $doctor->load('services');
+        $specialtyServices = Service::where('specialty_id', $doctor->specialty_id)
+            ->where('is_active', true)->get();
 
-        return view('admin.doctors.edit', compact('doctor', 'specialties'));
+        $branches = $clinic->branches()->where('is_active', true)->get();
+        if ($doctor->user) {
+            $doctor->user->load('branches');
+        }
+
+        return view('admin.doctors.edit', compact('doctor', 'specialties', 'specialtyServices', 'branches'));
     }
 
     public function update(Request $request, Doctor $doctor)
@@ -135,6 +144,11 @@ class DoctorController extends Controller
             'consultation_fee' => 'required|numeric|min:0',
             'bio' => 'nullable|string|max:1000',
             'is_active' => 'boolean',
+            'services' => 'nullable|array',
+            'services.*.price' => 'nullable|numeric|min:0',
+            'services.*.is_active' => 'nullable|boolean',
+            'branch_ids' => 'nullable|array',
+            'branch_ids.*' => 'exists:branches,id',
         ]);
 
         $doctor->update([
@@ -172,6 +186,26 @@ class DoctorController extends Controller
             ]);
             $doctor->update(['user_id' => $user->id]);
             $this->ensureDefaultPermissions($clinic->id, 'doctor');
+        }
+
+        // Sync branch access for the doctor's user account
+        if ($doctor->user) {
+            $doctor->user->branches()->sync($validated['branch_ids'] ?? []);
+        }
+
+        // Sync service prices
+        if (!empty($validated['services'])) {
+            $syncData = [];
+            foreach ($validated['services'] as $serviceId => $data) {
+                $price = $data['price'] ?? null;
+                if ($price !== null && $price !== '') {
+                    $syncData[$serviceId] = [
+                        'price' => $price,
+                        'is_active' => $data['is_active'] ?? false,
+                    ];
+                }
+            }
+            $doctor->services()->sync($syncData);
         }
 
         return redirect()->route('dashboard.doctors.show', $doctor)

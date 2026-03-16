@@ -60,4 +60,11 @@ class Doctor extends Model
     {
         return $this->hasMany(Diagnosis::class);
     }
+
+    public function services()
+    {
+        return $this->belongsToMany(Service::class, 'doctor_service')
+            ->withPivot('price', 'is_active')
+            ->withTimestamps();
+    }
 }

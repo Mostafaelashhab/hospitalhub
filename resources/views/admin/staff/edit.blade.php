@@ -64,7 +64,7 @@
                     <select name="role" required
                             class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-all">
                         @foreach($roles as $role)
-                        <option value="{{ $role }}" {{ old('role', $user->role) === $role ? 'selected' : '' }}>{{ __('app.' . $role) }}</option>
+                        <option value="{{ $role->slug }}" {{ old('role', $user->role) === $role->slug ? 'selected' : '' }}>{{ $role->localizedName() }}</option>
                         @endforeach
                     </select>
                 </div>
@@ -76,6 +76,30 @@
                            class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-all">
                 </div>
             </div>
+
+            {{-- Branch Access --}}
+            @if($branches->count() > 1)
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('app.branch_access') }}</label>
+                <p class="text-xs text-gray-400 mb-3">{{ __('app.branch_access_desc') }}</p>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    @php $userBranchIds = $user->branches->pluck('id')->toArray(); @endphp
+                    @foreach($branches as $branch)
+                    <label class="flex items-center gap-2.5 p-3 rounded-xl border cursor-pointer transition-all hover:border-indigo-200 hover:bg-indigo-50/30 has-[:checked]:border-indigo-300 has-[:checked]:bg-indigo-50">
+                        <input type="checkbox" name="branch_ids[]" value="{{ $branch->id }}" {{ in_array($branch->id, old('branch_ids', $userBranchIds)) ? 'checked' : '' }}
+                               class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                        <div>
+                            <span class="text-sm font-medium text-gray-800">{{ $branch->name }}</span>
+                            @if($branch->is_main)
+                            <span class="text-[10px] font-bold text-indigo-600 bg-indigo-100 px-1.5 py-0.5 rounded {{ app()->getLocale() === 'ar' ? 'mr-1' : 'ml-1' }}">{{ __('app.main_branch') }}</span>
+                            @endif
+                        </div>
+                    </label>
+                    @endforeach
+                </div>
+                <p class="text-xs text-gray-400 mt-2">{{ __('app.branch_access_hint') }}</p>
+            </div>
+            @endif
 
             {{-- Actions --}}
             <div class="flex items-center gap-3 pt-4 border-t border-gray-100">

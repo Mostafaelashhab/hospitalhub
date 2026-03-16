@@ -25,7 +25,7 @@ class AppointmentController extends Controller
 
         $branchId = BranchHelper::activeBranchId();
 
-        $query = $clinic->appointments()->with(['patient', 'doctor', 'service']);
+        $query = $clinic->appointments()->with(['patient', 'doctor', 'services']);
 
         if ($branchId) {
             $query->where('branch_id', $branchId);
@@ -89,7 +89,8 @@ class AppointmentController extends Controller
             'doctor_id' => 'required|exists:doctors,id',
             'appointment_date' => 'required|date|after_or_equal:today',
             'appointment_time' => 'required',
-            'service_id' => 'nullable|exists:services,id',
+            'service_ids' => 'nullable|array',
+            'service_ids.*' => 'exists:services,id',
             'notes' => 'nullable|string|max:1000',
             'recurrence_type' => 'nullable|in:none,daily,weekly,biweekly,monthly',
             'recurrence_count' => 'nullable|integer|min:2|max:52',
@@ -125,7 +126,6 @@ class AppointmentController extends Controller
                 'branch_id' => $branchId,
                 'patient_id' => $request->patient_id,
                 'doctor_id' => $request->doctor_id,
-                'service_id' => $request->service_id,
                 'appointment_date' => $date,
                 'appointment_time' => $request->appointment_time,
                 'notes' => $request->notes,
@@ -134,7 +134,13 @@ class AppointmentController extends Controller
                 'recurrence_type' => $recurrenceType,
                 'recurrence_count' => $isRecurring ? $recurrenceCount : 1,
             ]);
-            $firstAppointment = $firstAppointment ?? $appointment;
+
+            // Attach services with prices
+            if ($request->service_ids) {
+                $this->attachServicesWithPrices($appointment, $request->service_ids);
+            }
+
+            $firstAppointment ??= $appointment;
         }
 
         // Notify all clinic staff (doctors, admins, secretaries)
@@ -163,13 +169,28 @@ class AppointmentController extends Controller
         $clinic = auth()->user()->clinic;
         abort_if($doctor->clinic_id !== $clinic->id, 403);
 
-        $services = Service::where('specialty_id', $doctor->specialty_id)
+        // Get all services for the doctor's specialty (global + doctor's custom)
+        $allServices = Service::where('specialty_id', $doctor->specialty_id)
             ->where('is_active', true)
+            ->where(fn($q) => $q->whereNull('doctor_id')->orWhere('doctor_id', $doctor->id))
+            ->get();
+
+        // Get doctor's custom prices
+        $doctorServices = $doctor->services()
+            ->wherePivot('is_active', true)
             ->get()
-            ->map(fn($s) => [
+            ->keyBy('id');
+
+        $services = $allServices->map(function ($s) use ($doctorServices) {
+            $doctorService = $doctorServices->get($s->id);
+            // Custom service price from services table, or doctor's pivot price
+            $price = $s->doctor_id ? (float) $s->price : ($doctorService ? (float) $doctorService->pivot->price : null);
+            return [
                 'id' => $s->id,
                 'name' => app()->getLocale() === 'ar' ? $s->name_ar : $s->name_en,
-            ]);
+                'price' => $price,
+            ];
+        });
 
         return response()->json($services);
     }
@@ -179,7 +200,7 @@ class AppointmentController extends Controller
         $clinic = auth()->user()->clinic;
         abort_if($appointment->clinic_id !== $clinic->id, 403);
 
-        $appointment->load(['patient', 'doctor', 'diagnosis', 'invoice', 'service']);
+        $appointment->load(['patient', 'doctor', 'diagnosis', 'invoice.items', 'services']);
 
         return view('admin.appointments.show', compact('appointment'));
     }
@@ -194,7 +215,7 @@ class AppointmentController extends Controller
         ];
 
         if ($request->status === 'completed') {
-            $rules['amount'] = 'required|numeric|min:0';
+            $rules['amount'] = 'nullable|numeric|min:0';
             $rules['create_followup'] = 'nullable|boolean';
             $rules['followup_date'] = 'required_if:create_followup,1|nullable|date|after_or_equal:today';
         }
@@ -217,7 +238,11 @@ class AppointmentController extends Controller
         }
 
         if ($validated['status'] === 'completed') {
-            $amount = $validated['amount'];
+            $appointment->load('services');
+
+            // Calculate amount from services or fallback to manual amount/consultation fee
+            $servicesTotal = $appointment->servicesTotal();
+            $amount = $servicesTotal > 0 ? $servicesTotal : ($validated['amount'] ?? $appointment->doctor->consultation_fee ?? 0);
 
             // Calculate insurance coverage
             $insuranceProviderId = null;
@@ -241,7 +266,7 @@ class AppointmentController extends Controller
                 $patientShare = max(0, $amount - $insuranceCoverage);
             }
 
-            Invoice::create([
+            $invoice = Invoice::create([
                 'clinic_id' => $clinic->id,
                 'branch_id' => $appointment->branch_id,
                 'patient_id' => $appointment->patient_id,
@@ -254,6 +279,27 @@ class AppointmentController extends Controller
                 'total' => $patientShare,
                 'status' => 'unpaid',
             ]);
+
+            // Create invoice items from appointment services
+            if ($appointment->services->isNotEmpty()) {
+                foreach ($appointment->services as $service) {
+                    $invoice->items()->create([
+                        'service_id' => $service->id,
+                        'description' => app()->getLocale() === 'ar' ? $service->name_ar : $service->name_en,
+                        'price' => $service->pivot->price,
+                        'quantity' => 1,
+                        'total' => $service->pivot->price,
+                    ]);
+                }
+            } else {
+                // Fallback: single consultation fee item
+                $invoice->items()->create([
+                    'description' => __('app.consultation_fee'),
+                    'price' => $amount,
+                    'quantity' => 1,
+                    'total' => $amount,
+                ]);
+            }
 
             if ($request->boolean('create_followup') && $validated['followup_date']) {
                 Appointment::create([
@@ -270,5 +316,25 @@ class AppointmentController extends Controller
         }
 
         return back()->with('success', __('app.status_updated'));
+    }
+
+    private function attachServicesWithPrices(Appointment $appointment, array $serviceIds): void
+    {
+        $doctor = $appointment->doctor;
+        $doctorServices = $doctor->services()->wherePivot('is_active', true)->get()->keyBy('id');
+
+        $syncData = [];
+        foreach ($serviceIds as $serviceId) {
+            $service = Service::find($serviceId);
+            if (!$service) continue;
+
+            // Price priority: doctor_service pivot > services.price > 0
+            $doctorService = $doctorServices->get($serviceId);
+            $price = $doctorService ? (float) $doctorService->pivot->price : ($service->price ?? 0);
+
+            $syncData[$serviceId] = ['price' => $price];
+        }
+
+        $appointment->services()->attach($syncData);
     }
 }

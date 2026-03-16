@@ -75,6 +75,17 @@
                     {{-- Amount Breakdown --}}
                     <div class="mt-8 border-t border-gray-100 pt-6">
                         <div class="space-y-3">
+                            {{-- Invoice Items --}}
+                            @if($invoice->items->isNotEmpty())
+                            <div class="space-y-1.5 mb-3 pb-3 border-b border-gray-100">
+                                @foreach($invoice->items as $item)
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm text-gray-600">{{ $item->description }}</span>
+                                    <span class="text-sm font-medium text-gray-900" dir="ltr">{{ number_format($item->total, 2) }} {{ __('app.currency') }}</span>
+                                </div>
+                                @endforeach
+                            </div>
+                            @endif
                             <div class="flex items-center justify-between">
                                 <span class="text-sm text-gray-500">{{ __('app.amount') }}</span>
                                 <span class="text-sm font-medium text-gray-900">{{ number_format($invoice->amount, 2) }} {{ __('app.currency') }}</span>

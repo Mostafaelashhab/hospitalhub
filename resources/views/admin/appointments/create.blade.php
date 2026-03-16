@@ -61,16 +61,27 @@
                     </select>
                 </div>
 
-                {{-- Service --}}
-                <div x-show="services.length > 0" x-transition>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('app.service') }}</label>
-                    <select name="service_id" x-model="serviceId"
-                            class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-all">
-                        <option value="">{{ __('app.select_service') }}</option>
+                {{-- Services (Multi-select) --}}
+                <div x-show="services.length > 0" x-transition class="md:col-span-2">
+                    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('app.services') }}</label>
+                    <div class="bg-gray-50 border border-gray-200 rounded-xl p-3 max-h-52 overflow-y-auto space-y-2">
                         <template x-for="service in services" :key="service.id">
-                            <option :value="service.id" x-text="service.name"></option>
+                            <label class="flex items-center gap-3 p-2.5 rounded-lg border cursor-pointer transition-all"
+                                   :class="selectedServices.includes(service.id) ? 'border-indigo-300 bg-indigo-50' : 'border-gray-100 hover:border-gray-200 bg-white'">
+                                <input type="checkbox" :value="service.id" name="service_ids[]"
+                                       @change="toggleService(service.id)"
+                                       :checked="selectedServices.includes(service.id)"
+                                       class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                <span class="flex-1 text-sm font-medium text-gray-800" x-text="service.name"></span>
+                                <span x-show="service.price" class="text-sm font-bold text-indigo-600 shrink-0" dir="ltr"
+                                      x-text="service.price + ' {{ __('app.currency') }}'"></span>
+                            </label>
                         </template>
-                    </select>
+                    </div>
+                    <div x-show="servicesTotal > 0" class="mt-2 flex items-center justify-between px-1">
+                        <span class="text-xs text-gray-500">{{ __('app.total') }}</span>
+                        <span class="text-sm font-bold text-indigo-700" dir="ltr" x-text="servicesTotal.toFixed(2) + ' {{ __('app.currency') }}'"></span>
+                    </div>
                 </div>
 
                 {{-- Date --}}
@@ -149,14 +160,24 @@
         function appointmentForm() {
             return {
                 doctorId: '{{ old('doctor_id') }}',
-                serviceId: '{{ old('service_id') }}',
+                selectedServices: [],
                 services: [],
+                get servicesTotal() {
+                    return this.services
+                        .filter(s => this.selectedServices.includes(s.id))
+                        .reduce((sum, s) => sum + (s.price || 0), 0);
+                },
                 init() {
                     if (this.doctorId) this.fetchServices();
                 },
+                toggleService(id) {
+                    const idx = this.selectedServices.indexOf(id);
+                    if (idx > -1) this.selectedServices.splice(idx, 1);
+                    else this.selectedServices.push(id);
+                },
                 async fetchServices() {
                     this.services = [];
-                    this.serviceId = '';
+                    this.selectedServices = [];
                     if (!this.doctorId) return;
                     try {
                         const res = await fetch(`/dashboard/doctors/${this.doctorId}/services`);

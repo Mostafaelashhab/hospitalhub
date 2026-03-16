@@ -123,6 +123,7 @@ class ClinicRegistrationController extends Controller
             }
 
             $clinic->seedDefaultPermissions();
+            \App\Models\ClinicRole::seedForClinic($clinic->id);
 
             return ['clinic' => $clinic, 'admin' => $admin];
         });

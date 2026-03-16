@@ -92,12 +92,12 @@ Route::middleware(['auth', 'role:super_admin'])->prefix('super-admin')->name('su
 
 // ===== Clinic Dashboard Routes =====
 // Dashboard accessible even when pending (admin + staff)
-Route::middleware(['auth', 'role:admin,doctor,accountant,secretary'])->prefix('dashboard')->name('dashboard')->group(function () {
+Route::middleware(['auth', 'role:clinic_staff'])->prefix('dashboard')->name('dashboard')->group(function () {
     Route::get('/', [AdminDashboardController::class, 'index']);
 });
 
 // All clinic routes require active clinic (admin + staff with permissions)
-Route::middleware(['auth', 'role:admin,doctor,accountant,secretary', 'clinic.active'])->prefix('dashboard')->name('dashboard')->group(function () {
+Route::middleware(['auth', 'role:clinic_staff', 'clinic.active'])->prefix('dashboard')->name('dashboard')->group(function () {
     // Appointments
     Route::get('/appointments', [AppointmentController::class, 'index'])->name('.appointments.index')->middleware('permission:appointments.view');
     Route::get('/appointments/create', [AppointmentController::class, 'create'])->name('.appointments.create')->middleware('permission:appointments.create');
@@ -160,6 +160,8 @@ Route::middleware(['auth', 'role:admin,doctor,accountant,secretary', 'clinic.act
     // Permissions Management (admin only)
     Route::get('/permissions', [PermissionController::class, 'index'])->name('.permissions.index')->middleware('permission:permissions.manage');
     Route::post('/permissions', [PermissionController::class, 'update'])->name('.permissions.update')->middleware('permission:permissions.manage');
+    Route::post('/permissions/roles', [PermissionController::class, 'storeRole'])->name('.permissions.roles.store')->middleware('permission:permissions.manage');
+    Route::delete('/permissions/roles/{clinicRole}', [PermissionController::class, 'destroyRole'])->name('.permissions.roles.destroy')->middleware('permission:permissions.manage');
 
     // Diagnoses
     Route::get('/diagnoses', [DiagnosisController::class, 'index'])->name('.diagnoses.index')->middleware('permission:appointments.view');
@@ -246,6 +248,7 @@ Route::middleware(['auth', 'role:doctor', 'clinic.active'])->prefix('doctor')->n
     // Settings
     Route::get('/settings', [DoctorDashboardController::class, 'settings'])->name('settings');
     Route::put('/settings', [DoctorDashboardController::class, 'updateSettings'])->name('settings.update');
+    Route::delete('/services/{service}', [DoctorDashboardController::class, 'destroyService'])->name('services.destroy');
 
     // Drug Search (shared)
     Route::get('/drugs/search', [DrugSearchController::class, 'search'])->name('drugs.search');

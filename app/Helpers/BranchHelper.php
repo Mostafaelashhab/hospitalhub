@@ -16,13 +16,13 @@ class BranchHelper
         $branchId = session('active_branch_id');
 
         if ($branchId) {
-            // Verify the branch belongs to the user's clinic and is active
+            // Verify the branch belongs to the user's clinic, is active, and user has access
             $exists = Branch::where('id', $branchId)
                 ->where('clinic_id', $user->clinic_id)
                 ->where('is_active', true)
                 ->exists();
 
-            if ($exists) {
+            if ($exists && $user->hasAccessToBranch($branchId)) {
                 return $branchId;
             }
 
@@ -30,16 +30,45 @@ class BranchHelper
             session()->forget('active_branch_id');
         }
 
-        // Fallback to main branch
-        $mainBranch = Branch::where('clinic_id', $user->clinic_id)
-            ->where('is_main', true)
-            ->first();
+        // Fallback: first allowed branch for this user
+        $allowedBranchIds = $user->getAllowedBranchIds();
 
-        if ($mainBranch) {
-            session(['active_branch_id' => $mainBranch->id]);
-            return $mainBranch->id;
+        $query = Branch::where('clinic_id', $user->clinic_id)
+            ->where('is_active', true);
+
+        if ($allowedBranchIds !== null) {
+            $query->whereIn('id', $allowedBranchIds);
+        }
+
+        // Prefer main branch
+        $branch = $query->orderByDesc('is_main')->first();
+
+        if ($branch) {
+            session(['active_branch_id' => $branch->id]);
+            return $branch->id;
         }
 
         return null;
+    }
+
+    /**
+     * Get branches the current user can access (for branch switcher dropdown).
+     */
+    public static function accessibleBranches()
+    {
+        $user = auth()->user();
+        if (!$user || !$user->clinic_id) {
+            return collect();
+        }
+
+        $query = Branch::where('clinic_id', $user->clinic_id)
+            ->where('is_active', true);
+
+        $allowedBranchIds = $user->getAllowedBranchIds();
+        if ($allowedBranchIds !== null) {
+            $query->whereIn('id', $allowedBranchIds);
+        }
+
+        return $query->orderByDesc('is_main')->get();
     }
 }

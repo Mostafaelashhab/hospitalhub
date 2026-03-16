@@ -118,6 +118,61 @@
                 </div>
             </div>
 
+            {{-- Branch Access --}}
+            @if($branches->count() > 1)
+            <div class="border border-gray-200 rounded-xl p-5 bg-gray-50/50">
+                <h3 class="text-sm font-semibold text-gray-700 mb-1">{{ __('app.branch_access') }}</h3>
+                <p class="text-xs text-gray-400 mb-3">{{ __('app.branch_access_desc') }}</p>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                    @php $doctorBranchIds = $doctor->user?->branches?->pluck('id')->toArray() ?? []; @endphp
+                    @foreach($branches as $branch)
+                    <label class="flex items-center gap-2.5 p-3 rounded-xl border cursor-pointer transition-all hover:border-indigo-200 hover:bg-indigo-50/30 has-[:checked]:border-indigo-300 has-[:checked]:bg-indigo-50">
+                        <input type="checkbox" name="branch_ids[]" value="{{ $branch->id }}" {{ in_array($branch->id, old('branch_ids', $doctorBranchIds)) ? 'checked' : '' }}
+                               class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                        <div>
+                            <span class="text-sm font-medium text-gray-800">{{ $branch->name }}</span>
+                            @if($branch->is_main)
+                            <span class="text-[10px] font-bold text-indigo-600 bg-indigo-100 px-1.5 py-0.5 rounded {{ app()->getLocale() === 'ar' ? 'mr-1' : 'ml-1' }}">{{ __('app.main_branch') }}</span>
+                            @endif
+                        </div>
+                    </label>
+                    @endforeach
+                </div>
+                <p class="text-xs text-gray-400 mt-2">{{ __('app.branch_access_hint') }}</p>
+            </div>
+            @endif
+
+            {{-- Service Pricing --}}
+            @if($specialtyServices->count() > 0)
+            <div class="border border-gray-200 rounded-xl p-5 bg-gray-50/50">
+                <h3 class="text-sm font-semibold text-gray-700 mb-1">{{ __('app.service_pricing') }}</h3>
+                <p class="text-xs text-gray-400 mb-3">{{ __('app.service_pricing_desc') }}</p>
+                <div class="space-y-2 max-h-72 overflow-y-auto">
+                    @foreach($specialtyServices as $service)
+                    @php
+                        $doctorService = $doctor->services->firstWhere('id', $service->id);
+                        $price = $doctorService ? $doctorService->pivot->price : '';
+                        $isActive = $doctorService ? $doctorService->pivot->is_active : true;
+                    @endphp
+                    <div class="flex items-center gap-3 p-2.5 rounded-lg border border-gray-100 bg-white">
+                        <div class="flex-1 min-w-0">
+                            <p class="text-sm font-medium text-gray-800 truncate">{{ app()->getLocale() === 'ar' ? $service->name_ar : $service->name_en }}</p>
+                        </div>
+                        <div class="relative w-28 shrink-0">
+                            <input type="number" name="services[{{ $service->id }}][price]" value="{{ old("services.{$service->id}.price", $price) }}" min="0" step="0.01" placeholder="0"
+                                   class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 text-sm font-semibold text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-all" dir="ltr">
+                        </div>
+                        <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                            <input type="hidden" name="services[{{ $service->id }}][is_active]" value="0">
+                            <input type="checkbox" name="services[{{ $service->id }}][is_active]" value="1" {{ $isActive ? 'checked' : '' }} class="sr-only peer">
+                            <div class="w-8 h-4.5 bg-gray-200 peer-focus:ring-2 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-3.5 after:w-3.5 after:transition-all peer-checked:bg-indigo-600"></div>
+                        </label>
+                    </div>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
             {{-- Actions --}}
             <div class="flex items-center gap-3 pt-4 border-t border-gray-100">
                 <button type="submit" class="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-sm shadow-indigo-500/20 transition-all">

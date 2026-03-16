@@ -119,7 +119,20 @@ class Clinic extends Model
 
     public function staff()
     {
-        return $this->hasMany(User::class)->whereIn('role', ['accountant', 'secretary']);
+        return $this->hasMany(User::class)->whereNotIn('role', ['admin', 'doctor', 'super_admin']);
+    }
+
+    public function clinicRoles()
+    {
+        return $this->hasMany(ClinicRole::class);
+    }
+
+    public function getStaffRoles()
+    {
+        // Ensure system roles exist
+        ClinicRole::seedForClinic($this->id);
+
+        return $this->clinicRoles()->where('slug', '!=', 'doctor')->get();
     }
 
     public function insuranceProviders()

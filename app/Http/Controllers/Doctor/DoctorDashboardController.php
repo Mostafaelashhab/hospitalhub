@@ -89,12 +89,29 @@ class DoctorDashboardController extends Controller
         $doctor = $request->user()->doctor;
         abort_if($appointment->doctor_id !== $doctor->id, 403);
 
-        $appointment->load(['patient', 'diagnosis.prescription.items']);
+        $appointment->load(['patient', 'diagnosis.prescription.items', 'services']);
 
         $specialty = $doctor->specialty ?? $request->user()->clinic?->specialty;
         $diagramType = $this->getDiagramType($specialty?->name_en);
 
-        return view('doctor.appointment-show', compact('doctor', 'appointment', 'diagramType'));
+        // Get available services for this doctor
+        $doctorServices = $doctor->services()->wherePivot('is_active', true)->get()->keyBy('id');
+        $allServices = \App\Models\Service::where('specialty_id', $doctor->specialty_id)
+            ->where('is_active', true)
+            ->where(fn($q) => $q->whereNull('doctor_id')->orWhere('doctor_id', $doctor->id))
+            ->get()
+            ->map(function ($s) use ($doctorServices) {
+                $ds = $doctorServices->get($s->id);
+                return [
+                    'id' => $s->id,
+                    'name' => app()->getLocale() === 'ar' ? $s->name_ar : $s->name_en,
+                    'price' => $s->doctor_id ? (float) $s->price : ($ds ? (float) $ds->pivot->price : null),
+                ];
+            });
+
+        $availableServices = $allServices;
+
+        return view('doctor.appointment-show', compact('doctor', 'appointment', 'diagramType', 'availableServices'));
     }
 
     public function patientHistory(Request $request, Patient $patient)
@@ -135,6 +152,8 @@ class DoctorDashboardController extends Controller
             'diagram_data' => 'nullable|json',
             'rx_drugs_json' => 'nullable|string',
             'rx_notes' => 'nullable|string|max:1000',
+            'service_ids' => 'nullable|array',
+            'service_ids.*' => 'exists:services,id',
         ]);
 
         // Parse rx_drugs from JSON
@@ -186,6 +205,20 @@ class DoctorDashboardController extends Controller
                     'instructions' => $drug['instructions'] ?? null,
                 ]);
             }
+        }
+
+        // Sync services to appointment
+        if (isset($validated['service_ids'])) {
+            $doctorServices = $doctor->services()->wherePivot('is_active', true)->get()->keyBy('id');
+            $syncData = [];
+            foreach ($validated['service_ids'] as $serviceId) {
+                $service = \App\Models\Service::find($serviceId);
+                if (!$service) continue;
+                $ds = $doctorServices->get($serviceId);
+                $price = $service->doctor_id ? (float) $service->price : ($ds ? (float) $ds->pivot->price : 0);
+                $syncData[$serviceId] = ['price' => $price];
+            }
+            $appointment->services()->sync($syncData);
         }
 
         // Notify clinic admins about diagnosis
@@ -305,7 +338,16 @@ class DoctorDashboardController extends Controller
         $doctor = $request->user()->doctor;
         abort_if(!$doctor, 403);
 
-        return view('doctor.settings', compact('doctor'));
+        $doctor->load('services');
+        $specialtyServices = \App\Models\Service::where('specialty_id', $doctor->specialty_id)
+            ->where('is_active', true)
+            ->whereNull('doctor_id')
+            ->get();
+        $customServices = \App\Models\Service::where('doctor_id', $doctor->id)
+            ->where('is_active', true)
+            ->get();
+
+        return view('doctor.settings', compact('doctor', 'specialtyServices', 'customServices'));
     }
 
     public function updateSettings(Request $request)
@@ -319,6 +361,12 @@ class DoctorDashboardController extends Controller
             'working_days.*' => 'in:saturday,sunday,monday,tuesday,wednesday,thursday,friday',
             'working_from' => 'nullable|date_format:H:i',
             'working_to' => 'nullable|date_format:H:i',
+            'services' => 'nullable|array',
+            'services.*.price' => 'nullable|numeric|min:0',
+            'services.*.is_active' => 'nullable|boolean',
+            'custom_service_name_ar' => 'nullable|string|max:255',
+            'custom_service_name_en' => 'nullable|string|max:255',
+            'custom_service_price' => 'nullable|numeric|min:0',
         ]);
 
         $doctor->update([
@@ -328,7 +376,44 @@ class DoctorDashboardController extends Controller
             'working_to' => $validated['working_to'],
         ]);
 
+        // Sync service prices
+        if (!empty($validated['services'])) {
+            $syncData = [];
+            foreach ($validated['services'] as $serviceId => $data) {
+                $price = $data['price'] ?? null;
+                if ($price !== null && $price !== '') {
+                    $syncData[$serviceId] = [
+                        'price' => $price,
+                        'is_active' => $data['is_active'] ?? false,
+                    ];
+                }
+            }
+            $doctor->services()->sync($syncData);
+        }
+
+        // Create custom service
+        if (!empty($validated['custom_service_name_ar']) || !empty($validated['custom_service_name_en'])) {
+            \App\Models\Service::create([
+                'specialty_id' => $doctor->specialty_id,
+                'doctor_id' => $doctor->id,
+                'name_ar' => $validated['custom_service_name_ar'] ?? $validated['custom_service_name_en'],
+                'name_en' => $validated['custom_service_name_en'] ?? $validated['custom_service_name_ar'],
+                'price' => $validated['custom_service_price'] ?? 0,
+                'is_active' => true,
+            ]);
+        }
+
         return back()->with('success', __('app.settings_saved'));
+    }
+
+    public function destroyService(\App\Models\Service $service)
+    {
+        $doctor = request()->user()->doctor;
+        abort_if(!$doctor || $service->doctor_id !== $doctor->id, 403);
+
+        $service->delete();
+
+        return back()->with('success', __('app.service_deleted'));
     }
 
     private function getDiagramType(?string $specialtyName): string

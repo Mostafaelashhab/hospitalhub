@@ -12,10 +12,12 @@
             <h2 class="text-xl sm:text-2xl font-bold text-gray-900">{{ __('app.appointments') }}</h2>
             <p class="text-sm text-gray-500 mt-1">{{ __('app.all_appointments') }}</p>
         </div>
+        @if(auth()->user()->hasPermission('appointments.create'))
         <a href="{{ route('dashboard.appointments.create') }}" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-sm shadow-indigo-500/20 transition-all">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             {{ __('app.new_appointment') }}
         </a>
+        @endif
     </div>
 
     {{-- Success Message --}}
@@ -97,10 +99,19 @@
                         </td>
                         <td class="px-6 py-4 text-sm text-gray-700">{{ $appointment->doctor->name ?? '-' }}</td>
                         <td class="px-6 py-4 text-sm text-gray-600">
-                            @if($appointment->service)
-                                <span class="inline-flex items-center px-2.5 py-1 text-xs font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-lg">
-                                    {{ app()->getLocale() === 'ar' ? $appointment->service->name_ar : $appointment->service->name_en }}
-                                </span>
+                            @if($appointment->services->isNotEmpty())
+                                <div class="flex flex-wrap gap-1">
+                                    @foreach($appointment->services->take(2) as $service)
+                                    <span class="inline-flex items-center px-2 py-0.5 text-[11px] font-medium text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-md">
+                                        {{ app()->getLocale() === 'ar' ? $service->name_ar : $service->name_en }}
+                                    </span>
+                                    @endforeach
+                                    @if($appointment->services->count() > 2)
+                                    <span class="inline-flex items-center px-2 py-0.5 text-[11px] font-medium text-gray-500 bg-gray-50 border border-gray-200 rounded-md">
+                                        +{{ $appointment->services->count() - 2 }}
+                                    </span>
+                                    @endif
+                                </div>
                             @else
                                 <span class="text-gray-400">-</span>
                             @endif
@@ -135,7 +146,7 @@
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                     {{ __('app.view_details') }}
                                 </a>
-                                @if(in_array($appointment->status, ['scheduled', 'confirmed', 'in_progress']))
+                                @if(auth()->user()->hasPermission('appointments.change_status') && in_array($appointment->status, ['scheduled', 'confirmed', 'in_progress']))
                                 <a href="{{ route('dashboard.appointments.show', $appointment) }}" class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold text-gray-700 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-all">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
                                     {{ __('app.change_status') }}

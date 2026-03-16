@@ -654,6 +654,33 @@
                               class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-all resize-none">{{ old('notes', $diagnosis->notes ?? '') }}</textarea>
                 </div>
 
+                {{-- Services --}}
+                <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6" x-data="servicesPicker()">
+                    <h3 class="text-sm font-bold text-gray-900 mb-3 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                        {{ __('app.services') }}
+                    </h3>
+                    <div class="space-y-2 max-h-48 overflow-y-auto" x-show="allServices.length > 0">
+                        <template x-for="service in allServices" :key="service.id">
+                            <label class="flex items-center gap-3 p-2.5 rounded-lg border cursor-pointer transition-all"
+                                   :class="selected.includes(service.id) ? 'border-indigo-300 bg-indigo-50' : 'border-gray-100 hover:border-gray-200'">
+                                <input type="checkbox" :value="service.id" name="service_ids[]"
+                                       @change="toggle(service.id)"
+                                       :checked="selected.includes(service.id)"
+                                       class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500">
+                                <span class="flex-1 text-sm font-medium text-gray-800" x-text="service.name"></span>
+                                <span x-show="service.price" class="text-xs font-bold text-indigo-600" dir="ltr"
+                                      x-text="service.price + ' {{ __('app.currency') }}'"></span>
+                            </label>
+                        </template>
+                    </div>
+                    <p x-show="allServices.length === 0" class="text-xs text-gray-400">{{ __('app.no_services_yet') }}</p>
+                    <div x-show="total > 0" class="mt-3 pt-3 border-t border-gray-100 flex justify-between">
+                        <span class="text-xs text-gray-500">{{ __('app.total') }}</span>
+                        <span class="text-sm font-bold text-indigo-700" dir="ltr" x-text="total.toFixed(2) + ' {{ __('app.currency') }}'"></span>
+                    </div>
+                </div>
+
                 {{-- Submit --}}
                 <button type="submit" class="w-full inline-flex items-center justify-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-sm shadow-indigo-500/20 transition-all">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
@@ -662,4 +689,23 @@
             </div>
         </div>
     </form>
+
+    <script>
+        function servicesPicker() {
+            return {
+                allServices: @json($availableServices ?? []),
+                selected: @json($appointment->services->pluck('id')->toArray()),
+                get total() {
+                    return this.allServices
+                        .filter(s => this.selected.includes(s.id))
+                        .reduce((sum, s) => sum + (s.price || 0), 0);
+                },
+                toggle(id) {
+                    const idx = this.selected.indexOf(id);
+                    if (idx > -1) this.selected.splice(idx, 1);
+                    else this.selected.push(id);
+                }
+            }
+        }
+    </script>
 </x-dashboard-layout>

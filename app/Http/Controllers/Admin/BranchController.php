@@ -97,6 +97,7 @@ class BranchController extends Controller
     {
         $clinic = auth()->user()->clinic;
         abort_if($branch->clinic_id !== $clinic->id, 403);
+        abort_if(!auth()->user()->hasAccessToBranch($branch->id), 403);
 
         session(['active_branch_id' => $branch->id]);
 

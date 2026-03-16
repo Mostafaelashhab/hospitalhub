@@ -12,8 +12,17 @@ class RoleMiddleware
     {
         $user = $request->user();
 
-        if (!$user || !in_array($user->role, $roles)) {
-            if ($user && $user->role === 'super_admin') {
+        if (!$user) {
+            abort(403, 'Unauthorized.');
+        }
+
+        // 'clinic_staff' matches any non-super_admin user with a clinic
+        if (in_array('clinic_staff', $roles) && $user->clinic_id && $user->role !== 'super_admin') {
+            return $next($request);
+        }
+
+        if (!in_array($user->role, $roles)) {
+            if ($user->role === 'super_admin') {
                 return redirect('/super-admin/dashboard');
             }
             abort(403, 'Unauthorized.');

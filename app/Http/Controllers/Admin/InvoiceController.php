@@ -61,7 +61,7 @@ class InvoiceController extends Controller
         $clinic = auth()->user()->clinic;
         abort_if($invoice->clinic_id !== $clinic->id, 403);
 
-        $invoice->load(['patient', 'appointment.doctor', 'insuranceProvider']);
+        $invoice->load(['patient', 'appointment.doctor', 'insuranceProvider', 'items']);
 
         return view('admin.invoices.show', compact('invoice'));
     }

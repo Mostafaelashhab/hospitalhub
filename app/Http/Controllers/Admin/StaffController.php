@@ -13,8 +13,10 @@ class StaffController extends Controller
     public function index(Request $request)
     {
         $clinic = auth()->user()->clinic;
+        $staffRoles = $clinic->getStaffRoles();
+        $staffRoleSlugs = $staffRoles->pluck('slug')->toArray();
 
-        $query = $clinic->users()->whereIn('role', ['admin', 'accountant', 'secretary']);
+        $query = $clinic->users()->whereIn('role', array_merge(['admin'], $staffRoleSlugs));
 
         if ($request->filled('role')) {
             $query->where('role', $request->role);
@@ -31,13 +33,15 @@ class StaffController extends Controller
 
         $staff = $query->latest()->paginate(15);
 
-        return view('admin.staff.index', compact('staff'));
+        return view('admin.staff.index', compact('staff', 'staffRoles'));
     }
 
     public function create()
     {
-        $roles = collect(config('permissions.roles'))->filter(fn($r) => !in_array($r, ['admin', 'doctor']));
-        return view('admin.staff.create', compact('roles'));
+        $clinic = auth()->user()->clinic;
+        $roles = $clinic->getStaffRoles();
+        $branches = $clinic->branches()->where('is_active', true)->get();
+        return view('admin.staff.create', compact('roles', 'branches'));
     }
 
     public function store(Request $request)
@@ -47,10 +51,18 @@ class StaffController extends Controller
             'email' => 'required|email|unique:users,email',
             'phone' => 'nullable|string|max:20',
             'password' => ['required', Password::min(8)],
-            'role' => 'required|in:accountant,secretary',
+            'role' => 'required|string|max:50',
+            'branch_ids' => 'nullable|array',
+            'branch_ids.*' => 'exists:branches,id',
         ]);
 
         $clinic = auth()->user()->clinic;
+
+        // Validate role exists for this clinic (exclude admin and doctor)
+        $validRoles = $clinic->getStaffRoles()->pluck('slug')->toArray();
+        if (!in_array($validated['role'], $validRoles)) {
+            return back()->withErrors(['role' => 'Invalid role'])->withInput();
+        }
 
         $user = User::create([
             'name' => $validated['name'],
@@ -61,6 +73,11 @@ class StaffController extends Controller
             'clinic_id' => $clinic->id,
             'is_active' => true,
         ]);
+
+        // Assign branches
+        if (!empty($validated['branch_ids'])) {
+            $user->branches()->sync($validated['branch_ids']);
+        }
 
         // Set default permissions for this role if not already set
         $this->ensureDefaultPermissions($clinic->id, $validated['role']);
@@ -74,8 +91,10 @@ class StaffController extends Controller
         $clinic = auth()->user()->clinic;
         abort_if($user->clinic_id !== $clinic->id || $user->role === 'admin', 403);
 
-        $roles = collect(config('permissions.roles'))->filter(fn($r) => !in_array($r, ['admin', 'doctor']));
-        return view('admin.staff.edit', compact('user', 'roles'));
+        $roles = $clinic->getStaffRoles();
+        $branches = $clinic->branches()->where('is_active', true)->get();
+        $user->load('branches');
+        return view('admin.staff.edit', compact('user', 'roles', 'branches'));
     }
 
     public function update(Request $request, User $user)
@@ -88,7 +107,9 @@ class StaffController extends Controller
             'email' => 'required|email|unique:users,email,' . $user->id,
             'phone' => 'nullable|string|max:20',
             'password' => ['nullable', Password::min(8)],
-            'role' => 'required|in:accountant,secretary',
+            'role' => 'required|string|max:50',
+            'branch_ids' => 'nullable|array',
+            'branch_ids.*' => 'exists:branches,id',
         ]);
 
         $user->update([
@@ -101,6 +122,9 @@ class StaffController extends Controller
         if (!empty($validated['password'])) {
             $user->update(['password' => Hash::make($validated['password'])]);
         }
+
+        // Sync branches
+        $user->branches()->sync($validated['branch_ids'] ?? []);
 
         $this->ensureDefaultPermissions($clinic->id, $validated['role']);
 

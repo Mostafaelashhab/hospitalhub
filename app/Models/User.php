@@ -95,13 +95,51 @@ class User extends Authenticatable
         return $this->hasOne(Doctor::class);
     }
 
+    public function branches()
+    {
+        return $this->belongsToMany(Branch::class, 'user_branch')->withTimestamps();
+    }
+
+    public function hasAccessToBranch(?int $branchId): bool
+    {
+        if (!$branchId || $this->role === 'super_admin' || $this->role === 'admin') {
+            return true;
+        }
+
+        // If user has no branches assigned, they can access all
+        if ($this->branches()->count() === 0) {
+            return true;
+        }
+
+        return $this->branches()->where('branches.id', $branchId)->exists();
+    }
+
+    public function getAllowedBranchIds(): ?array
+    {
+        if ($this->role === 'super_admin' || $this->role === 'admin') {
+            return null; // null = all branches
+        }
+
+        $branchIds = $this->branches()->pluck('branches.id')->toArray();
+
+        // Empty = no restriction (backward compatible)
+        return empty($branchIds) ? null : $branchIds;
+    }
+
     public function isSoloDoctorAdmin(): bool
     {
         if ($this->role !== 'doctor' || !$this->clinic_id) {
             return false;
         }
 
-        return $this->clinic->doctors()->count() <= 1;
+        // Only true if there are no admin users in the clinic
+        // (meaning the doctor is the sole manager)
+        $hasAdmin = User::where('clinic_id', $this->clinic_id)
+            ->where('role', 'admin')
+            ->where('is_active', true)
+            ->exists();
+
+        return !$hasAdmin && $this->clinic->doctors()->count() <= 1;
     }
 
     public function hasPermission(string $permission): bool
@@ -110,9 +148,10 @@ class User extends Authenticatable
             return true;
         }
 
-        // Solo doctor admin gets all permissions EXCEPT doctor management
+        // Solo doctor admin (no admin users exist) gets all permissions
+        // EXCEPT creating/editing doctors
         if ($this->isSoloDoctorAdmin()) {
-            return !str_starts_with($permission, 'doctors.');
+            return !in_array($permission, ['doctors.create', 'doctors.edit']);
         }
 
         if (!$this->clinic_id) {
