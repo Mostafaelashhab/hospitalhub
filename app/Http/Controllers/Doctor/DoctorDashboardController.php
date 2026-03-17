@@ -425,6 +425,7 @@ class DoctorDashboardController extends Controller
             'Neurology' => 'neurology', 'General Medicine' => 'general', 'Psychiatry' => 'psychiatry',
             'Internal Medicine' => 'internal-medicine', 'Physiotherapy' => 'physiotherapy', 'Nutrition' => 'nutrition',
             'Plastic Surgery' => 'plastic-surgery', 'Cosmetic Dermatology' => 'cosmetic-dermatology',
+            'Colorectal Surgery' => 'colorectal',
         ];
         return $map[$specialtyName] ?? 'general';
     }

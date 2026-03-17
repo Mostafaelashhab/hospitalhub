@@ -108,6 +108,7 @@
             .diagram-viewport svg .dig-zone:hover,
             .diagram-viewport svg .brain-zone:hover,
             .diagram-viewport svg .derm-zone:hover,
+            .diagram-viewport svg .cr-zone:hover,
             .diagram-viewport svg .cursor-pointer:hover { filter: drop-shadow(0 0 8px rgba(99,102,241,0.4)) brightness(1.08); transition: filter 0.2s ease; }
 
             /* Selected zone glow */
@@ -120,6 +121,7 @@
             .diagram-viewport svg .dig-zone[style*="818cf8"],
             .diagram-viewport svg .brain-zone[style*="818cf8"],
             .diagram-viewport svg .derm-zone[style*="818cf8"],
+            .diagram-viewport svg .cr-zone[style*="818cf8"],
             .diagram-viewport svg .cursor-pointer[style*="818cf8"] { filter: drop-shadow(0 0 12px rgba(99,102,241,0.5)) drop-shadow(0 0 4px rgba(99,102,241,0.3)); }
 
             /* Crosshair cursor in diagram */

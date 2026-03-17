@@ -169,6 +169,7 @@ class DiagnosisController extends Controller
             'Nutrition' => 'nutrition',
             'Plastic Surgery' => 'plastic-surgery',
             'Cosmetic Dermatology' => 'cosmetic-dermatology',
+            'Colorectal Surgery' => 'colorectal',
         ];
 
         return $map[$specialtyName] ?? 'general';
