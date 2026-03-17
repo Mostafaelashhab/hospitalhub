@@ -18,6 +18,7 @@ use App\Http\Controllers\Admin\ClinicWebsiteController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\LanguageController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PushSubscriptionController;
 use App\Http\Controllers\Admin\OfferController as AdminOfferController;
@@ -35,6 +36,10 @@ use App\Http\Controllers\SuperAdmin\DashboardController as SuperDashboardControl
 use App\Http\Controllers\SuperAdmin\OfferController as SuperOfferController;
 use App\Http\Controllers\SuperAdmin\SettingsController as SuperSettingsController;
 use Illuminate\Support\Facades\Route;
+
+// SEO
+Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+Route::get('/robots.txt', [SitemapController::class, 'robots'])->name('robots');
 
 // Landing page
 Route::get('/', function () {

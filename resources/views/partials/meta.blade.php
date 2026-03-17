@@ -36,18 +36,49 @@
 
 {{-- SEO --}}
 <meta name="description" content="{{ $metaDescription ?? __('app.landing_hero_desc') }}">
+<meta name="keywords" content="{{ $metaKeywords ?? __('app.seo_default_keywords') }}">
+<meta name="author" content="{{ __('app.app_name') }}">
+<link rel="canonical" href="{{ $canonicalUrl ?? url()->current() }}">
+
+{{-- Alternate language links --}}
+<link rel="alternate" hreflang="en" href="{{ url()->current() }}?lang=en">
+<link rel="alternate" hreflang="ar" href="{{ url()->current() }}?lang=ar">
+<link rel="alternate" hreflang="x-default" href="{{ url()->current() }}">
 
 {{-- Open Graph --}}
-<meta property="og:type" content="website">
+<meta property="og:type" content="{{ $ogType ?? 'website' }}">
 <meta property="og:title" content="{{ $metaTitle ?? __('app.app_name') . ' — ' . __('app.hero_title') }}">
 <meta property="og:description" content="{{ $metaDescription ?? __('app.landing_hero_desc') }}">
-<meta property="og:image" content="{{ asset('og-image.svg') }}">
+<meta property="og:image" content="{{ $ogImage ?? asset('og-image.svg') }}">
 <meta property="og:url" content="{{ url()->current() }}">
 <meta property="og:site_name" content="{{ __('app.app_name') }}">
 <meta property="og:locale" content="{{ app()->getLocale() === 'ar' ? 'ar_AR' : 'en_US' }}">
+<meta property="og:locale:alternate" content="{{ app()->getLocale() === 'ar' ? 'en_US' : 'ar_AR' }}">
 
 {{-- Twitter Card --}}
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="{{ $metaTitle ?? __('app.app_name') . ' — ' . __('app.hero_title') }}">
 <meta name="twitter:description" content="{{ $metaDescription ?? __('app.landing_hero_desc') }}">
-<meta name="twitter:image" content="{{ asset('og-image.svg') }}">
+<meta name="twitter:image" content="{{ $ogImage ?? asset('og-image.svg') }}">
+
+{{-- JSON-LD Structured Data --}}
+@if(isset($jsonLd))
+<script type="application/ld+json">{!! json_encode($jsonLd, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}</script>
+@else
+<script type="application/ld+json">
+{!! json_encode([
+    '@context' => 'https://schema.org',
+    '@type' => 'WebApplication',
+    'name' => __('app.app_name'),
+    'description' => __('app.landing_hero_desc'),
+    'url' => url('/'),
+    'applicationCategory' => 'HealthApplication',
+    'operatingSystem' => 'Web',
+    'offers' => [
+        '@type' => 'Offer',
+        'price' => '0',
+        'priceCurrency' => 'USD',
+    ],
+], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) !!}
+</script>
+@endif

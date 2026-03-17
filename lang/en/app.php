@@ -1047,4 +1047,8 @@ return [
     'patient_qr' => 'Patient QR Code',
     'scan_qr_hint' => 'Scan to open patient profile',
     'schedule_follow_up' => 'Schedule Follow-up',
+
+    // SEO
+    'seo_default_keywords' => 'clinic management, hospital system, patient records, appointments, medical software, healthcare',
+    'clinic_page_default_desc' => ':name - Book appointments online, view doctors, and manage your healthcare needs.',
 ];
