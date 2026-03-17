@@ -127,6 +127,7 @@ Route::middleware(['auth', 'role:clinic_staff', 'clinic.active'])->prefix('dashb
     Route::get('/doctors/{doctor}/edit', [DoctorController::class, 'edit'])->name('.doctors.edit')->middleware('permission:doctors.edit');
     Route::put('/doctors/{doctor}', [DoctorController::class, 'update'])->name('.doctors.update')->middleware('permission:doctors.edit');
     Route::patch('/doctors/{doctor}/toggle', [DoctorController::class, 'toggleStatus'])->name('.doctors.toggle')->middleware('permission:doctors.edit');
+    Route::delete('/doctors/{doctor}', [DoctorController::class, 'destroy'])->name('.doctors.destroy')->middleware('permission:doctors.edit');
 
     // Patients
     Route::get('/patients', [PatientController::class, 'index'])->name('.patients.index')->middleware('permission:patients.view');

@@ -228,6 +228,22 @@ class DoctorController extends Controller
         return back()->with('success', __('app.status_updated'));
     }
 
+    public function destroy(Doctor $doctor)
+    {
+        $clinic = auth()->user()->clinic;
+        abort_if($doctor->clinic_id !== $clinic->id, 403);
+
+        // Delete the linked user account too
+        if ($doctor->user_id) {
+            $doctor->user->delete();
+        }
+
+        $doctor->delete();
+
+        return redirect()->route('dashboard.doctors.index')
+            ->with('success', __('app.doctor_deleted'));
+    }
+
     private function ensureDefaultPermissions(int $clinicId, string $role): void
     {
         $defaults = config("permissions.defaults.{$role}", []);
