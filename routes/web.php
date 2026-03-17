@@ -32,10 +32,14 @@ use App\Http\Controllers\Admin\DrugInteractionController;
 use App\Http\Controllers\Doctor\DiagnosisTemplateController as DoctorDiagnosisTemplateController;
 use App\Http\Controllers\Admin\ExpenseController;
 use App\Http\Controllers\Admin\PatientLedgerController;
+use App\Http\Controllers\Admin\PregnancyController;
+use App\Http\Controllers\Admin\PhotoTimelineController;
 use App\Http\Controllers\Admin\PatientMedicalController;
 use App\Http\Controllers\Admin\RechargeController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\MedicalReportController;
+use App\Http\Controllers\Admin\ChronicDashboardController;
+use App\Http\Controllers\Admin\GrowthChartController;
 use App\Http\Controllers\WaitingRoomController;
 use App\Http\Controllers\SuperAdmin\ClinicManagementController;
 use App\Http\Controllers\SuperAdmin\DashboardController as SuperDashboardController;
@@ -137,12 +141,29 @@ Route::middleware(['auth', 'role:clinic_staff', 'clinic.active'])->prefix('dashb
     Route::get('/patients/{patient}/edit', [PatientController::class, 'edit'])->name('.patients.edit')->middleware('permission:patients.edit');
     Route::put('/patients/{patient}', [PatientController::class, 'update'])->name('.patients.update')->middleware('permission:patients.edit');
     Route::get('/patients/{patient}/timeline', [PatientController::class, 'timeline'])->name('.patients.timeline')->middleware('permission:patients.view');
+    Route::get('/patients/{patient}/chronic-dashboard', [ChronicDashboardController::class, 'show'])->name('.patients.chronic-dashboard')->middleware('permission:patients.view');
     Route::delete('/patients/{patient}', [PatientController::class, 'destroy'])->name('.patients.destroy')->middleware('permission:patients.edit');
+    Route::get('/patients/{patient}/growth-chart', [GrowthChartController::class, 'show'])->name('.patients.growth-chart')->middleware('permission:patients.view');
+
+    // Pregnancy Tracker
+    Route::get('/patients/{patient}/pregnancy', [PregnancyController::class, 'index'])->name('.patients.pregnancy.index')->middleware('permission:patients.view');
+    Route::get('/patients/{patient}/pregnancy/create', [PregnancyController::class, 'create'])->name('.patients.pregnancy.create')->middleware('permission:patients.edit');
+    Route::post('/patients/{patient}/pregnancy', [PregnancyController::class, 'store'])->name('.patients.pregnancy.store')->middleware('permission:patients.edit');
+    Route::get('/pregnancy/{pregnancy}', [PregnancyController::class, 'show'])->name('.pregnancy.show')->middleware('permission:patients.view');
+    Route::post('/pregnancy/{pregnancy}/visit', [PregnancyController::class, 'addVisit'])->name('.pregnancy.visit')->middleware('permission:patients.edit');
+    Route::patch('/pregnancy/{pregnancy}/complete', [PregnancyController::class, 'complete'])->name('.pregnancy.complete')->middleware('permission:patients.edit');
+    Route::delete('/pregnancy/{pregnancy}', [PregnancyController::class, 'destroy'])->name('.pregnancy.destroy')->middleware('permission:patients.edit');
 
     // Patient Files
     Route::post('/patients/{patient}/files', [PatientFileController::class, 'store'])->name('.patients.files.store')->middleware('permission:patients.edit');
     Route::get('/patient-files/{patientFile}/download', [PatientFileController::class, 'download'])->name('.patients.files.download')->middleware('permission:patients.view');
     Route::delete('/patient-files/{patientFile}', [PatientFileController::class, 'destroy'])->name('.patients.files.destroy')->middleware('permission:patients.edit');
+
+    // Photo Timeline (Before / After)
+    Route::get('/patients/{patient}/photos', [PhotoTimelineController::class, 'index'])->name('.patients.photos.index')->middleware('permission:patients.view');
+    Route::post('/patients/{patient}/photos', [PhotoTimelineController::class, 'store'])->name('.patients.photos.store')->middleware('permission:patients.edit');
+    Route::get('/patients/{patient}/photos/compare', [PhotoTimelineController::class, 'compare'])->name('.patients.photos.compare')->middleware('permission:patients.view');
+    Route::delete('/photo-records/{photo}', [PhotoTimelineController::class, 'destroy'])->name('.photo-records.destroy')->middleware('permission:patients.edit');
 
     // Insurance Providers
     Route::get('/insurance', [InsuranceController::class, 'index'])->name('.insurance.index');
@@ -164,6 +185,11 @@ Route::middleware(['auth', 'role:clinic_staff', 'clinic.active'])->prefix('dashb
     Route::delete('/medications/{medication}', [PatientMedicalController::class, 'destroyMedication'])->name('.patients.medications.destroy')->middleware('permission:patients.edit');
     Route::post('/patients/{patient}/notes', [PatientMedicalController::class, 'storeNote'])->name('.patients.notes.store')->middleware('permission:patients.edit');
     Route::delete('/medical-notes/{note}', [PatientMedicalController::class, 'destroyNote'])->name('.patients.notes.destroy')->middleware('permission:patients.edit');
+
+    // Dental Chart
+    Route::get('/patients/{patient}/dental-chart', [\App\Http\Controllers\Admin\DentalChartController::class, 'show'])->name('.patients.dental-chart.show')->middleware('permission:patients.view');
+    Route::post('/patients/{patient}/dental-chart', [\App\Http\Controllers\Admin\DentalChartController::class, 'store'])->name('.patients.dental-chart.store')->middleware('permission:patients.edit');
+    Route::get('/patients/{patient}/dental-chart/history', [\App\Http\Controllers\Admin\DentalChartController::class, 'history'])->name('.patients.dental-chart.history')->middleware('permission:patients.view');
 
     // Staff Management (admin only)
     Route::get('/staff', [StaffController::class, 'index'])->name('.staff.index')->middleware('permission:staff.view');

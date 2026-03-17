@@ -61,6 +61,11 @@ class Patient extends Model
         return $this->hasMany(PatientFile::class);
     }
 
+    public function photoRecords()
+    {
+        return $this->hasMany(\App\Models\PhotoRecord::class);
+    }
+
     public function insurances()
     {
         return $this->hasMany(PatientInsurance::class);
@@ -109,5 +114,25 @@ class Patient extends Model
     public function activeMedications()
     {
         return $this->hasMany(PatientMedication::class)->where('is_active', true);
+    }
+
+    public function pregnancies()
+    {
+        return $this->hasMany(Pregnancy::class);
+    }
+
+    public function activePregnancy()
+    {
+        return $this->hasOne(Pregnancy::class)->where('status', 'active')->latest();
+    }
+
+    public function dentalCharts()
+    {
+        return $this->hasMany(DentalChart::class);
+    }
+
+    public function latestDentalChart()
+    {
+        return $this->hasOne(DentalChart::class)->latest();
     }
 }
