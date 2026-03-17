@@ -22,12 +22,22 @@
     <svg class="w-5 h-5 {{ $active === 'patients' ? '' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
     {{ __('app.patients') }}
 </a>
+
+<a href="{{ route('dashboard.reviews.index') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl {{ $active === 'reviews' ? 'nav-link-active' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100' }} transition-all duration-200">
+    <svg class="w-5 h-5 {{ $active === 'reviews' ? '' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/></svg>
+    {{ __('app.reviews') }}
+</a>
 @endif
 
 @if(auth()->user()->hasPermission('doctors.view'))
 <a href="{{ route('dashboard.doctors.index') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl {{ $active === 'doctors' ? 'nav-link-active' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100' }} transition-all duration-200">
     <svg class="w-5 h-5 {{ $active === 'doctors' ? '' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
     {{ __('app.doctors') }}
+</a>
+
+<a href="{{ route('dashboard.leaves.index') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl {{ $active === 'leaves' ? 'nav-link-active' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100' }} transition-all duration-200">
+    <svg class="w-5 h-5 {{ $active === 'leaves' ? '' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/><line x1="9" y1="14" x2="15" y2="14" stroke-linecap="round" stroke-width="2"/><line x1="12" y1="11" x2="12" y2="17" stroke-linecap="round" stroke-width="2"/></svg>
+    {{ __('app.doctor_leaves') }}
 </a>
 @endif
 
@@ -45,6 +55,11 @@
 <a href="{{ route('dashboard.ledger.index') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl {{ $active === 'ledger' ? 'nav-link-active' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100' }} transition-all duration-200">
     <svg class="w-5 h-5 {{ $active === 'ledger' ? '' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
     {{ __('app.patient_ledger') }}
+</a>
+
+<a href="{{ route('dashboard.coupons.index') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl {{ $active === 'coupons' ? 'nav-link-active' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100' }} transition-all duration-200">
+    <svg class="w-5 h-5 {{ $active === 'coupons' ? '' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+    {{ __('app.coupons') }}
 </a>
 @endif
 
@@ -105,6 +120,11 @@
 @if(!auth()->user()->hasPermission('staff.view') && !auth()->user()->isDoctor())
 <div class="my-3 border-t border-gray-100"></div>
 @endif
+
+<a href="{{ route('dashboard.audit-logs.index') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl {{ $active === 'audit-logs' ? 'nav-link-active' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100' }} transition-all duration-200">
+    <svg class="w-5 h-5 {{ $active === 'audit-logs' ? '' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+    {{ __('app.audit_log') }}
+</a>
 
 <a href="{{ route('dashboard.settings.index') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl {{ $active === 'settings' ? 'nav-link-active' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100' }} transition-all duration-200">
     <svg class="w-5 h-5 {{ $active === 'settings' ? '' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>

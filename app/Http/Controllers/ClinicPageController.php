@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Clinic;
+use App\Models\Review;
 
 class ClinicPageController extends Controller
 {
@@ -15,6 +16,15 @@ class ClinicPageController extends Controller
                 $q->where('is_active', true)->with('specialty');
             }, 'branches'])
             ->firstOrFail();
+
+        $reviews = Review::where('clinic_id', $clinic->id)
+            ->where('is_visible', true)
+            ->with(['patient', 'doctor'])
+            ->latest()
+            ->limit(6)
+            ->get();
+        $avgRating = Review::where('clinic_id', $clinic->id)->where('is_visible', true)->avg('rating');
+        $totalReviews = Review::where('clinic_id', $clinic->id)->where('is_visible', true)->count();
 
         $localeName = app()->getLocale() === 'ar' ? $clinic->name_ar : $clinic->name_en;
         $metaTitle = $localeName . ' — ' . __('app.app_name');
@@ -52,7 +62,8 @@ class ClinicPageController extends Controller
         }
 
         return view('clinic.website', compact(
-            'clinic', 'metaTitle', 'metaDescription', 'ogType', 'ogImage', 'canonicalUrl', 'jsonLd'
+            'clinic', 'metaTitle', 'metaDescription', 'ogType', 'ogImage', 'canonicalUrl', 'jsonLd',
+            'reviews', 'avgRating', 'totalReviews'
         ));
     }
 }

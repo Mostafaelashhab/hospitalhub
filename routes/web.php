@@ -26,11 +26,17 @@ use App\Http\Controllers\Admin\PrescriptionController;
 use App\Http\Controllers\Admin\InsuranceController;
 use App\Http\Controllers\Admin\PatientFileController;
 use App\Http\Controllers\Admin\QueueController;
+use App\Http\Controllers\Admin\DoctorLeaveController;
+use App\Http\Controllers\Admin\DiagnosisTemplateController;
+use App\Http\Controllers\Admin\DrugInteractionController;
+use App\Http\Controllers\Doctor\DiagnosisTemplateController as DoctorDiagnosisTemplateController;
 use App\Http\Controllers\Admin\ExpenseController;
 use App\Http\Controllers\Admin\PatientLedgerController;
 use App\Http\Controllers\Admin\PatientMedicalController;
 use App\Http\Controllers\Admin\RechargeController;
 use App\Http\Controllers\Admin\ReportController;
+use App\Http\Controllers\Admin\MedicalReportController;
+use App\Http\Controllers\WaitingRoomController;
 use App\Http\Controllers\SuperAdmin\ClinicManagementController;
 use App\Http\Controllers\SuperAdmin\DashboardController as SuperDashboardController;
 use App\Http\Controllers\SuperAdmin\OfferController as SuperOfferController;
@@ -59,6 +65,9 @@ Route::get('/register-clinic/success', [ClinicRegistrationController::class, 'su
 // Public clinic website
 Route::get('/clinic/{slug}', [ClinicPageController::class, 'show'])->name('clinic.page');
 Route::post('/clinic/{slug}/book', [OnlineBookingController::class, 'store'])->name('clinic.book');
+
+// Waiting Room Display (public, no auth required)
+Route::get('/waiting-room/{slug}', [WaitingRoomController::class, 'show'])->name('waiting-room');
 
 // Clinic suspended page
 Route::get('/clinic-suspended', function () {
@@ -203,6 +212,13 @@ Route::middleware(['auth', 'role:clinic_staff', 'clinic.active'])->prefix('dashb
     // Reports
     Route::get('/reports', [ReportController::class, 'index'])->name('.reports.index');
 
+    // Medical Reports (PDF)
+    Route::get('/diagnoses/{diagnosis}/report', [MedicalReportController::class, 'generate'])->name('.diagnoses.report')->middleware('permission:appointments.view');
+    Route::get('/invoices/{invoice}/pdf', [MedicalReportController::class, 'generateInvoice'])->name('.invoices.pdf')->middleware('permission:invoices.view');
+
+    // Audit Logs
+    Route::get('/audit-logs', [\App\Http\Controllers\Admin\AuditLogController::class, 'index'])->name('.audit-logs.index');
+
     // Expenses
     Route::get('/expenses', [ExpenseController::class, 'index'])->name('.expenses.index')->middleware('permission:invoices.view');
     Route::get('/expenses/create', [ExpenseController::class, 'create'])->name('.expenses.create')->middleware('permission:invoices.edit');
@@ -213,11 +229,34 @@ Route::middleware(['auth', 'role:clinic_staff', 'clinic.active'])->prefix('dashb
     Route::post('/expenses/categories', [ExpenseController::class, 'storeCategory'])->name('.expenses.categories.store')->middleware('permission:invoices.edit');
     Route::delete('/expenses/categories/{category}', [ExpenseController::class, 'destroyCategory'])->name('.expenses.categories.destroy')->middleware('permission:invoices.edit');
 
+    // Doctor Leaves
+    Route::get('/leaves', [DoctorLeaveController::class, 'index'])->name('.leaves.index')->middleware('permission:doctors.view');
+    Route::get('/leaves/create', [DoctorLeaveController::class, 'create'])->name('.leaves.create')->middleware('permission:doctors.create');
+    Route::post('/leaves', [DoctorLeaveController::class, 'store'])->name('.leaves.store')->middleware('permission:doctors.create');
+    Route::patch('/leaves/{leave}/approve', [DoctorLeaveController::class, 'approve'])->name('.leaves.approve')->middleware('permission:doctors.edit');
+    Route::patch('/leaves/{leave}/reject', [DoctorLeaveController::class, 'reject'])->name('.leaves.reject')->middleware('permission:doctors.edit');
+    Route::delete('/leaves/{leave}', [DoctorLeaveController::class, 'destroy'])->name('.leaves.destroy')->middleware('permission:doctors.edit');
+
     // Patient Ledger (Debt Tracking)
     Route::get('/ledger', [PatientLedgerController::class, 'index'])->name('.ledger.index')->middleware('permission:invoices.view');
     Route::get('/ledger/{patient}', [PatientLedgerController::class, 'show'])->name('.ledger.show')->middleware('permission:invoices.view');
     Route::post('/ledger/{patient}/payment', [PatientLedgerController::class, 'addPayment'])->name('.ledger.payment')->middleware('permission:invoices.edit');
     Route::post('/ledger/{patient}/debt', [PatientLedgerController::class, 'addDebt'])->name('.ledger.debt')->middleware('permission:invoices.edit');
+
+    // Reviews
+    Route::get('/reviews', [\App\Http\Controllers\Admin\ReviewController::class, 'index'])->name('.reviews.index');
+    Route::patch('/reviews/{review}/toggle', [\App\Http\Controllers\Admin\ReviewController::class, 'toggleVisibility'])->name('.reviews.toggle');
+    Route::delete('/reviews/{review}', [\App\Http\Controllers\Admin\ReviewController::class, 'destroy'])->name('.reviews.destroy');
+
+    // Coupons
+    Route::get('/coupons', [\App\Http\Controllers\Admin\CouponController::class, 'index'])->name('.coupons.index');
+    Route::get('/coupons/create', [\App\Http\Controllers\Admin\CouponController::class, 'create'])->name('.coupons.create');
+    Route::post('/coupons', [\App\Http\Controllers\Admin\CouponController::class, 'store'])->name('.coupons.store');
+    Route::get('/coupons/{coupon}/edit', [\App\Http\Controllers\Admin\CouponController::class, 'edit'])->name('.coupons.edit');
+    Route::put('/coupons/{coupon}', [\App\Http\Controllers\Admin\CouponController::class, 'update'])->name('.coupons.update');
+    Route::patch('/coupons/{coupon}/toggle', [\App\Http\Controllers\Admin\CouponController::class, 'toggleStatus'])->name('.coupons.toggle');
+    Route::delete('/coupons/{coupon}', [\App\Http\Controllers\Admin\CouponController::class, 'destroy'])->name('.coupons.destroy');
+    Route::post('/coupons/validate', [\App\Http\Controllers\Admin\CouponController::class, 'validateCoupon'])->name('.coupons.validate');
 
     // Queue Management
     Route::get('/queue', [QueueController::class, 'index'])->name('.queue.index')->middleware('permission:appointments.view');
@@ -231,6 +270,18 @@ Route::middleware(['auth', 'role:clinic_staff', 'clinic.active'])->prefix('dashb
     // Recharge
     Route::get('/recharge', [RechargeController::class, 'index'])->name('.recharge.index');
     Route::post('/recharge', [RechargeController::class, 'store'])->name('.recharge.store');
+
+    // Diagnosis Templates
+    Route::get('/diagnosis-templates', [DiagnosisTemplateController::class, 'index'])->name('.diagnosis-templates.index');
+    Route::post('/diagnosis-templates', [DiagnosisTemplateController::class, 'store'])->name('.diagnosis-templates.store');
+    Route::delete('/diagnosis-templates/{template}', [DiagnosisTemplateController::class, 'destroy'])->name('.diagnosis-templates.destroy');
+    Route::get('/diagnosis-templates/{template}/load', [DiagnosisTemplateController::class, 'loadTemplate'])->name('.diagnosis-templates.load');
+
+    // Drug Interactions
+    Route::get('/drug-interactions', [DrugInteractionController::class, 'index'])->name('.drug-interactions.index');
+    Route::post('/drug-interactions', [DrugInteractionController::class, 'store'])->name('.drug-interactions.store');
+    Route::delete('/drug-interactions/{interaction}', [DrugInteractionController::class, 'destroy'])->name('.drug-interactions.destroy');
+    Route::post('/drug-interactions/check', [DrugInteractionController::class, 'check'])->name('.drug-interactions.check');
 
     // Settings
     Route::get('/settings', [SettingsController::class, 'index'])->name('.settings.index');
@@ -257,6 +308,12 @@ Route::middleware(['auth', 'role:doctor', 'clinic.active'])->prefix('doctor')->n
 
     // Drug Search (shared)
     Route::get('/drugs/search', [DrugSearchController::class, 'search'])->name('drugs.search');
+
+    // Diagnosis Templates
+    Route::get('/diagnosis-templates', [DoctorDiagnosisTemplateController::class, 'index'])->name('diagnosis-templates.index');
+    Route::post('/diagnosis-templates', [DoctorDiagnosisTemplateController::class, 'store'])->name('diagnosis-templates.store');
+    Route::delete('/diagnosis-templates/{template}', [DoctorDiagnosisTemplateController::class, 'destroy'])->name('diagnosis-templates.destroy');
+    Route::get('/diagnosis-templates/{template}/load', [DoctorDiagnosisTemplateController::class, 'load'])->name('diagnosis-templates.load');
 });
 
 // Auth routes

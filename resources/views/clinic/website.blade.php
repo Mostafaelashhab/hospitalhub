@@ -568,6 +568,89 @@
     </section>
     @endif
 
+    {{-- ═══════ REVIEWS ═══════ --}}
+    @if($totalReviews > 0)
+    <section class="py-20 sm:py-28 bg-white" id="reviews">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-14 fade-up">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gray-100 text-xs font-bold uppercase tracking-wider mb-6" style="color: {{ $primary }};">
+                    <span class="w-1.5 h-1.5 rounded-full" style="background: {{ $primary }};"></span>
+                    {{ __('app.reviews') }}
+                </div>
+                <h3 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4 tracking-tight">{{ __('app.patient_reviews') }}</h3>
+                <div class="flex items-center justify-center gap-3 mt-4">
+                    <div class="flex items-center gap-1">
+                        @for($i = 1; $i <= 5; $i++)
+                        <svg class="w-6 h-6 {{ $i <= round($avgRating) ? 'text-amber-400' : 'text-gray-200' }}" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        @endfor
+                    </div>
+                    <span class="text-2xl font-black text-gray-900">{{ number_format($avgRating, 1) }}</span>
+                    <span class="text-sm text-gray-400">({{ $totalReviews }} {{ __('app.reviews') }})</span>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @foreach($reviews as $review)
+                <div class="fade-up card-lift bg-white rounded-2xl border border-gray-100 p-6">
+                    <div class="flex items-center gap-1 mb-3">
+                        @for($i = 1; $i <= 5; $i++)
+                        <svg class="w-4 h-4 {{ $i <= $review->rating ? 'text-amber-400' : 'text-gray-200' }}" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        @endfor
+                    </div>
+                    @if($review->comment)
+                    <p class="text-sm text-gray-600 mb-4 leading-relaxed">{{ Str::limit($review->comment, 150) }}</p>
+                    @endif
+                    <div class="flex items-center gap-3 pt-3 border-t border-gray-100">
+                        <div class="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold" style="background: {{ $primary }};">
+                            {{ mb_substr($review->patient->name ?? '?', 0, 1) }}
+                        </div>
+                        <div>
+                            <p class="text-sm font-bold text-gray-900">{{ $review->patient->name ?? __('app.patient') }}</p>
+                            <p class="text-xs text-gray-400">{{ $review->created_at->diffForHumans() }}</p>
+                        </div>
+                    </div>
+                </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+    @endif
+
+    {{-- ═══════ BRANCHES MAP ═══════ --}}
+    @php $mappableBranches = $branches->filter(fn($b) => $b->latitude && $b->longitude); @endphp
+    @if($mappableBranches->count() > 0)
+    <section class="py-20 sm:py-28 bg-gray-50" id="map">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-14 fade-up">
+                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gray-100 text-xs font-bold uppercase tracking-wider mb-6" style="color: {{ $primary }};">
+                    <span class="w-1.5 h-1.5 rounded-full" style="background: {{ $primary }};"></span>
+                    {{ __('app.location_on_map') }}
+                </div>
+                <h3 class="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4 tracking-tight">{{ __('app.our_branches') }}</h3>
+            </div>
+            <div class="fade-up rounded-2xl overflow-hidden border border-gray-200 shadow-lg" style="height: 400px;">
+                <div id="clinic-branches-map" class="w-full h-full"></div>
+            </div>
+        </div>
+    </section>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const branches = @json($mappableBranches->map(fn($b) => ['name' => $b->name, 'lat' => $b->latitude, 'lng' => $b->longitude, 'address' => $b->address, 'phone' => $b->phone, 'is_main' => $b->is_main])->values());
+        if (!branches.length) return;
+        const map = L.map('clinic-branches-map').setView([branches[0].lat, branches[0].lng], branches.length > 1 ? 10 : 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; OpenStreetMap' }).addTo(map);
+        const bounds = [];
+        branches.forEach(b => {
+            const marker = L.marker([b.lat, b.lng]).addTo(map);
+            marker.bindPopup(`<b>${b.name}</b>${b.is_main ? ' <span style="color:{{ $primary }};font-size:11px;">({{ __("app.main") }})</span>' : ''}<br>${b.address || ''}${b.phone ? '<br><a href="tel:'+b.phone+'">'+b.phone+'</a>' : ''}`);
+            bounds.push([b.lat, b.lng]);
+        });
+        if (bounds.length > 1) map.fitBounds(bounds, { padding: [50, 50] });
+    });
+    </script>
+    @endif
+
     {{-- ═══════ CONTACT ═══════ --}}
     <section class="py-20 sm:py-28 bg-gradient-to-b from-gray-50 to-white" id="contact">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -648,6 +731,12 @@
                             </div>
                             @if($branch->address)<p class="text-xs text-gray-400 mb-1 {{ $isAr ? 'mr-5' : 'ml-5' }}">{{ $branch->address }}{{ $branch->city ? ', ' . $branch->city : '' }}</p>@endif
                             @if($branch->phone)<a href="tel:{{ $branch->phone }}" class="text-xs font-semibold {{ $isAr ? 'mr-5' : 'ml-5' }} hover:underline" style="color: {{ $primary }};" dir="ltr">{{ $branch->phone }}</a>@endif
+                            @if($branch->latitude && $branch->longitude)
+                            <a href="https://www.google.com/maps?q={{ $branch->latitude }},{{ $branch->longitude }}" target="_blank" class="inline-flex items-center gap-1 {{ $isAr ? 'mr-5' : 'ml-5' }} mt-1 text-xs font-semibold hover:underline" style="color: {{ $secondary }};">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/></svg>
+                                {{ __('app.view_on_map') }}
+                            </a>
+                            @endif
                         </div>
                         @endforeach
                     </div>
