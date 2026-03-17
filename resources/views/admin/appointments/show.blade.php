@@ -70,7 +70,7 @@
                         </div>
                         <div>
                             <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">{{ __('app.consultation_fee') }}</p>
-                            <p class="text-sm font-semibold text-gray-900">{{ number_format($appointment->doctor->consultation_fee ?? 0) }} {{ __('app.points') }}</p>
+                            <p class="text-sm font-semibold text-gray-900">{{ number_format($appointment->doctor->consultation_fee ?? 0) }} {{ __('app.currency') }}</p>
                         </div>
                         @if($appointment->services->isNotEmpty())
                         <div class="sm:col-span-2">
@@ -181,7 +181,7 @@
                     </div>
                     <div class="bg-gray-50 rounded-xl p-4">
                         <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1">{{ __('app.consultation_fee') }}</p>
-                        <p class="text-xl font-bold text-gray-900">{{ number_format($appointment->doctor->consultation_fee ?? 0) }} <span class="text-sm font-normal text-gray-500">{{ __('app.points') }}</span></p>
+                        <p class="text-xl font-bold text-gray-900">{{ number_format($appointment->doctor->consultation_fee ?? 0) }} <span class="text-sm font-normal text-gray-500">{{ __('app.currency') }}</span></p>
                     </div>
                 </div>
             </div>

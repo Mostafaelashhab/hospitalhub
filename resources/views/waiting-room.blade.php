@@ -318,6 +318,13 @@
             border: 1px solid var(--wait-border);
         }
 
+        /* completed */
+        .queue-item.completed {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.05);
+            opacity: 0.45;
+        }
+
         /* Queue number */
         .queue-number {
             width: 46px; height: 46px;
@@ -330,9 +337,10 @@
             flex-shrink: 0;
         }
 
-        .in-room  .queue-number { background: rgba(0,200,150,0.2);  color: var(--green); }
-        .called   .queue-number { background: rgba(255,193,77,0.2); color: var(--amber); }
-        .waiting  .queue-number { background: rgba(255,255,255,0.06); color: var(--text-muted); }
+        .in-room    .queue-number { background: rgba(0,200,150,0.2);  color: var(--green); }
+        .called     .queue-number { background: rgba(255,193,77,0.2); color: var(--amber); }
+        .waiting    .queue-number { background: rgba(255,255,255,0.06); color: var(--text-muted); }
+        .completed  .queue-number { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.3); text-decoration: line-through; }
 
         /* Patient info */
         .patient-info { flex: 1; min-width: 0; }
@@ -346,8 +354,9 @@
         }
 
         .in-room  .patient-name { color: var(--green); }
-        .called   .patient-name { color: var(--amber); }
-        .waiting  .patient-name { color: var(--text-main); }
+        .called     .patient-name { color: var(--amber); }
+        .waiting    .patient-name { color: var(--text-main); }
+        .completed  .patient-name { color: rgba(255,255,255,0.3); text-decoration: line-through; }
 
         .status-text {
             font-size: clamp(10px, 1vw, 11px);
@@ -493,20 +502,24 @@
                         <div class="queue-list">
                             @foreach($appointments as $appt)
                                 @php
-                                    $statusClass = match($appt->queue_status) {
-                                        'in_room' => 'in-room',
-                                        'called'  => 'called',
-                                        default   => 'waiting',
-                                    };
-                                    $statusLabel = match($appt->queue_status) {
-                                        'in_room' => __('app.currently_seeing'),
-                                        'called'  => __('app.called_next'),
-                                        default   => __('app.waiting_in_queue'),
-                                    };
+                                    if ($appt->status === 'completed' || ($appt->queue_status === 'done')) {
+                                        $statusClass = 'completed';
+                                        $statusLabel = __('app.completed');
+                                    } elseif ($appt->queue_status === 'in_room' || $appt->status === 'in_progress') {
+                                        $statusClass = 'in-room';
+                                        $statusLabel = __('app.currently_seeing');
+                                    } elseif ($appt->queue_status === 'called') {
+                                        $statusClass = 'called';
+                                        $statusLabel = __('app.called_next');
+                                    } else {
+                                        $statusClass = 'waiting';
+                                        $statusLabel = __('app.waiting_in_queue');
+                                    }
+                                    $displayNumber = $appt->queue_number ?? \Carbon\Carbon::parse($appt->appointment_time)->format('H:i');
                                 @endphp
 
                                 <div class="queue-item {{ $statusClass }}">
-                                    <div class="queue-number">{{ $appt->queue_number }}</div>
+                                    <div class="queue-number">{{ $displayNumber }}</div>
 
                                     <div class="patient-info">
                                         <div class="patient-name">{{ $appt->patient->name }}</div>
@@ -514,13 +527,13 @@
                                     </div>
 
                                     <div class="status-icon">
-                                        @if($appt->queue_status === 'in_room')
+                                        @if($statusClass === 'in-room')
                                             {{-- Stethoscope --}}
                                             <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 3.75H6a2.25 2.25 0 00-2.25 2.25v4.5A7.5 7.5 0 0011.25 18v0a3.75 3.75 0 007.5 0v-1.5"/>
                                                 <circle cx="18.75" cy="16.5" r="1.5" fill="currentColor"/>
                                             </svg>
-                                        @elseif($appt->queue_status === 'called')
+                                        @elseif($statusClass === 'called')
                                             {{-- Bell --}}
                                             <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/>

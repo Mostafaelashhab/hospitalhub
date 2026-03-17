@@ -56,7 +56,7 @@
                             class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-all">
                         <option value="">{{ __('app.select_doctor') }}</option>
                         @foreach($doctors as $doctor)
-                        <option value="{{ $doctor->id }}" {{ old('doctor_id') == $doctor->id ? 'selected' : '' }}>{{ $doctor->name }} ({{ number_format($doctor->consultation_fee) }} {{ __('app.points') }})</option>
+                        <option value="{{ $doctor->id }}" {{ old('doctor_id') == $doctor->id ? 'selected' : '' }}>{{ $doctor->name }} ({{ number_format($doctor->consultation_fee) }} {{ __('app.currency') }})</option>
                         @endforeach
                     </select>
                 </div>
