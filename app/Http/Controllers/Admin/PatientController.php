@@ -214,4 +214,15 @@ class PatientController extends Controller
 
         return view('admin.patients.timeline', compact('patient', 'timeline'));
     }
+
+    public function destroy(Patient $patient)
+    {
+        $clinic = auth()->user()->clinic;
+        abort_if($patient->clinic_id !== $clinic->id, 403);
+
+        $patient->delete();
+
+        return redirect()->route('dashboard.patients.index')
+            ->with('success', __('app.patient_deleted'));
+    }
 }

@@ -136,6 +136,7 @@ Route::middleware(['auth', 'role:clinic_staff', 'clinic.active'])->prefix('dashb
     Route::get('/patients/{patient}/edit', [PatientController::class, 'edit'])->name('.patients.edit')->middleware('permission:patients.edit');
     Route::put('/patients/{patient}', [PatientController::class, 'update'])->name('.patients.update')->middleware('permission:patients.edit');
     Route::get('/patients/{patient}/timeline', [PatientController::class, 'timeline'])->name('.patients.timeline')->middleware('permission:patients.view');
+    Route::delete('/patients/{patient}', [PatientController::class, 'destroy'])->name('.patients.destroy')->middleware('permission:patients.edit');
 
     // Patient Files
     Route::post('/patients/{patient}/files', [PatientFileController::class, 'store'])->name('.patients.files.store')->middleware('permission:patients.edit');
