@@ -410,6 +410,11 @@ return [
     'cannot_delete_main_branch' => 'لا يمكن حذف الفرع الرئيسي',
     'confirm_delete' => 'هل أنت متأكد من الحذف؟',
     'manage_branches' => 'إدارة الفروع',
+    'location_on_map' => 'الموقع على الخريطة',
+    'click_map_to_set' => 'اضغط على الخريطة لتحديد موقع الفرع',
+    'search_location' => 'ابحث عن موقع...',
+    'reset_location' => 'إعادة تعيين الموقع',
+    'view_on_map' => 'عرض على الخريطة',
 
     // Landing Page
     'landing_badge' => 'مجاني لفترة محدودة',

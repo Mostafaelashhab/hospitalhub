@@ -56,6 +56,41 @@
                           class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-all resize-none">{{ old('address') }}</textarea>
             </div>
 
+            {{-- Map Location Picker --}}
+            <div x-data="mapPicker({ lat: {{ old('latitude', 30.0444) }}, lng: {{ old('longitude', 31.2357) }}, hasLocation: {{ old('latitude') ? 'true' : 'false' }} })">
+                <label class="block text-sm font-semibold text-gray-700 mb-2">
+                    {{ __('app.location_on_map') }}
+                </label>
+                <p class="text-xs text-gray-500 mb-3">{{ __('app.click_map_to_set') }}</p>
+
+                {{-- Search Box --}}
+                <div class="relative mb-3">
+                    <input type="text" x-ref="searchBox" x-model="searchQuery" @keydown.enter.prevent="searchLocation()"
+                           placeholder="{{ __('app.search_location') }}"
+                           class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-all {{ app()->getLocale() === 'ar' ? 'pl-10' : 'pr-10' }}">
+                    <button type="button" @click="searchLocation()"
+                            class="absolute {{ app()->getLocale() === 'ar' ? 'left-2' : 'right-2' }} top-1/2 -translate-y-1/2 p-1.5 text-gray-400 hover:text-indigo-600 transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    </button>
+                </div>
+
+                {{-- Map Container --}}
+                <div x-ref="mapContainer" class="w-full h-72 sm:h-80 rounded-xl border-2 border-gray-200 overflow-hidden shadow-sm z-0"></div>
+
+                {{-- Coordinates Display & Reset --}}
+                <div class="flex items-center justify-between mt-2">
+                    <div class="text-xs text-gray-500" x-show="hasLocation" x-transition>
+                        <span class="font-mono bg-gray-100 px-2 py-0.5 rounded" x-text="'Lat: ' + selectedLat.toFixed(6) + ' | Lng: ' + selectedLng.toFixed(6)"></span>
+                    </div>
+                    <button type="button" x-show="hasLocation" @click="resetLocation()" class="text-xs text-red-600 hover:text-red-700 font-medium transition-colors">
+                        {{ __('app.reset_location') }}
+                    </button>
+                </div>
+
+                <input type="hidden" name="latitude" :value="hasLocation ? selectedLat : ''">
+                <input type="hidden" name="longitude" :value="hasLocation ? selectedLng : ''">
+            </div>
+
             <div class="flex items-center gap-3 pt-4 border-t border-gray-100">
                 <button type="submit" class="inline-flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold rounded-xl shadow-sm shadow-indigo-500/20 transition-all">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
@@ -67,4 +102,93 @@
             </div>
         </form>
     </div>
+    {{-- Leaflet CSS & JS (Free - OpenStreetMap) --}}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <style>.leaflet-control-attribution{font-size:9px!important;}</style>
+
+    <script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('mapPicker', (config) => ({
+            map: null,
+            marker: null,
+            selectedLat: config.lat,
+            selectedLng: config.lng,
+            hasLocation: config.hasLocation,
+            searchQuery: '',
+
+            init() {
+                this.$nextTick(() => {
+                    this.map = L.map(this.$refs.mapContainer, { zoomControl: true }).setView([this.selectedLat, this.selectedLng], this.hasLocation ? 15 : 6);
+                    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                        attribution: '&copy; OpenStreetMap',
+                        maxZoom: 19,
+                    }).addTo(this.map);
+
+                    if (this.hasLocation) {
+                        this.marker = L.marker([this.selectedLat, this.selectedLng], { draggable: true }).addTo(this.map);
+                        this.marker.on('dragend', (e) => {
+                            const pos = e.target.getLatLng();
+                            this.selectedLat = pos.lat;
+                            this.selectedLng = pos.lng;
+                        });
+                    }
+
+                    this.map.on('click', (e) => {
+                        this.selectedLat = e.latlng.lat;
+                        this.selectedLng = e.latlng.lng;
+                        this.hasLocation = true;
+                        if (this.marker) {
+                            this.marker.setLatLng(e.latlng);
+                        } else {
+                            this.marker = L.marker(e.latlng, { draggable: true }).addTo(this.map);
+                            this.marker.on('dragend', (ev) => {
+                                const pos = ev.target.getLatLng();
+                                this.selectedLat = pos.lat;
+                                this.selectedLng = pos.lng;
+                            });
+                        }
+                    });
+
+                    setTimeout(() => this.map.invalidateSize(), 200);
+                });
+            },
+
+            async searchLocation() {
+                if (!this.searchQuery.trim()) return;
+                try {
+                    const resp = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(this.searchQuery)}&limit=1`);
+                    const data = await resp.json();
+                    if (data.length > 0) {
+                        const lat = parseFloat(data[0].lat);
+                        const lng = parseFloat(data[0].lon);
+                        this.selectedLat = lat;
+                        this.selectedLng = lng;
+                        this.hasLocation = true;
+                        this.map.setView([lat, lng], 16);
+                        if (this.marker) {
+                            this.marker.setLatLng([lat, lng]);
+                        } else {
+                            this.marker = L.marker([lat, lng], { draggable: true }).addTo(this.map);
+                            this.marker.on('dragend', (ev) => {
+                                const pos = ev.target.getLatLng();
+                                this.selectedLat = pos.lat;
+                                this.selectedLng = pos.lng;
+                            });
+                        }
+                    }
+                } catch (e) { console.error('Search failed:', e); }
+            },
+
+            resetLocation() {
+                this.hasLocation = false;
+                if (this.marker) {
+                    this.map.removeLayer(this.marker);
+                    this.marker = null;
+                }
+                this.map.setView([30.0444, 31.2357], 6);
+            },
+        }));
+    });
+    </script>
 </x-dashboard-layout>

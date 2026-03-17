@@ -407,6 +407,11 @@ return [
     'cannot_delete_main_branch' => 'Cannot delete the main branch',
     'confirm_delete' => 'Are you sure you want to delete?',
     'manage_branches' => 'Manage Branches',
+    'location_on_map' => 'Location on Map',
+    'click_map_to_set' => 'Click on the map to set branch location',
+    'search_location' => 'Search location...',
+    'reset_location' => 'Reset Location',
+    'view_on_map' => 'View on Map',
 
     // Landing Page
     'landing_badge' => 'Free for a limited time',

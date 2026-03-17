@@ -74,6 +74,13 @@
                 @endif
             </div>
 
+            {{-- Mini Map --}}
+            @if($branch->latitude && $branch->longitude)
+            <div class="mb-4 rounded-xl overflow-hidden border border-gray-200 shadow-sm" style="height:140px;">
+                <div id="minimap-{{ $branch->id }}" class="w-full h-full"></div>
+            </div>
+            @endif
+
             {{-- Actions --}}
             <div class="flex items-center gap-2 pt-4 border-t border-gray-100">
                 <a href="{{ route('dashboard.branches.edit', $branch) }}" class="flex-1 inline-flex items-center justify-center gap-1.5 px-3 py-2 text-xs font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-lg hover:bg-amber-100 transition-all">
@@ -94,4 +101,27 @@
         </div>
         @endforeach
     </div>
+    @if($branches->where('latitude', '!=', null)->count())
+    {{-- Leaflet CSS & JS --}}
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+    <style>.leaflet-control-attribution{font-size:8px!important;} .leaflet-control-zoom{display:none!important;}</style>
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+        @foreach($branches as $branch)
+        @if($branch->latitude && $branch->longitude)
+        (() => {
+            const el = document.getElementById('minimap-{{ $branch->id }}');
+            if (!el) return;
+            const map = L.map(el, { zoomControl: false, dragging: false, scrollWheelZoom: false, doubleClickZoom: false, touchZoom: false, attributionControl: false }).setView([{{ $branch->latitude }}, {{ $branch->longitude }}], 15);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(map);
+            L.marker([{{ $branch->latitude }}, {{ $branch->longitude }}]).addTo(map);
+            el.addEventListener('click', () => window.open(`https://www.google.com/maps?q={{ $branch->latitude }},{{ $branch->longitude }}`, '_blank'));
+            el.style.cursor = 'pointer';
+        })();
+        @endif
+        @endforeach
+    });
+    </script>
+    @endif
 </x-dashboard-layout>
