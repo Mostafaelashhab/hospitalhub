@@ -50,6 +50,7 @@ return [
     'created' => 'Created',
     'updated' => 'Updated',
     'deleted' => 'Deleted',
+    'clear' => 'Clear',
 
     // Registration
     'register_clinic' => 'Register Your Clinic',

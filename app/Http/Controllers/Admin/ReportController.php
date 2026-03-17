@@ -69,7 +69,7 @@ class ReportController extends Controller
 
         // === Doctor Performance ===
         $doctorPerformance = Appointment::where('appointments.clinic_id', $clinicId)
-            ->when($branchId, fn ($q) => $q->where('branch_id', $branchId))
+            ->when($branchId, fn ($q) => $q->where('appointments.branch_id', $branchId))
             ->whereBetween('appointment_date', [$from, $to])
             ->join('doctors', 'appointments.doctor_id', '=', 'doctors.id')
             ->join('users', 'doctors.user_id', '=', 'users.id')

@@ -53,6 +53,7 @@ return [
     'created' => 'تم الإنشاء',
     'updated' => 'تم التحديث',
     'deleted' => 'تم الحذف',
+    'clear' => 'مسح',
 
 
     // Registration
