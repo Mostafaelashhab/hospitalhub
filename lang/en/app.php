@@ -46,6 +46,10 @@ return [
     'next' => 'Next',
     'submit' => 'Submit',
     'home' => 'Home',
+    'optional' => 'Optional',
+    'created' => 'Created',
+    'updated' => 'Updated',
+    'deleted' => 'Deleted',
 
     // Registration
     'register_clinic' => 'Register Your Clinic',

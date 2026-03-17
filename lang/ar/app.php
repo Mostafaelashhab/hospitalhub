@@ -49,6 +49,11 @@ return [
     'next' => 'التالي',
     'submit' => 'إرسال',
     'home' => 'الرئيسية',
+    'optional' => 'اختياري',
+    'created' => 'تم الإنشاء',
+    'updated' => 'تم التحديث',
+    'deleted' => 'تم الحذف',
+
 
     // Registration
     'register_clinic' => 'سجّل عيادتك',
