@@ -324,6 +324,27 @@ class DatabaseSeeder extends Seeder
                     ['name_en' => 'Sculptra', 'name_ar' => 'سكلبترا'],
                 ],
             ],
+            [
+                'name_en' => 'Colorectal Surgery',
+                'name_ar' => 'جراحة القولون والمستقيم',
+                'services' => [
+                    ['name_en' => 'Colorectal Consultation', 'name_ar' => 'كشف جراحة القولون والمستقيم'],
+                    ['name_en' => 'Hemorrhoid Treatment', 'name_ar' => 'علاج البواسير'],
+                    ['name_en' => 'Hemorrhoidectomy', 'name_ar' => 'استئصال البواسير'],
+                    ['name_en' => 'Rubber Band Ligation', 'name_ar' => 'ربط البواسير بالحلقات المطاطية'],
+                    ['name_en' => 'Hemorrhoid Laser Treatment', 'name_ar' => 'علاج البواسير بالليزر'],
+                    ['name_en' => 'Anal Fissure Treatment', 'name_ar' => 'علاج الشرخ الشرجي'],
+                    ['name_en' => 'Anal Fistula Surgery', 'name_ar' => 'جراحة الناسور الشرجي'],
+                    ['name_en' => 'Perianal Abscess Drainage', 'name_ar' => 'تفريغ خراج شرجي'],
+                    ['name_en' => 'Colonoscopy', 'name_ar' => 'منظار القولون'],
+                    ['name_en' => 'Sigmoidoscopy', 'name_ar' => 'منظار القولون السيني'],
+                    ['name_en' => 'Rectal Prolapse Treatment', 'name_ar' => 'علاج السقوط الشرجي'],
+                    ['name_en' => 'Pilonidal Sinus Surgery', 'name_ar' => 'جراحة الناسور العصعصي'],
+                    ['name_en' => 'Colon Polyp Removal', 'name_ar' => 'إزالة سلائل القولون'],
+                    ['name_en' => 'Colorectal Cancer Screening', 'name_ar' => 'فحص أورام القولون والمستقيم'],
+                    ['name_en' => 'Proctoscopy', 'name_ar' => 'منظار شرجي'],
+                ],
+            ],
         ];
 
         foreach ($specialties as $specialtyData) {
