@@ -144,6 +144,8 @@ return [
     'points_added' => 'تم إضافة النقاط بنجاح',
     'points_deducted' => 'تم خصم النقاط بنجاح',
     'status_updated' => 'تم تحديث الحالة بنجاح',
+    'invalid_status_transition' => 'تغيير الحالة هذا غير مسموح به',
+    'confirm_status_change' => 'هل أنت متأكد من تغيير الحالة؟',
     'insufficient_balance' => 'رصيد غير كافي',
     'description' => 'الوصف',
     'amount' => 'المبلغ',

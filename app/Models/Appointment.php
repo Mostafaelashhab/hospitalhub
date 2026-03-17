@@ -104,4 +104,44 @@ class Appointment extends Model
 
         return ($max ?? 0) + 1;
     }
+
+    /**
+     * Status transition rules (state machine).
+     * Key = current status, Value = array of allowed next statuses.
+     */
+    public static function allowedTransitions(): array
+    {
+        return [
+            'scheduled'   => ['confirmed', 'cancelled', 'no_show'],
+            'confirmed'   => ['in_progress', 'cancelled', 'no_show'],
+            'in_progress' => ['completed', 'cancelled'],
+            'completed'   => [],  // terminal
+            'cancelled'   => [],  // terminal
+            'no_show'     => [],  // terminal
+        ];
+    }
+
+    /**
+     * Get allowed next statuses for this appointment.
+     */
+    public function allowedNextStatuses(): array
+    {
+        return static::allowedTransitions()[$this->status] ?? [];
+    }
+
+    /**
+     * Check if transition to a given status is allowed.
+     */
+    public function canTransitionTo(string $newStatus): bool
+    {
+        return in_array($newStatus, $this->allowedNextStatuses());
+    }
+
+    /**
+     * Is this a terminal (final) status?
+     */
+    public function isTerminal(): bool
+    {
+        return empty($this->allowedNextStatuses());
+    }
 }

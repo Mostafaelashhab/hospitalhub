@@ -13,9 +13,9 @@
             {{ __('app.back') }}
         </a>
 
-        {{-- Status actions --}}
+        {{-- Status actions (state machine enforced) --}}
         <div class="flex items-center gap-2">
-            @if(in_array($appointment->status, ['scheduled', 'confirmed']))
+            @if($appointment->canTransitionTo('in_progress'))
             <form method="POST" action="{{ route('doctor.appointment.status', $appointment) }}">
                 @csrf @method('PATCH')
                 <input type="hidden" name="status" value="in_progress">
@@ -25,7 +25,7 @@
                 </button>
             </form>
             @endif
-            @if($appointment->status === 'in_progress')
+            @if($appointment->canTransitionTo('completed'))
             <form method="POST" action="{{ route('doctor.appointment.status', $appointment) }}">
                 @csrf @method('PATCH')
                 <input type="hidden" name="status" value="completed">

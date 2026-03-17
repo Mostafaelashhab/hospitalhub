@@ -222,7 +222,29 @@ class AppointmentController extends Controller
 
         $validated = $request->validate($rules);
 
-        $appointment->update(['status' => $validated['status']]);
+        // Enforce state machine — block invalid transitions
+        if (!$appointment->canTransitionTo($validated['status'])) {
+            return back()->with('error', __('app.invalid_status_transition'));
+        }
+
+        $newStatus = $validated['status'];
+
+        // Sync queue_status with appointment status
+        $queueUpdate = [];
+        if ($newStatus === 'confirmed' && !$appointment->queue_status) {
+            $queueUpdate['queue_status'] = 'waiting';
+            $queueUpdate['checked_in_at'] = now();
+            $queueUpdate['queue_number'] = Appointment::nextQueueNumber($appointment->doctor_id, $appointment->appointment_date);
+        } elseif ($newStatus === 'in_progress' && in_array($appointment->queue_status, ['waiting', 'called', null])) {
+            $queueUpdate['queue_status'] = 'in_room';
+            if (!$appointment->called_at) $queueUpdate['called_at'] = now();
+        } elseif ($newStatus === 'completed' && $appointment->queue_status) {
+            $queueUpdate['queue_status'] = 'done';
+        } elseif (in_array($newStatus, ['cancelled', 'no_show']) && $appointment->queue_status) {
+            $queueUpdate['queue_status'] = 'skipped';
+        }
+
+        $appointment->update(array_merge(['status' => $newStatus], $queueUpdate));
 
         // Notify clinic staff about status change
         $clinicStaff = User::where('clinic_id', $clinic->id)

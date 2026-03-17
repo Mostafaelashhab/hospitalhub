@@ -140,6 +140,8 @@ return [
     'points_added' => 'Points added successfully',
     'points_deducted' => 'Points deducted successfully',
     'status_updated' => 'Status updated successfully',
+    'invalid_status_transition' => 'This status change is not allowed',
+    'confirm_status_change' => 'Are you sure you want to change the status?',
     'insufficient_balance' => 'Insufficient balance',
     'description' => 'Description',
     'amount' => 'Amount',

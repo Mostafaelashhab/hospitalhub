@@ -200,16 +200,17 @@
                 </a>
             </div>
 
-            {{-- Change Status --}}
-            @if(in_array($appointment->status, ['scheduled', 'confirmed', 'in_progress']))
+            {{-- Change Status (only allowed transitions) --}}
+            @if(!$appointment->isTerminal())
+            @php $allowedNext = $appointment->allowedNextStatuses(); @endphp
             <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                 <div class="px-6 py-5 border-b border-gray-100">
                     <h3 class="text-base font-bold text-gray-900">{{ __('app.change_status') }}</h3>
                 </div>
                 <div class="p-6 space-y-2">
-                    @foreach(['scheduled', 'confirmed', 'in_progress', 'cancelled', 'no_show'] as $s)
-                        @if($s !== $appointment->status)
-                        <form method="POST" action="{{ route('dashboard.appointments.status', $appointment) }}">
+                    @foreach($allowedNext as $s)
+                        @if($s !== 'completed')
+                        <form method="POST" action="{{ route('dashboard.appointments.status', $appointment) }}" @if(in_array($s, ['cancelled', 'no_show'])) onsubmit="return confirm('{{ __('app.confirm_status_change') }}')" @endif>
                             @csrf @method('PATCH')
                             <input type="hidden" name="status" value="{{ $s }}">
                             <button type="submit" class="w-full {{ app()->getLocale() === 'ar' ? 'text-right' : 'text-left' }} px-4 py-3 text-sm font-medium text-gray-700 bg-gray-50 border border-gray-100 rounded-xl hover:bg-gray-100 transition-all flex items-center gap-3">
@@ -222,7 +223,8 @@
                 </div>
             </div>
 
-            {{-- Complete Appointment --}}
+            {{-- Complete Appointment (only if 'completed' is an allowed transition) --}}
+            @if(in_array('completed', $allowedNext))
             <div class="bg-white rounded-2xl border border-emerald-200 shadow-sm overflow-hidden" x-data="{ showForm: {{ request()->get('complete') ? 'true' : 'false' }} }">
                 <button type="button" @click="showForm = !showForm" class="w-full px-6 py-5 flex items-center gap-3 hover:bg-emerald-50 transition-all">
                     <span class="w-3 h-3 rounded-full bg-emerald-500"></span>
@@ -273,7 +275,8 @@
                     </form>
                 </div>
             </div>
-            @endif
+            @endif {{-- end completed allowed --}}
+            @endif {{-- end not terminal --}}
         </div>
     </div>
 </x-dashboard-layout>

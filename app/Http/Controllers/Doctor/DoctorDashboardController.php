@@ -246,12 +246,18 @@ class DoctorDashboardController extends Controller
             'status' => 'required|in:in_progress,completed',
         ]);
 
+        // Enforce state machine
+        if (!$appointment->canTransitionTo($validated['status'])) {
+            return back()->with('error', __('app.invalid_status_transition'));
+        }
+
         $updateData = ['status' => $validated['status']];
         if ($validated['status'] === 'completed' && $appointment->queue_status) {
             $updateData['queue_status'] = 'done';
         }
-        if ($validated['status'] === 'in_progress' && $appointment->queue_status === 'waiting') {
+        if ($validated['status'] === 'in_progress' && in_array($appointment->queue_status, ['waiting', 'called', null])) {
             $updateData['queue_status'] = 'in_room';
+            if (!$appointment->called_at) $updateData['called_at'] = now();
         }
         $appointment->update($updateData);
 
