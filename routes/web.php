@@ -234,6 +234,10 @@ Route::middleware(['auth', 'role:clinic_staff', 'clinic.active'])->prefix('dashb
     // Drug Search
     Route::get('/drugs/search', [DrugSearchController::class, 'search'])->name('.drugs.search');
 
+    // Pharmacy
+    Route::get('/pharmacy', [\App\Http\Controllers\Admin\PharmacyController::class, 'index'])->name('.pharmacy.index');
+    Route::get('/pharmacy/api-lookup', [\App\Http\Controllers\Admin\PharmacyController::class, 'apiLookup'])->name('.pharmacy.api-lookup');
+
     // Services by Doctor
     Route::get('/doctors/{doctor}/services', [AppointmentController::class, 'servicesByDoctor'])->name('.doctors.services');
 

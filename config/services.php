@@ -40,4 +40,9 @@ return [
         'host' => env('RAPIDAPI_RADIOLOGY_HOST', 'ai-radiology-reporting-x-ray-interpretation-api.p.rapidapi.com'),
     ],
 
+    'drug_info' => [
+        'key' => env('RAPIDAPI_KEY', ''),
+        'host' => env('RAPIDAPI_DRUG_HOST', 'drug-info-and-price-history.p.rapidapi.com'),
+    ],
+
 ];
