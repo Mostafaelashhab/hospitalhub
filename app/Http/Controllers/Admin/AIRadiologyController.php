@@ -62,8 +62,8 @@ class AIRadiologyController extends Controller
             'language' => 'required|in:en,ar',
         ]);
 
-        $language = $request->input('language', app()->getLocale());
-        $message = $request->input('message', '');
+        $language = $request->input('language', app()->getLocale()) ?? app()->getLocale();
+        $message = $request->input('message') ?? '';
 
         if ($request->analysis_type === 'file') {
             $result = $this->service->analyzeFromFile(
