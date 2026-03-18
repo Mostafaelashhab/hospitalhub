@@ -35,4 +35,9 @@ return [
         ],
     ],
 
+    'ai_radiology' => [
+        'key' => env('RAPIDAPI_KEY', ''),
+        'host' => env('RAPIDAPI_RADIOLOGY_HOST', 'ai-radiology-reporting-x-ray-interpretation-api.p.rapidapi.com'),
+    ],
+
 ];

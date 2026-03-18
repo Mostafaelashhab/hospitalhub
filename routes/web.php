@@ -35,6 +35,7 @@ use App\Http\Controllers\Admin\PatientLedgerController;
 use App\Http\Controllers\Admin\PregnancyController;
 use App\Http\Controllers\Admin\PhotoTimelineController;
 use App\Http\Controllers\Admin\PatientMedicalController;
+use App\Http\Controllers\Admin\AIRadiologyController;
 use App\Http\Controllers\Admin\RechargeController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\MedicalReportController;
@@ -185,6 +186,11 @@ Route::middleware(['auth', 'role:clinic_staff', 'clinic.active'])->prefix('dashb
     Route::delete('/medications/{medication}', [PatientMedicalController::class, 'destroyMedication'])->name('.patients.medications.destroy')->middleware('permission:patients.edit');
     Route::post('/patients/{patient}/notes', [PatientMedicalController::class, 'storeNote'])->name('.patients.notes.store')->middleware('permission:patients.edit');
     Route::delete('/medical-notes/{note}', [PatientMedicalController::class, 'destroyNote'])->name('.patients.notes.destroy')->middleware('permission:patients.edit');
+
+    // AI Radiology
+    Route::get('/patients/{patient}/ai-radiology', [AIRadiologyController::class, 'index'])->name('.ai-radiology.index')->middleware('permission:patients.view');
+    Route::post('/patients/{patient}/ai-radiology/analyze', [AIRadiologyController::class, 'analyze'])->name('.ai-radiology.analyze')->middleware('permission:patients.edit');
+    Route::post('/patients/{patient}/ai-radiology/analyze-ajax', [AIRadiologyController::class, 'analyzeAjax'])->name('.ai-radiology.analyze-ajax')->middleware('permission:patients.edit');
 
     // Dental Chart
     Route::get('/patients/{patient}/dental-chart', [\App\Http\Controllers\Admin\DentalChartController::class, 'show'])->name('.patients.dental-chart.show')->middleware('permission:patients.view');
