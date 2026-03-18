@@ -8,7 +8,7 @@
 
     <div x-data="pharmacyApp()" class="space-y-6">
 
-        {{-- Header --}}
+        {{-- Header + Stats --}}
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div class="flex items-center gap-4">
                 <div class="w-12 h-12 rounded-xl bg-emerald-50 flex items-center justify-center">
@@ -19,6 +19,38 @@
                 <div>
                     <h2 class="text-2xl font-bold text-gray-900">{{ __('app.pharmacy') }}</h2>
                     <p class="text-sm text-gray-500 mt-0.5">{{ __('app.pharmacy_desc') }}</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <div class="px-4 py-2 bg-emerald-50 rounded-xl text-center">
+                    <p class="text-lg font-bold text-emerald-700">{{ number_format($totalDrugs) }}</p>
+                    <p class="text-[10px] text-emerald-600 font-medium">{{ __('app.total_drugs') }}</p>
+                </div>
+            </div>
+        </div>
+
+        {{-- How it works info --}}
+        <div class="bg-gradient-to-r from-emerald-50 via-teal-50 to-cyan-50 rounded-2xl border border-emerald-200/60 p-5">
+            <div class="flex items-start gap-3">
+                <div class="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0 mt-0.5">
+                    <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div>
+                    <h3 class="text-sm font-bold text-gray-900 mb-1">{{ __('app.how_pharmacy_works') }}</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs text-gray-600">
+                        <div class="flex items-start gap-2">
+                            <span class="w-5 h-5 rounded-full bg-emerald-200 text-emerald-800 flex items-center justify-center text-[10px] font-bold shrink-0">1</span>
+                            <p>{{ __('app.pharmacy_step_1') }}</p>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="w-5 h-5 rounded-full bg-violet-200 text-violet-800 flex items-center justify-center text-[10px] font-bold shrink-0">2</span>
+                            <p>{{ __('app.pharmacy_step_2') }}</p>
+                        </div>
+                        <div class="flex items-start gap-2">
+                            <span class="w-5 h-5 rounded-full bg-blue-200 text-blue-800 flex items-center justify-center text-[10px] font-bold shrink-0">3</span>
+                            <p>{{ __('app.pharmacy_step_3') }}</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -33,8 +65,7 @@
                         </svg>
                         <input type="text" name="q" value="{{ $query }}"
                                placeholder="{{ __('app.search_drug_placeholder') }}"
-                               class="{{ app()->getLocale() === 'ar' ? 'pr-10' : 'pl-10' }} w-full rounded-xl border-gray-200 focus:border-emerald-500 focus:ring-emerald-500 text-sm py-3"
-                               x-ref="searchInput">
+                               class="{{ app()->getLocale() === 'ar' ? 'pr-10' : 'pl-10' }} w-full rounded-xl border-gray-200 focus:border-emerald-500 focus:ring-emerald-500 text-sm py-3">
                     </div>
 
                     {{-- Source Toggle --}}
@@ -68,118 +99,72 @@
             </form>
         </div>
 
-        {{-- API Result --}}
+        {{-- API Result + Saved Notice --}}
         @if($source === 'api' && $apiResult)
-            <div class="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
-                <div class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-violet-50 to-purple-50">
-                    <div class="flex items-center gap-2">
-                        <svg class="w-5 h-5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                        <h3 class="text-sm font-bold text-gray-900">{{ __('app.api_drug_result') }}</h3>
-                        <span class="text-[10px] font-bold text-violet-600 bg-violet-100 px-2 py-0.5 rounded-full">RapidAPI</span>
+            @if($apiResult['success'] && $savedDrug)
+                {{-- Success: saved to DB --}}
+                <div class="bg-white rounded-2xl border border-emerald-200 shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 border-b border-emerald-100 bg-gradient-to-r from-emerald-50 to-teal-50 flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <h3 class="text-sm font-bold text-gray-900">{{ __('app.drug_saved_to_db') }}</h3>
+                            <span class="text-[10px] font-bold text-emerald-600 bg-emerald-100 px-2 py-0.5 rounded-full">{{ __('app.saved') }}</span>
+                        </div>
+                        <a href="{{ route('dashboard.pharmacy.show', $savedDrug) }}"
+                           class="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition-colors">
+                            {{ __('app.view_details') }}
+                            <svg class="w-3 h-3 {{ app()->getLocale() === 'ar' ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        </a>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-start gap-5">
+                            @if($savedDrug->image)
+                                <img src="{{ filter_var($savedDrug->image, FILTER_VALIDATE_URL) ? $savedDrug->image : asset('storage/' . $savedDrug->image) }}"
+                                     alt="{{ $savedDrug->name }}"
+                                     class="w-20 h-20 object-contain rounded-xl border border-gray-200 bg-gray-50 p-2">
+                            @endif
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-lg font-bold text-gray-900">{{ $savedDrug->name }}</h3>
+                                @if($savedDrug->generic_name)
+                                    <p class="text-sm text-gray-500 mt-0.5">{{ __('app.generic_name') }}: {{ $savedDrug->generic_name }}</p>
+                                @endif
+                                @if($savedDrug->description)
+                                    <p class="text-sm text-gray-600 mt-2 line-clamp-2">{{ $savedDrug->description }}</p>
+                                @endif
+                                <div class="flex flex-wrap gap-2 mt-3">
+                                    @if($savedDrug->drug_class)
+                                        <span class="px-2.5 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-lg">{{ $savedDrug->drug_class }}</span>
+                                    @endif
+                                    @if($savedDrug->manufacturer)
+                                        <span class="px-2.5 py-1 bg-gray-100 text-gray-600 text-xs font-medium rounded-lg">{{ $savedDrug->manufacturer }}</span>
+                                    @endif
+                                    @if($savedDrug->price > 0)
+                                        <span class="px-2.5 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-lg">{{ number_format($savedDrug->price, 2) }} {{ __('app.egp') }}</span>
+                                    @endif
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-
-                @if($apiResult['success'] && $apiResult['data'])
-                    <div class="p-6">
-                        @php $drug = $apiResult['data']; @endphp
-
-                        {{-- Drug Header --}}
-                        <div class="flex flex-col md:flex-row gap-6 mb-6">
-                            @if(!empty($drug['image']))
-                                <div class="shrink-0">
-                                    <img src="{{ $drug['image'] }}" alt="{{ $drug['name'] ?? $query }}" class="w-32 h-32 object-contain rounded-xl border border-gray-200 bg-gray-50 p-2">
-                                </div>
-                            @endif
-                            <div class="flex-1 space-y-2">
-                                <h3 class="text-xl font-bold text-gray-900">{{ $drug['name'] ?? $query }}</h3>
-                                @if(!empty($drug['generic_name']))
-                                    <p class="text-sm text-gray-500">
-                                        <span class="font-medium text-gray-700">{{ __('app.generic_name') }}:</span>
-                                        {{ $drug['generic_name'] }}
-                                    </p>
-                                @endif
-                                @if(!empty($drug['manufacturer']))
-                                    <p class="text-sm text-gray-500">
-                                        <span class="font-medium text-gray-700">{{ __('app.manufacturer') }}:</span>
-                                        {{ $drug['manufacturer'] }}
-                                    </p>
-                                @endif
-                                @if(!empty($drug['drug_class']) || !empty($drug['type']))
-                                    <div class="flex flex-wrap gap-2 mt-2">
-                                        @if(!empty($drug['drug_class']))
-                                            <span class="inline-flex items-center px-2.5 py-1 bg-blue-50 text-blue-700 text-xs font-medium rounded-lg">{{ $drug['drug_class'] }}</span>
-                                        @endif
-                                        @if(!empty($drug['type']))
-                                            <span class="inline-flex items-center px-2.5 py-1 bg-emerald-50 text-emerald-700 text-xs font-medium rounded-lg">{{ $drug['type'] }}</span>
-                                        @endif
-                                    </div>
-                                @endif
-                            </div>
-                        </div>
-
-                        {{-- Drug Details Grid --}}
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            @foreach(['description', 'indications', 'dosage', 'side_effects', 'contraindications', 'interactions', 'warnings', 'pregnancy_category', 'storage'] as $field)
-                                @if(!empty($drug[$field]))
-                                    <div class="p-4 bg-gray-50 rounded-xl {{ in_array($field, ['description', 'side_effects', 'warnings']) ? 'md:col-span-2' : '' }}">
-                                        <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-2">
-                                            {{ __('app.drug_' . $field) }}
-                                        </h4>
-                                        <p class="text-sm text-gray-700 leading-relaxed whitespace-pre-line">{{ is_array($drug[$field]) ? implode("\n", $drug[$field]) : $drug[$field] }}</p>
-                                    </div>
-                                @endif
-                            @endforeach
-                        </div>
-
-                        {{-- Price History --}}
-                        @if(!empty($drug['price']) || !empty($drug['prices']))
-                            <div class="mt-4 p-4 bg-emerald-50 rounded-xl">
-                                <h4 class="text-xs font-bold text-emerald-700 uppercase tracking-wider mb-2">{{ __('app.drug_price') }}</h4>
-                                @if(!empty($drug['price']))
-                                    <p class="text-2xl font-bold text-emerald-800">{{ $drug['price'] }}</p>
-                                @endif
-                                @if(!empty($drug['prices']) && is_array($drug['prices']))
-                                    <div class="space-y-1 mt-2">
-                                        @foreach($drug['prices'] as $priceEntry)
-                                            <div class="flex justify-between text-sm">
-                                                <span class="text-emerald-700">{{ $priceEntry['pharmacy'] ?? $priceEntry['source'] ?? '-' }}</span>
-                                                <span class="font-semibold text-emerald-800">{{ $priceEntry['price'] ?? '-' }}</span>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                @endif
-                            </div>
-                        @endif
-
-                        {{-- Raw data (collapsible for debugging) --}}
-                        <div class="mt-4" x-data="{ showRaw: false }">
-                            <button @click="showRaw = !showRaw" class="text-xs text-gray-400 hover:text-gray-600 flex items-center gap-1">
-                                <svg class="w-3 h-3 transition-transform" :class="showRaw && 'rotate-90'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                                {{ __('app.raw_data') }}
-                            </button>
-                            <pre x-show="showRaw" x-transition class="mt-2 p-4 bg-gray-900 text-green-400 text-xs rounded-xl overflow-x-auto max-h-64">{{ json_encode($drug, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
-                        </div>
-                    </div>
-                @elseif($apiResult['error'] === 'rate_limit')
-                    <div class="p-8 text-center">
-                        <svg class="w-12 h-12 text-amber-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <h3 class="text-sm font-bold text-gray-900 mb-1">{{ __('app.rate_limit_reached') }}</h3>
-                        <p class="text-xs text-gray-500">{{ __('app.rate_limit_desc') }}</p>
-                    </div>
-                @elseif($apiResult['error'] === 'no_results')
-                    <div class="p-8 text-center">
-                        <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <h3 class="text-sm font-bold text-gray-900 mb-1">{{ __('app.no_results_found') }}</h3>
-                        <p class="text-xs text-gray-500">{{ __('app.try_different_drug_name') }}</p>
-                    </div>
-                @else
-                    <div class="p-8 text-center">
-                        <svg class="w-12 h-12 text-red-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
-                        <h3 class="text-sm font-bold text-gray-900 mb-1">{{ __('app.api_error') }}</h3>
-                        <p class="text-xs text-gray-500">{{ $apiResult['error'] }}</p>
-                    </div>
-                @endif
-            </div>
+            @elseif($apiResult['error'] === 'rate_limit')
+                <div class="bg-white rounded-2xl border border-amber-200 shadow-sm p-8 text-center">
+                    <svg class="w-12 h-12 text-amber-400 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <h3 class="text-sm font-bold text-gray-900 mb-1">{{ __('app.rate_limit_reached') }}</h3>
+                    <p class="text-xs text-gray-500">{{ __('app.rate_limit_desc') }}</p>
+                </div>
+            @elseif($apiResult['error'] === 'no_results')
+                <div class="bg-white rounded-2xl border border-gray-200 shadow-sm p-8 text-center">
+                    <svg class="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <h3 class="text-sm font-bold text-gray-900 mb-1">{{ __('app.no_results_found') }}</h3>
+                    <p class="text-xs text-gray-500">{{ __('app.try_different_drug_name') }}</p>
+                </div>
+            @elseif(!$apiResult['success'])
+                <div class="bg-white rounded-2xl border border-red-200 shadow-sm p-8 text-center">
+                    <svg class="w-12 h-12 text-red-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z"/></svg>
+                    <h3 class="text-sm font-bold text-gray-900 mb-1">{{ __('app.api_error') }}</h3>
+                    <p class="text-xs text-gray-500">{{ $apiResult['error'] }}</p>
+                </div>
+            @endif
         @endif
 
         {{-- Local Drug Database --}}
@@ -198,10 +183,10 @@
                         <thead class="bg-gray-50/80">
                             <tr>
                                 <th class="px-6 py-3 text-start text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('app.drug_name') }}</th>
+                                <th class="px-6 py-3 text-start text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('app.generic_name') }}</th>
                                 <th class="px-6 py-3 text-start text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('app.category') }}</th>
                                 <th class="px-6 py-3 text-start text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('app.price') }}</th>
-                                <th class="px-6 py-3 text-start text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('app.type') }}</th>
-                                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('app.api_lookup') }}</th>
+                                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-500 uppercase tracking-wider">{{ __('app.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-gray-100">
@@ -210,7 +195,9 @@
                                     <td class="px-6 py-3.5">
                                         <div class="flex items-center gap-3">
                                             @if($drug->image)
-                                                <img src="{{ asset('storage/' . $drug->image) }}" alt="{{ $drug->name }}" class="w-10 h-10 rounded-lg object-contain border border-gray-200 bg-white p-0.5">
+                                                <img src="{{ filter_var($drug->image, FILTER_VALIDATE_URL) ? $drug->image : asset('storage/' . $drug->image) }}"
+                                                     alt="{{ $drug->name }}"
+                                                     class="w-10 h-10 rounded-lg object-contain border border-gray-200 bg-white p-0.5">
                                             @else
                                                 <div class="w-10 h-10 rounded-lg bg-emerald-50 flex items-center justify-center">
                                                     <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"/></svg>
@@ -221,14 +208,26 @@
                                                 @if($drug->name_ar)
                                                     <p class="text-xs text-gray-400">{{ $drug->name_ar }}</p>
                                                 @endif
+                                                @if($drug->description)
+                                                    <p class="text-xs text-gray-400 line-clamp-1 max-w-xs mt-0.5">{{ Str::limit($drug->description, 60) }}</p>
+                                                @endif
                                             </div>
                                         </div>
+                                    </td>
+                                    <td class="px-6 py-3.5">
+                                        @if($drug->generic_name)
+                                            <span class="text-sm text-gray-600">{{ Str::limit($drug->generic_name, 30) }}</span>
+                                        @else
+                                            <span class="text-gray-300">—</span>
+                                        @endif
                                     </td>
                                     <td class="px-6 py-3.5">
                                         @if($drug->category_name)
                                             <span class="inline-flex items-center px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-md">
                                                 {{ app()->getLocale() === 'ar' && $drug->category_name_ar ? $drug->category_name_ar : $drug->category_name }}
                                             </span>
+                                        @elseif($drug->drug_class)
+                                            <span class="inline-flex items-center px-2 py-0.5 bg-blue-50 text-blue-600 text-xs rounded-md">{{ Str::limit($drug->drug_class, 20) }}</span>
                                         @else
                                             <span class="text-gray-300">—</span>
                                         @endif
@@ -240,21 +239,22 @@
                                             <span class="text-gray-300">—</span>
                                         @endif
                                     </td>
-                                    <td class="px-6 py-3.5">
-                                        <span class="inline-flex items-center px-2 py-0.5 text-xs rounded-md {{ $drug->is_drug ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600' }}">
-                                            {{ $drug->is_drug ? __('app.drug') : __('app.product') }}
-                                        </span>
-                                    </td>
                                     <td class="px-6 py-3.5 text-center">
-                                        @if($isConfigured)
-                                            <a href="{{ route('dashboard.pharmacy.index', ['q' => $drug->name, 'source' => 'api']) }}"
-                                               class="inline-flex items-center gap-1 px-3 py-1.5 bg-violet-50 hover:bg-violet-100 text-violet-700 text-xs font-medium rounded-lg transition-colors">
-                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                                                {{ __('app.lookup') }}
+                                        <div class="flex items-center justify-center gap-2">
+                                            <a href="{{ route('dashboard.pharmacy.show', $drug) }}"
+                                               class="inline-flex items-center gap-1 px-3 py-1.5 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-medium rounded-lg transition-colors">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                {{ __('app.view') }}
                                             </a>
-                                        @else
-                                            <span class="text-gray-300 text-xs">—</span>
-                                        @endif
+                                            @if($isConfigured)
+                                                <a href="{{ route('dashboard.pharmacy.index', ['q' => $drug->name, 'source' => 'api']) }}"
+                                                   class="inline-flex items-center gap-1 px-3 py-1.5 bg-violet-50 hover:bg-violet-100 text-violet-700 text-xs font-medium rounded-lg transition-colors"
+                                                   title="{{ __('app.refresh_from_api') }}">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                                    API
+                                                </a>
+                                            @endif
+                                        </div>
                                     </td>
                                 </tr>
                             @endforeach
@@ -272,15 +272,16 @@
             @endif
         </div>
 
-        {{-- Quick API Lookup (AJAX sidebar) --}}
+        {{-- Quick API Lookup --}}
         @if($isConfigured)
         <div class="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
             <div class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-violet-50 to-purple-50">
                 <div class="flex items-center gap-2">
                     <svg class="w-5 h-5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                     <h3 class="text-sm font-bold text-gray-900">{{ __('app.quick_drug_lookup') }}</h3>
-                    <span class="text-[10px] font-bold text-violet-600 bg-violet-100 px-2 py-0.5 rounded-full">AI</span>
+                    <span class="text-[10px] font-bold text-violet-600 bg-violet-100 px-2 py-0.5 rounded-full">API</span>
                 </div>
+                <p class="text-xs text-gray-500 mt-1">{{ __('app.quick_lookup_desc') }}</p>
             </div>
             <div class="p-6">
                 <div class="flex gap-3">
@@ -299,6 +300,10 @@
                 <div x-show="quickResult" x-transition class="mt-4">
                     <template x-if="quickResult && quickResult.success">
                         <div class="p-4 bg-emerald-50 rounded-xl border border-emerald-200">
+                            <div class="flex items-center gap-2 mb-3">
+                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <span class="text-xs font-bold text-emerald-700">{{ __('app.drug_saved_to_db') }}</span>
+                            </div>
                             <div class="flex items-start gap-3">
                                 <template x-if="quickResult.data && quickResult.data.image">
                                     <img :src="quickResult.data.image" class="w-16 h-16 object-contain rounded-lg border bg-white p-1">
@@ -306,25 +311,27 @@
                                 <div class="flex-1 min-w-0">
                                     <h4 class="font-bold text-gray-900" x-text="quickResult.data?.name || quickQuery"></h4>
                                     <template x-if="quickResult.data?.generic_name">
-                                        <p class="text-xs text-gray-500 mt-0.5" x-text="'Generic: ' + quickResult.data.generic_name"></p>
-                                    </template>
-                                    <template x-if="quickResult.data?.drug_class">
-                                        <span class="inline-flex mt-1 items-center px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-md" x-text="quickResult.data.drug_class"></span>
+                                        <p class="text-xs text-gray-500 mt-0.5"><span class="font-medium">{{ __('app.generic_name') }}:</span> <span x-text="quickResult.data.generic_name"></span></p>
                                     </template>
                                     <template x-if="quickResult.data?.description">
-                                        <p class="text-sm text-gray-600 mt-2 line-clamp-3" x-text="quickResult.data.description"></p>
+                                        <p class="text-sm text-gray-600 mt-2 line-clamp-2" x-text="quickResult.data.description"></p>
                                     </template>
-                                    <template x-if="quickResult.data?.price">
-                                        <p class="text-lg font-bold text-emerald-700 mt-2" x-text="quickResult.data.price"></p>
+                                    <div class="flex flex-wrap gap-2 mt-2">
+                                        <template x-if="quickResult.data?.drug_class">
+                                            <span class="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs rounded-md" x-text="quickResult.data.drug_class"></span>
+                                        </template>
+                                        <template x-if="quickResult.data?.price">
+                                            <span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-xs font-bold rounded-md" x-text="quickResult.data.price"></span>
+                                        </template>
+                                    </div>
+                                    <template x-if="quickResult.saved_drug_id">
+                                        <a :href="'{{ route('dashboard.pharmacy.index') }}/' + quickResult.saved_drug_id"
+                                           class="inline-flex items-center gap-1 mt-3 px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg transition-colors">
+                                            {{ __('app.view_details') }}
+                                            <svg class="w-3 h-3 {{ app()->getLocale() === 'ar' ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                        </a>
                                     </template>
                                 </div>
-                            </div>
-                            <div class="mt-3 pt-3 border-t border-emerald-200">
-                                <button @click="showFullRaw = !showFullRaw" class="text-xs text-emerald-600 hover:text-emerald-700 flex items-center gap-1">
-                                    <svg class="w-3 h-3 transition-transform" :class="showFullRaw && 'rotate-90'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                                    {{ __('app.view_full_data') }}
-                                </button>
-                                <pre x-show="showFullRaw" x-transition class="mt-2 p-3 bg-gray-900 text-green-400 text-xs rounded-lg overflow-x-auto max-h-48" x-text="JSON.stringify(quickResult.data, null, 2)"></pre>
                             </div>
                         </div>
                     </template>
@@ -346,13 +353,11 @@
                 quickQuery: '',
                 quickResult: null,
                 loading: false,
-                showFullRaw: false,
 
                 async quickLookup() {
                     if (this.quickQuery.length < 2 || this.loading) return;
                     this.loading = true;
                     this.quickResult = null;
-                    this.showFullRaw = false;
 
                     try {
                         const res = await fetch(`{{ route('dashboard.pharmacy.api-lookup') }}?drug=${encodeURIComponent(this.quickQuery)}`, {

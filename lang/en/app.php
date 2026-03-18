@@ -724,6 +724,16 @@ return [
     'rate_limit_desc' => 'API request limit exceeded. Please try again later.',
     'api_error' => 'API Error',
     'egp' => 'EGP',
+    'total_drugs' => 'Total Drugs',
+    'how_pharmacy_works' => 'How the Pharmacy Section Works',
+    'pharmacy_step_1' => 'Search the local drug database for medications already in the system',
+    'pharmacy_step_2' => 'Use API Search to fetch drug details from a global database and save them locally',
+    'pharmacy_step_3' => 'View full details including dosage, side effects, interactions, and more',
+    'drug_saved_to_db' => 'Drug information saved to local database',
+    'refresh_from_api' => 'Refresh from API',
+    'quick_lookup_desc' => 'Search for a drug using the API without reloading the page. Results are automatically saved.',
+    'drug_storage_info' => 'Storage',
+    'api_fetched' => 'Last updated from API',
 
     // Landing Page
     'landing_badge' => 'Free for a limited time',
@@ -1295,7 +1305,6 @@ return [
     'no_debts' => 'No patient debts found.',
     'balance' => 'Balance',
     'search_patient' => 'Search patient name or phone',
-    'view_details' => 'View Details',
 
     // Patient Medical Features
     'vital_signs' => 'Vital Signs',
