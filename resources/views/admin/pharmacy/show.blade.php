@@ -110,20 +110,64 @@
             @endforeach
         </div>
 
-        {{-- Raw API Data --}}
+        {{-- Extra API Data (rendered as readable cards, NOT raw JSON) --}}
         @if($drug->api_raw_data)
-            <div class="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden" x-data="{ open: false }">
-                <button @click="open = !open" class="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors">
-                    <div class="flex items-center gap-2">
-                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"/></svg>
-                        <h3 class="text-sm font-bold text-gray-900">{{ __('app.raw_data') }} (JSON)</h3>
+            @php
+                // Get fields we already displayed above
+                $displayedKeys = ['name', 'brand_name', 'generic_name', 'manufacturer', 'company', 'labeler', 'drug_class',
+                    'pharmacologic_class', 'pharm_class', 'description', 'purpose', 'summary', 'indications', 'indications_and_usage',
+                    'uses', 'dosage', 'dosage_and_administration', 'dose', 'side_effects', 'adverse_reactions', 'adverse_effects',
+                    'contraindications', 'do_not_use', 'interactions', 'drug_interactions', 'warnings', 'warnings_and_cautions',
+                    'boxed_warning', 'pregnancy_category', 'pregnancy', 'storage', 'storage_and_handling', 'image', 'price',
+                    'prices', 'id', 'product_id', 'type', 'active_ingredient', 'active_ingredients', 'category'];
+
+                $extraData = collect($drug->api_raw_data)->reject(function ($value, $key) use ($displayedKeys) {
+                    return in_array($key, $displayedKeys) || empty($value);
+                });
+            @endphp
+
+            @if($extraData->count() > 0)
+                <div class="bg-white rounded-2xl border border-gray-200/80 shadow-sm overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-100 flex items-center gap-2">
+                        <div class="w-7 h-7 rounded-lg bg-indigo-50 flex items-center justify-center">
+                            <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        </div>
+                        <h3 class="text-sm font-bold text-gray-900">{{ __('app.additional_info') }}</h3>
                     </div>
-                    <svg class="w-4 h-4 text-gray-400 transition-transform" :class="open && 'rotate-180'" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-                </button>
-                <div x-show="open" x-transition class="px-6 pb-6">
-                    <pre class="p-4 bg-gray-900 text-green-400 text-xs rounded-xl overflow-x-auto max-h-96">{{ json_encode($drug->api_raw_data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                    <div class="divide-y divide-gray-100">
+                        @foreach($extraData as $key => $value)
+                            <div class="px-6 py-4">
+                                <h4 class="text-xs font-bold text-gray-500 uppercase tracking-wider mb-1.5">
+                                    {{ __(str_replace('_', ' ', ucfirst($key))) }}
+                                </h4>
+                                @if(is_array($value))
+                                    @if(array_is_list($value))
+                                        <ul class="text-sm text-gray-700 space-y-1">
+                                            @foreach($value as $item)
+                                                <li class="flex items-start gap-2">
+                                                    <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 shrink-0"></span>
+                                                    <span>{{ is_string($item) ? $item : json_encode($item) }}</span>
+                                                </li>
+                                            @endforeach
+                                        </ul>
+                                    @else
+                                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                            @foreach($value as $subKey => $subVal)
+                                                <div class="p-3 bg-gray-50 rounded-lg">
+                                                    <p class="text-[10px] font-bold text-gray-400 uppercase">{{ str_replace('_', ' ', $subKey) }}</p>
+                                                    <p class="text-sm text-gray-700 mt-0.5">{{ is_string($subVal) ? $subVal : json_encode($subVal) }}</p>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                @else
+                                    <p class="text-sm text-gray-700 leading-relaxed whitespace-pre-line">{{ $value }}</p>
+                                @endif
+                            </div>
+                        @endforeach
+                    </div>
                 </div>
-            </div>
+            @endif
         @endif
     </div>
 </x-dashboard-layout>

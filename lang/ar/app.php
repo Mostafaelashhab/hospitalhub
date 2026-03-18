@@ -738,6 +738,7 @@ return [
     'quick_lookup_desc' => 'ابحث عن دواء باستخدام API بدون إعادة تحميل الصفحة. النتائج تُحفظ تلقائياً.',
     'drug_storage_info' => 'التخزين',
     'api_fetched' => 'آخر تحديث من API',
+    'additional_info' => 'معلومات إضافية',
 
     // Landing Page
     'landing_badge' => 'مجاني لفترة محدودة',
