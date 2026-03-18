@@ -20,7 +20,7 @@ class AIRadiologyService
     }
 
     /**
-     * Analyze an X-ray image via URL.
+     * Analyze an X-ray image via URL (downloads then sends as file).
      */
     public function analyzeFromUrl(string $imageUrl, string $message = '', string $language = 'en'): array
     {
@@ -28,13 +28,10 @@ class AIRadiologyService
             return $this->errorResponse('AI Radiology API key is not configured.');
         }
 
-        if (empty($message)) {
-            $message = $language === 'ar'
-                ? 'فحص شامل للأشعة وتحديد أي نتائج غير طبيعية'
-                : 'Perform a comprehensive analysis and check for any abnormalities';
-        }
+        $message = $this->resolveMessage($message, $language);
 
         try {
+            // Try with imageUrl query param first
             $queryString = http_build_query([
                 'imageUrl' => $imageUrl,
                 'message' => $message,
@@ -48,77 +45,133 @@ class AIRadiologyService
             ])->timeout(120)->post($this->baseUrl . '/check?' . $queryString);
 
             if ($response->successful()) {
-                $data = $response->json();
-                return [
-                    'success' => true,
-                    'data' => $data,
-                    'status_code' => $response->status(),
-                ];
+                return $this->successResponse($response->json());
             }
 
-            Log::warning('AI Radiology API error', [
-                'status' => $response->status(),
-                'body' => $response->body(),
-                'url' => $this->baseUrl . '/check',
-                'imageUrl' => $imageUrl,
-            ]);
+            // If 400 (image not found), try downloading and sending as file
+            if ($response->status() === 400) {
+                $imageContent = @file_get_contents($imageUrl);
+                if ($imageContent) {
+                    return $this->analyzeFromContent($imageContent, 'xray.jpg', $message, $language);
+                }
+            }
 
-            return $this->errorResponse(
-                'API returned status ' . $response->status(),
-                $response->status()
-            );
+            return $this->logAndError($response, $imageUrl);
         } catch (\Exception $e) {
-            Log::error('AI Radiology API exception', [
-                'message' => $e->getMessage(),
-            ]);
-
+            Log::error('AI Radiology API exception', ['message' => $e->getMessage()]);
             return $this->errorResponse($e->getMessage());
         }
     }
 
     /**
-     * Analyze an uploaded image file.
-     * Stores temporarily, generates a public URL, then calls the API.
+     * Analyze an uploaded file directly (sends as multipart).
      */
     public function analyzeFromFile($file, string $message = '', string $language = 'en'): array
     {
-        $path = $file->store('ai-radiology-temp', 'public');
-        $publicUrl = url(Storage::url($path));
+        if (empty($this->apiKey)) {
+            return $this->errorResponse('AI Radiology API key is not configured.');
+        }
 
-        $result = $this->analyzeFromUrl($publicUrl, $message, $language);
+        $message = $this->resolveMessage($message, $language);
 
-        // Keep the file for reference — will be cleaned up by the controller if needed
-        $result['temp_file_path'] = $path;
+        try {
+            $imageContent = file_get_contents($file->getRealPath());
+            $filename = $file->getClientOriginalName() ?: 'xray.jpg';
 
-        return $result;
+            return $this->analyzeFromContent($imageContent, $filename, $message, $language);
+        } catch (\Exception $e) {
+            Log::error('AI Radiology file exception', ['message' => $e->getMessage()]);
+            return $this->errorResponse($e->getMessage());
+        }
     }
 
     /**
-     * Check if the service is configured.
+     * Analyze from a storage path (existing patient file).
      */
+    public function analyzeFromStorage(string $storagePath, string $message = '', string $language = 'en'): array
+    {
+        if (empty($this->apiKey)) {
+            return $this->errorResponse('AI Radiology API key is not configured.');
+        }
+
+        $message = $this->resolveMessage($message, $language);
+
+        try {
+            $imageContent = Storage::disk('public')->get($storagePath);
+            if (!$imageContent) {
+                return $this->errorResponse('File not found in storage.');
+            }
+
+            $filename = basename($storagePath);
+            return $this->analyzeFromContent($imageContent, $filename, $message, $language);
+        } catch (\Exception $e) {
+            Log::error('AI Radiology storage exception', ['message' => $e->getMessage()]);
+            return $this->errorResponse($e->getMessage());
+        }
+    }
+
+    /**
+     * Core method: send image content as multipart file upload.
+     */
+    protected function analyzeFromContent(string $imageContent, string $filename, string $message, string $language): array
+    {
+        $queryString = http_build_query([
+            'message' => $message,
+            'language' => $language,
+            'noqueue' => '1',
+        ]);
+
+        $response = Http::withHeaders([
+            'x-rapidapi-key' => $this->apiKey,
+            'x-rapidapi-host' => $this->apiHost,
+        ])->timeout(120)
+          ->attach('image', $imageContent, $filename)
+          ->post($this->baseUrl . '/check?' . $queryString);
+
+        if ($response->successful()) {
+            return $this->successResponse($response->json());
+        }
+
+        Log::warning('AI Radiology API error (file upload)', [
+            'status' => $response->status(),
+            'body' => substr($response->body(), 0, 500),
+        ]);
+
+        return $this->errorResponse('API returned status ' . $response->status(), $response->status());
+    }
+
     public function isConfigured(): bool
     {
         return !empty($this->apiKey);
     }
 
-    /**
-     * Get remaining API quota info from last response headers (if available).
-     */
-    public function getQuotaInfo(): array
+    protected function resolveMessage(string $message, string $language): string
     {
-        return [
-            'configured' => $this->isConfigured(),
-            'host' => $this->apiHost,
-        ];
+        if (empty($message)) {
+            return $language === 'ar'
+                ? 'فحص شامل للأشعة وتحديد أي نتائج غير طبيعية'
+                : 'Perform a comprehensive analysis and check for any abnormalities';
+        }
+        return $message;
+    }
+
+    protected function successResponse(array $data): array
+    {
+        return ['success' => true, 'data' => $data, 'status_code' => 200];
+    }
+
+    protected function logAndError($response, string $imageUrl): array
+    {
+        Log::warning('AI Radiology API error', [
+            'status' => $response->status(),
+            'body' => substr($response->body(), 0, 500),
+            'imageUrl' => $imageUrl,
+        ]);
+        return $this->errorResponse('API returned status ' . $response->status(), $response->status());
     }
 
     protected function errorResponse(string $message, int $statusCode = 0): array
     {
-        return [
-            'success' => false,
-            'error' => $message,
-            'status_code' => $statusCode,
-            'data' => null,
-        ];
+        return ['success' => false, 'error' => $message, 'status_code' => $statusCode, 'data' => null];
     }
 }

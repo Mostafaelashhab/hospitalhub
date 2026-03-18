@@ -83,8 +83,7 @@ class AIRadiologyController extends Controller
                 ->where('clinic_id', $clinic->id)
                 ->firstOrFail();
 
-            $publicUrl = url(Storage::url($file->file_path));
-            $result = $this->service->analyzeFromUrl($publicUrl, $message, $language);
+            $result = $this->service->analyzeFromStorage($file->file_path, $message, $language);
         }
 
         if ($result['success']) {
