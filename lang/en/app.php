@@ -678,6 +678,13 @@ return [
     'setup_instructions' => 'Setup Instructions',
     'ai_setup_step1' => '1. Get a free API key from RapidAPI (AI Radiology Reporting API) and add it to your .env file:',
     'ai_setup_step2' => '2. Clear config cache: php artisan config:clear',
+    'image_quality' => 'Image Quality',
+    'health_risk' => 'Health Risk',
+    'urgency' => 'Urgency',
+    'severity' => 'Severity',
+    'complication_risk' => 'Complication Risk',
+    'potential_abnormalities' => 'Potential Abnormalities',
+    'observations' => 'Observations',
 
     // Landing Page
     'landing_badge' => 'Free for a limited time',

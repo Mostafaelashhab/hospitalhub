@@ -35,15 +35,17 @@ class AIRadiologyService
         }
 
         try {
-            $response = Http::withHeaders([
-                'x-rapidapi-key' => $this->apiKey,
-                'x-rapidapi-host' => $this->apiHost,
-            ])->timeout(60)->get($this->baseUrl . '/check', [
+            $queryString = http_build_query([
                 'imageUrl' => $imageUrl,
                 'message' => $message,
                 'language' => $language,
-                'noqueue' => 1,
+                'noqueue' => '1',
             ]);
+
+            $response = Http::withHeaders([
+                'x-rapidapi-key' => $this->apiKey,
+                'x-rapidapi-host' => $this->apiHost,
+            ])->timeout(120)->post($this->baseUrl . '/check?' . $queryString);
 
             if ($response->successful()) {
                 $data = $response->json();
@@ -57,6 +59,8 @@ class AIRadiologyService
             Log::warning('AI Radiology API error', [
                 'status' => $response->status(),
                 'body' => $response->body(),
+                'url' => $this->baseUrl . '/check',
+                'imageUrl' => $imageUrl,
             ]);
 
             return $this->errorResponse(

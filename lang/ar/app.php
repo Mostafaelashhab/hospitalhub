@@ -682,6 +682,13 @@ return [
     'setup_instructions' => 'تعليمات الإعداد',
     'ai_setup_step1' => '1. احصل على مفتاح API مجاني من RapidAPI (AI Radiology Reporting API) وأضفه في ملف .env:',
     'ai_setup_step2' => '2. امسح الكاش: php artisan config:clear',
+    'image_quality' => 'جودة الصورة',
+    'health_risk' => 'الخطورة الصحية',
+    'urgency' => 'الاستعجال',
+    'severity' => 'الشدة',
+    'complication_risk' => 'خطر المضاعفات',
+    'potential_abnormalities' => 'تشوهات محتملة',
+    'observations' => 'ملاحظات',
 
     // Landing Page
     'landing_badge' => 'مجاني لفترة محدودة',
