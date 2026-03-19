@@ -54,12 +54,13 @@
                     <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     {{ __('app.how_points_work') }}
                 </h3>
+                @php $pointCost = (int) \App\Models\PlatformSetting::getPointPrice($clinic); @endphp
                 <div class="space-y-3">
                     <div class="flex items-center gap-3 p-3 rounded-xl bg-blue-50 border border-blue-100">
                         <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center shrink-0">
-                            <span class="text-sm font-bold text-blue-600">1</span>
+                            <span class="text-sm font-bold text-blue-600">{{ $pointCost }}</span>
                         </div>
-                        <p class="text-sm text-blue-800"><strong>{{ __('app.new_patient_cost') }}</strong> — {{ __('app.new_patient_cost_desc') }}</p>
+                        <p class="text-sm text-blue-800"><strong>{{ __('app.new_patient_cost', ['count' => $pointCost]) }}</strong> — {{ __('app.new_patient_cost_desc', ['count' => $pointCost]) }}</p>
                     </div>
                     <div class="flex items-center gap-3 p-3 rounded-xl bg-emerald-50 border border-emerald-100">
                         <div class="w-8 h-8 bg-emerald-100 rounded-lg flex items-center justify-center shrink-0">

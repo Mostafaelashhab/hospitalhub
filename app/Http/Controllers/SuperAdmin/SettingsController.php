@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\SuperAdmin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Clinic;
 use App\Models\PlatformSetting;
 use Illuminate\Http\Request;
 
@@ -43,6 +44,25 @@ class SettingsController extends Controller
         PlatformSetting::set('vodafone_account_name', $validated['vodafone_account_name'] ?? null);
         PlatformSetting::set('vodafone_account_number', $validated['vodafone_account_number'] ?? null);
 
-        return back()->with('success', __('app.settings_updated'));
+        $messages = [__('app.settings_updated')];
+
+        // Apply point price to all clinics
+        if ($request->filled('apply_points_all')) {
+            Clinic::query()->update(['points_per_patient' => (int) $validated['point_price']]);
+            $messages[] = app()->getLocale() === 'ar'
+                ? 'تم تعميم سعر النقطة على كل العيادات'
+                : 'Point price applied to all clinics';
+        }
+
+        // Apply free mode to all clinics
+        if ($request->filled('apply_free_mode_all')) {
+            $freeMode = $request->has('free_mode_enabled');
+            Clinic::query()->update(['free_mode' => $freeMode]);
+            $messages[] = app()->getLocale() === 'ar'
+                ? 'تم تعميم الوضع المجاني على كل العيادات'
+                : 'Free mode applied to all clinics';
+        }
+
+        return back()->with('success', implode(' | ', $messages));
     }
 }

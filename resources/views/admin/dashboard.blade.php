@@ -18,9 +18,11 @@
             <div>
                 <h3 class="text-base font-bold text-emerald-800">{{ __('app.free_mode_banner_title') }}</h3>
                 <p class="text-sm text-emerald-700 mt-1">{{ __('app.free_mode_banner_desc') }}</p>
-                @php $freeModeUntil = \App\Models\PlatformSetting::get('free_mode_until'); @endphp
-                @if($freeModeUntil)
-                <p class="text-xs text-emerald-600 mt-2 font-semibold">{{ __('app.until') }} {{ $freeModeUntil }}</p>
+                @if(!$clinic->free_mode)
+                    @php $freeModeUntil = \App\Models\PlatformSetting::get('free_mode_until'); @endphp
+                    @if($freeModeUntil)
+                    <p class="text-xs text-emerald-600 mt-2 font-semibold">{{ __('app.until') }} {{ $freeModeUntil }}</p>
+                    @endif
                 @endif
             </div>
         </div>

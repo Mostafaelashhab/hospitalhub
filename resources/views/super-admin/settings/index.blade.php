@@ -45,6 +45,34 @@
                     </div>
                 </div>
 
+                {{-- Apply Point Price to All Clinics --}}
+                <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5" x-data="{ confirmPoints: false }">
+                    <div class="flex items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center shrink-0">
+                                <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold text-amber-900">{{ app()->getLocale() === 'ar' ? 'تعميم سعر النقطة على كل العيادات' : 'Apply point price to all clinics' }}</p>
+                                <p class="text-xs text-amber-700">{{ app()->getLocale() === 'ar' ? 'هيتغير سعر النقطة لكل العيادات حتى اللي محدد لها سعر مخصص' : 'Overrides all per-clinic point prices' }}</p>
+                            </div>
+                        </div>
+                        <button type="button" @click="confirmPoints = true" x-show="!confirmPoints"
+                                class="px-4 py-2 bg-amber-600 text-white text-xs font-bold rounded-xl hover:bg-amber-700 transition shrink-0">
+                            {{ app()->getLocale() === 'ar' ? 'تعميم' : 'Apply All' }}
+                        </button>
+                    </div>
+                    <div x-show="confirmPoints" x-transition class="mt-3 flex items-center gap-2 justify-end">
+                        <p class="text-xs text-amber-800 flex-1">{{ app()->getLocale() === 'ar' ? 'متأكد؟ هيتغير سعر النقطة لكل العيادات.' : 'Are you sure? This will change all clinics.' }}</p>
+                        <button type="button" @click="confirmPoints = false" class="px-3 py-1.5 bg-white border border-amber-300 text-amber-700 text-xs font-semibold rounded-lg hover:bg-amber-50 transition">
+                            {{ __('app.cancel') }}
+                        </button>
+                        <button type="submit" name="apply_points_all" value="1" @click="$el.closest('form').insertAdjacentHTML('beforeend', '<input type=\'hidden\' name=\'apply_points_all\' value=\'1\'>')" class="px-3 py-1.5 bg-amber-600 text-white text-xs font-bold rounded-lg hover:bg-amber-700 transition">
+                            {{ app()->getLocale() === 'ar' ? 'أيوه، عمّم' : 'Yes, Apply' }}
+                        </button>
+                    </div>
+                </div>
+
                 {{-- Free Mode --}}
                 <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6" x-data="{ enabled: {{ old('free_mode_enabled', $settings['free_mode_enabled']) == '1' ? 'true' : 'false' }} }">
                     <h3 class="text-base font-bold text-gray-900 mb-5 flex items-center gap-2">
@@ -94,6 +122,34 @@
                             </p>
                         </div>
                         @endif
+                    </div>
+                </div>
+
+                {{-- Apply Free Mode to All Clinics --}}
+                <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5" x-data="{ confirmFree: false }">
+                    <div class="flex items-center justify-between gap-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 bg-amber-100 rounded-lg flex items-center justify-center shrink-0">
+                                <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                            </div>
+                            <div>
+                                <p class="text-sm font-semibold text-amber-900">{{ app()->getLocale() === 'ar' ? 'تعميم الوضع المجاني على كل العيادات' : 'Apply free mode to all clinics' }}</p>
+                                <p class="text-xs text-amber-700">{{ app()->getLocale() === 'ar' ? 'هيتفعل أو يتعطل الوضع المجاني لكل العيادات حسب الإعداد فوق' : 'Syncs per-clinic free mode with global setting above' }}</p>
+                            </div>
+                        </div>
+                        <button type="button" @click="confirmFree = true" x-show="!confirmFree"
+                                class="px-4 py-2 bg-amber-600 text-white text-xs font-bold rounded-xl hover:bg-amber-700 transition shrink-0">
+                            {{ app()->getLocale() === 'ar' ? 'تعميم' : 'Apply All' }}
+                        </button>
+                    </div>
+                    <div x-show="confirmFree" x-transition class="mt-3 flex items-center gap-2 justify-end">
+                        <p class="text-xs text-amber-800 flex-1">{{ app()->getLocale() === 'ar' ? 'متأكد؟ هيتغير الوضع المجاني لكل العيادات.' : 'Are you sure? This affects all clinics.' }}</p>
+                        <button type="button" @click="confirmFree = false" class="px-3 py-1.5 bg-white border border-amber-300 text-amber-700 text-xs font-semibold rounded-lg hover:bg-amber-50 transition">
+                            {{ __('app.cancel') }}
+                        </button>
+                        <button type="submit" name="apply_free_mode_all" value="1" @click="$el.closest('form').insertAdjacentHTML('beforeend', '<input type=\'hidden\' name=\'apply_free_mode_all\' value=\'1\'>')" class="px-3 py-1.5 bg-amber-600 text-white text-xs font-bold rounded-lg hover:bg-amber-700 transition">
+                            {{ app()->getLocale() === 'ar' ? 'أيوه، عمّم' : 'Yes, Apply' }}
+                        </button>
                     </div>
                 </div>
 
