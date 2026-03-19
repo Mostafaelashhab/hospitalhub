@@ -67,8 +67,8 @@
                 </form>
 
                 {{-- Resend --}}
-                <div class="mt-6 text-center" x-data="{ timer: 60, canResend: false }"
-                     x-init="let i = setInterval(() => { timer--; if(timer <= 0) { canResend = true; clearInterval(i); } }, 1000)">
+                <div class="mt-6 text-center" x-data="{ timer: {{ (int) $cooldown }}, canResend: {{ (int) $cooldown <= 0 ? 'true' : 'false' }} }"
+                     x-init="if(timer > 0) { let i = setInterval(() => { timer--; if(timer <= 0) { canResend = true; clearInterval(i); } }, 1000); }">
                     <template x-if="!canResend">
                         <p class="text-sm text-gray-500">
                             {{ app()->getLocale()==='ar' ? 'إعادة الإرسال بعد' : 'Resend in' }}
@@ -77,9 +77,10 @@
                         </p>
                     </template>
                     <template x-if="canResend">
-                        <form method="POST" action="{{ $purpose === 'login' ? route('otp.login.send') : route('otp.send') }}">
+                        <form method="POST" action="{{ $purpose === 'login' ? route('otp.login.send') : route('otp.resend') }}">
                             @csrf
                             <input type="hidden" name="phone" value="{{ $phone }}">
+                            <input type="hidden" name="purpose" value="{{ $purpose }}">
                             <button type="submit" class="text-sm text-emerald-400 hover:text-emerald-300 font-semibold transition">
                                 {{ app()->getLocale()==='ar' ? 'إعادة إرسال الرمز' : 'Resend code' }}
                             </button>
@@ -88,7 +89,14 @@
                 </div>
 
                 <div class="mt-4 text-center">
-                    <a href="{{ $purpose === 'login' ? route('otp.login') : route('login') }}" class="text-sm text-gray-400 hover:text-white transition">
+                    @php
+                        $backUrl = match($purpose) {
+                            'login' => route('otp.login'),
+                            'register' => route('register.clinic'),
+                            default => route('login'),
+                        };
+                    @endphp
+                    <a href="{{ $backUrl }}" class="text-sm text-gray-400 hover:text-white transition">
                         {{ app()->getLocale()==='ar' ? 'تغيير الرقم' : 'Change number' }}
                     </a>
                 </div>

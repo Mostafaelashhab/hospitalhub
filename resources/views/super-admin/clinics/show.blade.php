@@ -294,6 +294,27 @@
                 </div>
             </div>
 
+            {{-- Points Per Patient --}}
+            <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="w-8 h-8 rounded-lg flex items-center justify-center bg-indigo-50">
+                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-semibold text-gray-900">{{ app()->getLocale() === 'ar' ? 'نقاط لكل مريض' : 'Points Per Patient' }}</p>
+                        <p class="text-xs text-gray-400">{{ app()->getLocale() === 'ar' ? 'بتتخصم مع كل مريض جديد' : 'Deducted per new patient' }}</p>
+                    </div>
+                </div>
+                <form method="POST" action="{{ route('super.clinics.update-point-price', $clinic) }}" class="flex gap-2">
+                    @csrf @method('PATCH')
+                    <input type="number" name="points_per_patient" min="0" required value="{{ $clinic->points_per_patient ?? (int) \App\Models\PlatformSetting::getPointPrice() }}"
+                           class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-all">
+                    <button type="submit" class="px-4 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition">
+                        {{ __('app.save') }}
+                    </button>
+                </form>
+            </div>
+
             {{-- Balance Card --}}
             <div class="bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl p-6 shadow-lg shadow-indigo-500/20 relative overflow-hidden">
                 <div class="absolute top-0 {{ app()->getLocale() === 'ar' ? 'left-0' : 'right-0' }} w-24 h-24 bg-white/10 rounded-full -translate-y-1/2 {{ app()->getLocale() === 'ar' ? '-translate-x-1/2' : 'translate-x-1/2' }}"></div>

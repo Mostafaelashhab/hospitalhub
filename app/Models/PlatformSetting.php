@@ -40,8 +40,13 @@ class PlatformSetting extends Model
         return true;
     }
 
-    public static function getPointPrice(): float
+    public static function getPointPrice(?Clinic $clinic = null): float
     {
+        // Per-clinic override
+        if ($clinic && $clinic->points_per_patient !== null) {
+            return (float) $clinic->points_per_patient;
+        }
+
         return (float) static::get('point_price', 1);
     }
 }

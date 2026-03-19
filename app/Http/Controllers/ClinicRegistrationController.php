@@ -8,6 +8,7 @@ use App\Models\Doctor;
 use App\Models\Specialty;
 use App\Models\User;
 use App\Notifications\NewClinicRegistered;
+use App\Services\OtpService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -17,12 +18,17 @@ use Illuminate\Validation\Rules\Password;
 
 class ClinicRegistrationController extends Controller
 {
+    public function __construct(private OtpService $otp) {}
+
     public function showForm()
     {
         $specialties = Specialty::where('is_active', true)->get();
         return view('auth.register-clinic', compact('specialties'));
     }
 
+    /**
+     * Step 1: Validate form, save to session, send OTP, redirect to verify page.
+     */
     public function register(Request $request)
     {
         $validated = $request->validate([
@@ -59,8 +65,50 @@ class ClinicRegistrationController extends Controller
             'password' => ['required', 'confirmed', Password::defaults()],
         ]);
 
+        // Save form data to session
+        session(['clinic_registration' => $validated]);
+
+        // Send OTP to admin phone
+        $result = $this->otp->send($validated['admin_phone'], 'verify', $request->ip());
+
+        if (!$result['success'] && $result['reason'] !== 'cooldown') {
+            return back()->withInput()->withErrors(['admin_phone' => __('app.otp_rate_limit')]);
+        }
+
+        // Redirect to OTP verification page
+        return redirect()->route('otp.verify.form', [
+            'phone' => $validated['admin_phone'],
+            'purpose' => 'register',
+        ]);
+    }
+
+    /**
+     * Step 2: After OTP verified, complete the registration.
+     */
+    public function completeRegistration(Request $request)
+    {
+        $validated = session('clinic_registration');
+
+        if (!$validated) {
+            return redirect()->route('register.clinic');
+        }
+
+        // Verify phone was confirmed via OTP
+        if (!session('phone_verified') || session('phone_verified') !== $validated['admin_phone']) {
+            return redirect()->route('register.clinic')
+                ->withInput($validated)
+                ->withErrors(['admin_phone' => __('app.phone_not_verified')]);
+        }
+
+        // Check email uniqueness again (in case someone registered in the meantime)
+        if (User::where('email', $validated['admin_email'])->exists()) {
+            session()->forget(['clinic_registration', 'phone_verified']);
+            return redirect()->route('register.clinic')
+                ->withInput($validated)
+                ->withErrors(['admin_email' => __('validation.unique', ['attribute' => __('app.admin_email')])]);
+        }
+
         $result = DB::transaction(function () use ($validated) {
-            // Generate unique slug before insert
             $slug = Str::slug($validated['clinic_name_en']);
             $originalSlug = $slug;
             $counter = 1;
@@ -108,7 +156,6 @@ class ClinicRegistrationController extends Controller
                 'balance' => 0,
             ]);
 
-            // If solo doctor, create a Doctor record from admin info
             if (!empty($validated['is_solo_doctor'])) {
                 Doctor::create([
                     'clinic_id' => $clinic->id,
@@ -128,7 +175,7 @@ class ClinicRegistrationController extends Controller
             return ['clinic' => $clinic, 'admin' => $admin];
         });
 
-        // Notify all super admins about the new clinic
+        // Notify super admins
         $superAdmins = User::where('role', 'super_admin')->get();
         foreach ($superAdmins as $superAdmin) {
             try {
@@ -137,6 +184,9 @@ class ClinicRegistrationController extends Controller
                 // Skip notification failures
             }
         }
+
+        // Clean up session
+        session()->forget(['clinic_registration', 'phone_verified']);
 
         Auth::login($result['admin']);
 

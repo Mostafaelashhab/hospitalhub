@@ -1371,4 +1371,7 @@ return [
     'phone_not_found' => 'This phone number is not registered.',
     'otp_rate_limit' => 'Too many attempts. Please wait and try again.',
     'otp_invalid' => 'Invalid or expired code.',
+    'otp_cooldown' => 'Please wait :seconds seconds before requesting a new code.',
+    'otp_locked' => 'Too many wrong attempts. Try again after 30 minutes.',
+    'phone_not_verified' => 'Please verify your phone number first.',
 ];

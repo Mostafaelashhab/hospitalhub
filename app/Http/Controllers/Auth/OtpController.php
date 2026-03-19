@@ -37,8 +37,15 @@ class OtpController extends Controller
             return back()->withInput()->withErrors(['phone' => __('app.phone_not_found')]);
         }
 
-        if (!$this->otp->send($phone, 'login')) {
-            return back()->withInput()->withErrors(['phone' => __('app.otp_rate_limit')]);
+        $result = $this->otp->send($phone, 'login', $request->ip());
+
+        if (!$result['success']) {
+            $msg = match ($result['reason']) {
+                'cooldown' => __('app.otp_cooldown', ['seconds' => $result['remaining']]),
+                'ip_limit' => __('app.otp_rate_limit'),
+                default => __('app.otp_rate_limit'),
+            };
+            return back()->withInput()->withErrors(['phone' => $msg]);
         }
 
         return redirect()->route('otp.verify.form', ['phone' => $phone, 'purpose' => 'login']);
@@ -56,7 +63,15 @@ class OtpController extends Controller
             return redirect()->route('login');
         }
 
-        return view('auth.otp-verify', compact('phone', 'purpose'));
+        // For register purpose, ensure we have registration data in session
+        if ($purpose === 'register' && !session('clinic_registration')) {
+            return redirect()->route('register.clinic');
+        }
+
+        $otpPurpose = $purpose === 'register' ? 'verify' : $purpose;
+        $cooldown = $this->otp->getCooldownRemaining($phone, $otpPurpose);
+
+        return view('auth.otp-verify', compact('phone', 'purpose', 'cooldown'));
     }
 
     /**
@@ -67,11 +82,18 @@ class OtpController extends Controller
         $request->validate([
             'phone' => 'required|string',
             'code' => 'required|string|size:6',
-            'purpose' => 'required|in:login,verify',
+            'purpose' => 'required|in:login,verify,register',
         ]);
 
-        if (!$this->otp->verify($request->phone, $request->code, $request->purpose)) {
-            return back()->withInput()->withErrors(['code' => __('app.otp_invalid')]);
+        $otpPurpose = $request->purpose === 'register' ? 'verify' : $request->purpose;
+        $result = $this->otp->verify($request->phone, $request->code, $otpPurpose);
+
+        if (!$result['success']) {
+            $msg = match ($result['reason']) {
+                'locked' => __('app.otp_locked'),
+                default => __('app.otp_invalid'),
+            };
+            return back()->withInput()->withErrors(['code' => $msg]);
         }
 
         if ($request->purpose === 'login') {
@@ -86,8 +108,13 @@ class OtpController extends Controller
             return redirect()->intended($this->redirectPath($user));
         }
 
-        // For verify purpose (registration), store verified phone in session
+        // Store verified phone in session
         session(['phone_verified' => $request->phone]);
+
+        // For register purpose, complete the clinic registration
+        if ($request->purpose === 'register') {
+            return redirect()->route('register.clinic.complete');
+        }
 
         return redirect()->back()->with('phone_verified', true);
     }
@@ -101,11 +128,18 @@ class OtpController extends Controller
             'phone' => 'required|string|max:20',
         ]);
 
-        if (!$this->otp->send($request->phone, 'verify')) {
-            return response()->json(['success' => false, 'message' => __('app.otp_rate_limit')]);
+        $result = $this->otp->send($request->phone, 'verify', $request->ip());
+
+        if (!$result['success']) {
+            $msg = match ($result['reason']) {
+                'cooldown' => __('app.otp_cooldown', ['seconds' => $result['remaining']]),
+                'ip_limit' => __('app.otp_rate_limit'),
+                default => __('app.otp_rate_limit'),
+            };
+            return response()->json(['success' => false, 'message' => $msg]);
         }
 
-        return response()->json(['success' => true]);
+        return response()->json(['success' => true, 'cooldown' => $result['cooldown']]);
     }
 
     /**
@@ -118,13 +152,35 @@ class OtpController extends Controller
             'code' => 'required|string|size:6',
         ]);
 
-        $valid = $this->otp->verify($request->phone, $request->code, 'verify');
+        $result = $this->otp->verify($request->phone, $request->code, 'verify');
 
-        if ($valid) {
+        if ($result['success']) {
             session(['phone_verified' => $request->phone]);
         }
 
-        return response()->json(['success' => $valid]);
+        return response()->json([
+            'success' => $result['success'],
+            'reason' => $result['reason'] ?? null,
+        ]);
+    }
+
+    /**
+     * Resend OTP and redirect back to verify page.
+     */
+    public function resend(Request $request)
+    {
+        $request->validate([
+            'phone' => 'required|string|max:20',
+            'purpose' => 'required|string',
+        ]);
+
+        $otpPurpose = $request->purpose === 'register' ? 'verify' : $request->purpose;
+        $this->otp->send($request->phone, $otpPurpose, $request->ip());
+
+        return redirect()->route('otp.verify.form', [
+            'phone' => $request->phone,
+            'purpose' => $request->purpose,
+        ]);
     }
 
     private function redirectPath(User $user): string

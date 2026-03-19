@@ -59,6 +59,17 @@ class ClinicManagementController extends Controller
         return back()->with('success', __('app.status_updated'));
     }
 
+    public function updatePointPrice(Request $request, Clinic $clinic)
+    {
+        $request->validate([
+            'points_per_patient' => 'required|integer|min:0',
+        ]);
+
+        $clinic->update(['points_per_patient' => $request->points_per_patient]);
+
+        return back()->with('success', __('app.settings_updated'));
+    }
+
     public function addPoints(Request $request, Clinic $clinic)
     {
         $request->validate([

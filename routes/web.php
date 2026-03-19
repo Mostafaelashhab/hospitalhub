@@ -64,17 +64,19 @@ Route::get('/lang/{locale}', [LanguageController::class, 'switch'])->name('lang.
 // OTP Auth
 Route::middleware('guest')->group(function () {
     Route::get('/login/phone', [OtpController::class, 'showLoginForm'])->name('otp.login');
-    Route::post('/login/phone', [OtpController::class, 'sendLoginOtp'])->name('otp.login.send');
+    Route::post('/login/phone', [OtpController::class, 'sendLoginOtp'])->middleware('throttle:5,1')->name('otp.login.send');
     Route::get('/otp/verify', [OtpController::class, 'showVerifyForm'])->name('otp.verify.form');
-    Route::post('/otp/verify', [OtpController::class, 'verify'])->name('otp.verify');
+    Route::post('/otp/verify', [OtpController::class, 'verify'])->middleware('throttle:10,1')->name('otp.verify');
+    Route::post('/otp/resend', [OtpController::class, 'resend'])->middleware('throttle:5,1')->name('otp.resend');
 });
-Route::post('/otp/send', [OtpController::class, 'sendVerifyOtp'])->name('otp.send');
-Route::post('/otp/check', [OtpController::class, 'verifyAjax'])->name('otp.check');
+Route::post('/otp/send', [OtpController::class, 'sendVerifyOtp'])->middleware('throttle:5,1')->name('otp.send');
+Route::post('/otp/check', [OtpController::class, 'verifyAjax'])->middleware('throttle:10,1')->name('otp.check');
 
 // Clinic Registration
 Route::middleware('guest')->group(function () {
     Route::get('/register-clinic', [ClinicRegistrationController::class, 'showForm'])->name('register.clinic');
     Route::post('/register-clinic', [ClinicRegistrationController::class, 'register'])->name('register.clinic.store');
+    Route::get('/register-clinic/complete', [ClinicRegistrationController::class, 'completeRegistration'])->name('register.clinic.complete');
 });
 Route::get('/register-clinic/success', [ClinicRegistrationController::class, 'success'])->name('register.clinic.success');
 
@@ -99,6 +101,7 @@ Route::middleware(['auth', 'role:super_admin'])->prefix('super-admin')->name('su
     Route::post('/clinics/{clinic}/add-points', [ClinicManagementController::class, 'addPoints'])->name('clinics.add-points');
     Route::post('/clinics/{clinic}/deduct-points', [ClinicManagementController::class, 'deductPoints'])->name('clinics.deduct-points');
     Route::patch('/clinics/{clinic}/free-mode', [ClinicManagementController::class, 'toggleFreeMode'])->name('clinics.free-mode');
+    Route::patch('/clinics/{clinic}/point-price', [ClinicManagementController::class, 'updatePointPrice'])->name('clinics.update-point-price');
     Route::post('/send-notification', [ClinicManagementController::class, 'sendNotification'])->name('send-notification');
 
     // Offers

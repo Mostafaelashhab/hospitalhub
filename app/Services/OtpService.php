@@ -7,21 +7,54 @@ use OctopusTeam\Waapi\Facades\Waapi;
 
 class OtpService
 {
+    const COOLDOWN_SECONDS = 60;
+    const MAX_PER_PHONE_PER_HOUR = 5;
+    const MAX_PER_IP_PER_HOUR = 10;
+    const MAX_FAILED_ATTEMPTS = 5;
+    const LOCKOUT_MINUTES = 30;
+
     /**
      * Send OTP to phone number via WhatsApp.
      */
-    public function send(string $phone, string $purpose = 'verify'): bool
+    public function send(string $phone, string $purpose = 'verify', ?string $ip = null): array
     {
         $phone = $this->formatPhone($phone);
 
-        // Rate limit: max 5 OTPs per phone per hour
-        $recentCount = DB::table('otp_codes')
+        // Cooldown: prevent resend within 60 seconds
+        $lastOtp = DB::table('otp_codes')
+            ->where('phone', $phone)
+            ->where('purpose', $purpose)
+            ->latest('created_at')
+            ->first();
+
+        if ($lastOtp) {
+            $secondsSinceLast = (int) now()->diffInSeconds($lastOtp->created_at, absolute: true);
+            if ($secondsSinceLast < self::COOLDOWN_SECONDS) {
+                $remaining = self::COOLDOWN_SECONDS - $secondsSinceLast;
+                return ['success' => false, 'reason' => 'cooldown', 'remaining' => $remaining];
+            }
+        }
+
+        // Rate limit: max per phone per hour
+        $phoneCount = DB::table('otp_codes')
             ->where('phone', $phone)
             ->where('created_at', '>=', now()->subHour())
             ->count();
 
-        if ($recentCount >= 5) {
-            return false;
+        if ($phoneCount >= self::MAX_PER_PHONE_PER_HOUR) {
+            return ['success' => false, 'reason' => 'phone_limit'];
+        }
+
+        // Rate limit: max per IP per hour
+        if ($ip) {
+            $ipCount = DB::table('otp_codes')
+                ->where('ip_address', $ip)
+                ->where('created_at', '>=', now()->subHour())
+                ->count();
+
+            if ($ipCount >= self::MAX_PER_IP_PER_HOUR) {
+                return ['success' => false, 'reason' => 'ip_limit'];
+            }
         }
 
         // Generate 6-digit code
@@ -33,6 +66,8 @@ class OtpService
             'code' => $code,
             'purpose' => $purpose,
             'is_used' => false,
+            'ip_address' => $ip,
+            'failed_attempts' => 0,
             'expires_at' => now()->addMinutes(5),
             'created_at' => now(),
             'updated_at' => now(),
@@ -40,25 +75,37 @@ class OtpService
 
         // Send via WhatsApp
         $appName = config('app.name');
-        $message = "رمز التحقق الخاص بك في {$appName} هو:\n\n";
-        $message .= "🔐 *{$code}*\n\n";
+        $message = "رمز التحقق الخاص بك في {$appName} هو:\n";
+        $message .= "🔐 *{$code}*\n";
         $message .= "صالح لمدة 5 دقائق.\n";
         $message .= "لا تشارك هذا الرمز مع أي شخص.";
 
         try {
             Waapi::sendMessage($phone, $message);
-            return true;
+            return ['success' => true, 'cooldown' => self::COOLDOWN_SECONDS];
         } catch (\Exception $e) {
-            return false;
+            return ['success' => false, 'reason' => 'send_failed'];
         }
     }
 
     /**
      * Verify OTP code.
      */
-    public function verify(string $phone, string $code, string $purpose = 'verify'): bool
+    public function verify(string $phone, string $code, string $purpose = 'verify'): array
     {
         $phone = $this->formatPhone($phone);
+
+        // Check if phone is locked out due to too many failed attempts
+        $recentFailed = DB::table('otp_codes')
+            ->where('phone', $phone)
+            ->where('purpose', $purpose)
+            ->where('is_used', false)
+            ->where('created_at', '>=', now()->subMinutes(self::LOCKOUT_MINUTES))
+            ->sum('failed_attempts');
+
+        if ($recentFailed >= self::MAX_FAILED_ATTEMPTS) {
+            return ['success' => false, 'reason' => 'locked'];
+        }
 
         $otp = DB::table('otp_codes')
             ->where('phone', $phone)
@@ -70,13 +117,42 @@ class OtpService
             ->first();
 
         if (!$otp) {
-            return false;
+            // Increment failed attempts on the latest unused OTP
+            DB::table('otp_codes')
+                ->where('phone', $phone)
+                ->where('purpose', $purpose)
+                ->where('is_used', false)
+                ->where('expires_at', '>=', now())
+                ->increment('failed_attempts');
+
+            return ['success' => false, 'reason' => 'invalid'];
         }
 
         // Mark as used
         DB::table('otp_codes')->where('id', $otp->id)->update(['is_used' => true]);
 
-        return true;
+        return ['success' => true];
+    }
+
+    /**
+     * Get remaining cooldown seconds for a phone.
+     */
+    public function getCooldownRemaining(string $phone, string $purpose = 'verify'): int
+    {
+        $phone = $this->formatPhone($phone);
+
+        $lastOtp = DB::table('otp_codes')
+            ->where('phone', $phone)
+            ->where('purpose', $purpose)
+            ->latest('created_at')
+            ->first();
+
+        if (!$lastOtp) {
+            return 0;
+        }
+
+        $elapsed = (int) now()->diffInSeconds($lastOtp->created_at, absolute: true);
+        return max(0, self::COOLDOWN_SECONDS - $elapsed);
     }
 
     /**

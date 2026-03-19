@@ -528,27 +528,30 @@
                                     @error('admin_name') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                                 </div>
 
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-300 mb-1.5">{{ __('app.admin_email') }} <span class="text-red-400">*</span></label>
-                                        <div class="relative">
-                                            <div class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none">
-                                                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                                            </div>
-                                            <input type="email" name="admin_email" value="{{ old('admin_email') }}" placeholder="admin@clinic.com" class="w-full bg-gray-900 border border-gray-700 rounded-xl ps-12 pe-4 py-3 text-white placeholder-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-1.5">{{ __('app.admin_email') }} <span class="text-red-400">*</span></label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none">
+                                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
                                         </div>
-                                        @error('admin_email') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                                        <input type="email" name="admin_email" value="{{ old('admin_email') }}" placeholder="admin@clinic.com" class="w-full bg-gray-900 border border-gray-700 rounded-xl ps-12 pe-4 py-3 text-white placeholder-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
                                     </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-300 mb-1.5">{{ __('app.admin_phone') }} <span class="text-red-400">*</span></label>
-                                        <div class="relative">
-                                            <div class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none">
-                                                <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
-                                            </div>
-                                            <input type="tel" name="admin_phone" value="{{ old('admin_phone') }}" placeholder="01xxxxxxxxx" class="w-full bg-gray-900 border border-gray-700 rounded-xl ps-12 pe-4 py-3 text-white placeholder-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                                    @error('admin_email') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-1.5">{{ __('app.admin_phone') }} <span class="text-red-400">*</span></label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 start-0 flex items-center ps-4 pointer-events-none">
+                                            <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
                                         </div>
-                                        @error('admin_phone') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
+                                        <input type="tel" name="admin_phone" value="{{ old('admin_phone') }}" placeholder="01xxxxxxxxx" class="w-full bg-gray-900 border border-gray-700 rounded-xl ps-12 pe-4 py-3 text-white placeholder-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
                                     </div>
+                                    <p class="text-xs text-gray-500 mt-1.5 flex items-center gap-1.5">
+                                        <svg class="w-4 h-4 text-green-500 shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 2C6.477 2 2 6.477 2 12c0 1.89.525 3.66 1.438 5.168L2.546 21.2a1 1 0 001.254 1.254l4.032-.892A9.96 9.96 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2z"/></svg>
+                                        {{ app()->getLocale() === 'ar' ? 'هيوصلك رمز تأكيد على واتساب بعد التسجيل' : 'A verification code will be sent via WhatsApp after registration' }}
+                                    </p>
+                                    @error('admin_phone') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                                 </div>
 
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

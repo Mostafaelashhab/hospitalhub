@@ -73,7 +73,7 @@ class PatientController extends Controller
         $freeMode = PlatformSetting::isFreeModeActive($clinic);
 
         // Check wallet balance (skip if free mode)
-        $pointCost = (int) PlatformSetting::getPointPrice();
+        $pointCost = (int) PlatformSetting::getPointPrice($clinic);
         if (!$freeMode && $pointCost > 0) {
             $wallet = $clinic->wallet;
             if ($wallet && !$wallet->hasEnoughBalance($pointCost)) {
