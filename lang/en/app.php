@@ -1366,4 +1366,9 @@ return [
     // SEO
     'seo_default_keywords' => 'clinic management, hospital system, patient records, appointments, medical software, healthcare',
     'clinic_page_default_desc' => ':name - Book appointments online, view doctors, and manage your healthcare needs.',
+
+    // OTP
+    'phone_not_found' => 'This phone number is not registered.',
+    'otp_rate_limit' => 'Too many attempts. Please wait and try again.',
+    'otp_invalid' => 'Invalid or expired code.',
 ];

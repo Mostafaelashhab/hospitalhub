@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\Diagnosis;
 use App\Models\Prescription;
+use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
 
 class DiagnosisController extends Controller
@@ -130,6 +131,13 @@ class DiagnosisController extends Controller
                     'instructions' => $drug['instructions'] ?? null,
                 ]);
             }
+        }
+
+        // Send WhatsApp notification with diagnosis details
+        try {
+            app(WhatsAppService::class)->notifyDiagnosisCreated($diagnosisRecord);
+        } catch (\Exception $e) {
+            // Don't block if WhatsApp fails
         }
 
         return redirect()->route('dashboard.appointments.show', $appointment)

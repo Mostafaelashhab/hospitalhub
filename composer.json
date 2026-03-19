@@ -11,6 +11,7 @@
         "laravel-notification-channels/webpush": "^10.5",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
+        "octopusteam/waapi-laravel": "^1.2",
         "simplesoftwareio/simple-qrcode": "^4.2"
     },
     "require-dev": {

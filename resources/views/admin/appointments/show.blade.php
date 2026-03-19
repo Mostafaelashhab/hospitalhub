@@ -186,7 +186,8 @@
                 </div>
             </div>
 
-            {{-- Diagnosis Button --}}
+            {{-- Diagnosis Button (Doctor only) --}}
+            @if(auth()->user()->isDoctor())
             <div class="bg-white rounded-2xl border border-teal-200 shadow-sm overflow-hidden">
                 <a href="{{ route('dashboard.diagnoses.create', $appointment) }}" class="flex items-center gap-3 px-6 py-5 hover:bg-teal-50 transition-all">
                     <div class="w-10 h-10 bg-teal-50 rounded-xl flex items-center justify-center">
@@ -199,6 +200,7 @@
                     <svg class="w-5 h-5 text-teal-400 {{ app()->getLocale() === 'ar' ? 'mr-auto rotate-180' : 'ml-auto' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                 </a>
             </div>
+            @endif
 
             {{-- Change Status (only allowed transitions) --}}
             @if(!$appointment->isTerminal())

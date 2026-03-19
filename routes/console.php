@@ -10,3 +10,6 @@ Artisan::command('inspire', function () {
 
 // Schedule daily database backup at 2:00 AM
 Schedule::command('app:database-backup')->dailyAt('02:00');
+
+// Send appointment reminders at 8:00 PM (day before)
+Schedule::command('appointments:send-reminders')->dailyAt('20:00');

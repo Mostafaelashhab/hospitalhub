@@ -1118,5 +1118,127 @@
         </div>
     </footer>
 
+{{-- ===== WHATSAPP FLOATING POPUP ===== --}}
+<style>
+#wa-popup{position:fixed;bottom:24px;{{ app()->getLocale()==='ar'?'left':'right' }}:24px;z-index:9999;width:340px;opacity:0;transform:translateY(40px) scale(0.85);transition:all 0.6s cubic-bezier(0.16,1,0.3,1);pointer-events:none;}
+#wa-popup.visible{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;}
+#wa-popup .wa-card{background:#fff;border-radius:20px;box-shadow:0 20px 60px rgba(0,0,0,0.12),0 0 0 1px rgba(0,0,0,0.05);overflow:hidden;}
+#wa-popup .wa-header{background:linear-gradient(135deg,#075e54,#128c7e);padding:14px 16px;display:flex;align-items:center;gap:12px;}
+#wa-popup .wa-avatar{width:42px;height:42px;background:#25d366;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(37,211,102,0.3);}
+#wa-popup .wa-close{width:28px;height:28px;background:rgba(255,255,255,0.15);border:none;border-radius:50%;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background 0.2s;}
+#wa-popup .wa-close:hover{background:rgba(255,255,255,0.3);}
+#wa-popup .wa-chat{background:#e5ddd5;background-image:url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23c9c2b8' fill-opacity='0.15'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");padding:14px;min-height:60px;max-height:300px;overflow-y:auto;}
+#wa-popup .wa-msg{background:#fff;border-radius:0 8px 8px 8px;padding:8px 10px;margin-bottom:6px;max-width:90%;box-shadow:0 1px 1px rgba(0,0,0,0.06);opacity:0;transform:translateY(12px) scale(0.95);transition:all 0.4s cubic-bezier(0.16,1,0.3,1);position:relative;}
+[dir=rtl] #wa-popup .wa-msg{border-radius:8px 0 8px 8px;}
+#wa-popup .wa-msg.visible{opacity:1;transform:translateY(0) scale(1);}
+#wa-popup .wa-msg-green{background:#dcf8c6;border-radius:8px 0 8px 8px;}
+[dir=rtl] #wa-popup .wa-msg-green{border-radius:0 8px 8px 8px;}
+#wa-popup .wa-typing{display:flex;align-items:center;gap:4px;padding:10px 14px;background:#fff;border-radius:0 8px 8px 8px;width:fit-content;box-shadow:0 1px 1px rgba(0,0,0,0.06);}
+#wa-popup .wa-typing span{width:6px;height:6px;background:#90958a;border-radius:50%;animation:waTyping 1.4s infinite;}
+#wa-popup .wa-typing span:nth-child(2){animation-delay:0.2s;}
+#wa-popup .wa-typing span:nth-child(3){animation-delay:0.4s;}
+@keyframes waTyping{0%,60%,100%{transform:translateY(0);opacity:0.4;}30%{transform:translateY(-4px);opacity:1;}}
+#wa-popup .wa-footer{background:#f0f0f0;padding:8px 14px;display:flex;align-items:center;gap:8px;border-top:1px solid #e5e5e5;}
+#wa-popup .wa-input{flex:1;background:#fff;border:none;border-radius:20px;padding:8px 14px;font-size:12px;color:#666;outline:none;}
+#wa-popup .wa-badge{position:absolute;top:-8px;{{ app()->getLocale()==='ar'?'right':'left' }}:-8px;width:24px;height:24px;background:#ff3b30;color:#fff;border-radius:50%;font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(255,59,48,0.4);border:2px solid #fff;animation:waPulse 2s infinite;}
+@keyframes waPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.15);}}
+</style>
+
+<div id="wa-popup">
+    <div class="wa-badge" id="wa-badge">0</div>
+    <div class="wa-card">
+        {{-- Header --}}
+        <div class="wa-header">
+            <div class="wa-avatar">
+                <svg width="22" height="22" fill="white" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+            </div>
+            <div style="flex:1;">
+                <div style="color:#fff;font-size:14px;font-weight:700;">{{ __('app.app_name') }}</div>
+                <div style="color:#a5d6a7;font-size:11px;display:flex;align-items:center;gap:4px;">
+                    <span style="width:6px;height:6px;background:#4caf50;border-radius:50%;display:inline-block;"></span>
+                    {{ app()->getLocale()==='ar' ? 'متصل' : 'online' }}
+                </div>
+            </div>
+            <button class="wa-close" onclick="document.getElementById('wa-popup').classList.remove('visible')" title="Close">
+                <svg width="14" height="14" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+        </div>
+        {{-- Chat --}}
+        <div class="wa-chat" id="wa-chat"></div>
+        {{-- Footer --}}
+        <div class="wa-footer">
+            <svg width="20" height="20" fill="#919191" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm5 11h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
+            <div class="wa-input">{{ app()->getLocale()==='ar' ? 'الرسائل بتتبعت تلقائي...' : 'Messages sent automatically...' }}</div>
+            <svg width="20" height="20" fill="#919191" viewBox="0 0 24 24"><path d="M12 15c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v7c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 15 6.7 12H5c0 3.41 2.72 6.23 6 6.72V22h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/></svg>
+        </div>
+    </div>
+</div>
+
+<script>
+(function(){
+    var isAr = document.documentElement.getAttribute('dir') === 'rtl';
+    var msgs = [
+        { text: (isAr?'مرحباً أحمد':'Hello Ahmed')+' 👋<br>'+(isAr?'تم حجز موعدك بنجاح':'Your appointment is booked')+' ✅<br><br><span style="color:#667781">🩺 Dr. Mohamed Ali<br>📅 Mar 20, 2026 • 🕐 3:30 PM</span>', time:'10:30 AM', label: isAr?'تأكيد حجز':'Booking' },
+        { text: (isAr?'تذكير':'Reminder')+' 🔔<br><span style="color:#667781">'+(isAr?'موعدك بكرة مع د. محمد':'Your appointment is tomorrow with Dr. Mohamed')+'<br>🕐 3:30 PM</span><br><br>'+(isAr?'منتظرينك!':'See you there!')+' 😊', time:'8:00 PM', label: isAr?'تذكير':'Reminder' },
+        { text: '💊 <strong>'+(isAr?'الأدوية':'Medications')+':</strong><br><span style="color:#667781">1. Augmentin 1g — '+(isAr?'كل 12 ساعة':'every 12h')+'<br>2. Panadol Extra — '+(isAr?'عند الحاجة':'as needed')+'</span><br><br>🧪 <strong>'+(isAr?'التحاليل':'Labs')+':</strong> <span style="color:#667781">CBC, CRP</span><br><br>'+(isAr?'سلامتك!':'Get well soon!')+' 🙏', time:'4:15 PM', label: isAr?'أدوية':'Rx' },
+        { text: (isAr?'موعد إعادة محدد':'Follow-up scheduled')+' 🔄<br><br><span style="color:#667781">🩺 Dr. Mohamed Ali<br>📅 Mar 27 • 🕐 3:30 PM</span><br><br>'+(isAr?'منتظرينك!':'See you!')+' 😊', time:'4:16 PM', label: isAr?'إعادة':'Follow-up' }
+    ];
+
+    var popup = document.getElementById('wa-popup');
+    var chat = document.getElementById('wa-chat');
+    var badge = document.getElementById('wa-badge');
+    var count = 0;
+    var closed = false;
+
+    function show(){ if(!closed){popup.classList.add('visible');} }
+    function hide(){ popup.classList.remove('visible'); }
+
+    function addTyping(){
+        var t = document.createElement('div');
+        t.className = 'wa-typing';
+        t.id = 'wa-typing';
+        t.innerHTML = '<span></span><span></span><span></span>';
+        chat.appendChild(t);
+        chat.scrollTop = chat.scrollHeight;
+    }
+    function removeTyping(){ var t=document.getElementById('wa-typing'); if(t) t.remove(); }
+
+    function addMsg(i){
+        removeTyping();
+        var m = msgs[i];
+        count++;
+        badge.textContent = count;
+        var d = document.createElement('div');
+        d.className = 'wa-msg' + (i===3?' wa-msg-green':'');
+        d.innerHTML = '<div style="font-size:10px;font-weight:700;color:#25d366;margin-bottom:3px;display:flex;align-items:center;gap:4px;"><svg width="12" height="12" fill="#25d366" viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg> '+m.label+'</div><div style="font-size:12px;color:#111b21;line-height:1.55;">'+m.text+'</div><div style="font-size:9px;color:#667781;text-align:end;margin-top:4px;display:flex;align-items:center;justify-content:flex-end;gap:3px;">'+m.time+' <svg width="16" height="10" viewBox="0 0 16 10" fill="none"><path d="M1.5 5.5l3 3L11 2" stroke="#53bdeb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M5.5 5.5l3 3L15 2" stroke="#53bdeb" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>';
+        chat.appendChild(d);
+        chat.scrollTop = chat.scrollHeight;
+        requestAnimationFrame(function(){ requestAnimationFrame(function(){ d.classList.add('visible'); }); });
+    }
+
+    function cycle(){
+        chat.innerHTML = '';
+        count = 0;
+        badge.textContent = '0';
+        closed = false;
+        show();
+
+        addTyping();
+        setTimeout(function(){ addMsg(0); if(count<4) addTyping(); }, 1200);
+        setTimeout(function(){ addMsg(1); if(count<4) addTyping(); }, 3500);
+        setTimeout(function(){ addMsg(2); if(count<4) addTyping(); }, 6000);
+        setTimeout(function(){ addMsg(3); removeTyping(); }, 8500);
+    }
+
+    // Close button — hide and don't come back
+    popup.querySelector('.wa-close').addEventListener('click', function(){
+        closed = true;
+        hide();
+    });
+
+    setTimeout(cycle, 3000);
+})();
+</script>
+
 </body>
 </html>

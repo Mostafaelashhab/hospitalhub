@@ -13,6 +13,7 @@ use App\Models\Service;
 use App\Models\User;
 use App\Notifications\AppointmentCreated;
 use App\Notifications\AppointmentStatusChanged;
+use App\Services\WhatsAppService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -22,36 +23,46 @@ class AppointmentController extends Controller
     public function index(Request $request)
     {
         $clinic = auth()->user()->clinic;
-
         $branchId = BranchHelper::activeBranchId();
 
-        $query = $clinic->appointments()->with(['patient', 'doctor', 'services']);
+        // Calendar month
+        $month = $request->input('month', now()->month);
+        $year = $request->input('year', now()->year);
+        $selectedDate = $request->input('date', now()->toDateString());
 
+        $startOfMonth = Carbon::create($year, $month, 1)->startOfMonth();
+        $endOfMonth = $startOfMonth->copy()->endOfMonth();
+
+        // Get appointments count per day for the calendar
+        $monthQuery = $clinic->appointments();
         if ($branchId) {
-            $query->where('branch_id', $branchId);
+            $monthQuery->where('branch_id', $branchId);
         }
-
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-
-        if ($request->filled('date')) {
-            $query->whereDate('appointment_date', $request->date);
-        }
-
         if ($request->filled('doctor_id')) {
-            $query->where('doctor_id', $request->doctor_id);
+            $monthQuery->where('doctor_id', $request->doctor_id);
         }
+        $appointmentCounts = $monthQuery
+            ->whereBetween('appointment_date', [$startOfMonth, $endOfMonth])
+            ->selectRaw('appointment_date, count(*) as count')
+            ->groupBy('appointment_date')
+            ->pluck('count', 'appointment_date')
+            ->toArray();
 
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->whereHas('patient', fn($p) => $p->where('name', 'like', "%{$search}%")->orWhere('phone', 'like', "%{$search}%"))
-                  ->orWhereHas('doctor', fn($d) => $d->where('name', 'like', "%{$search}%"));
-            });
+        // Get appointments for the selected day
+        $dayQuery = $clinic->appointments()->with(['patient', 'doctor', 'services']);
+        if ($branchId) {
+            $dayQuery->where('branch_id', $branchId);
         }
-
-        $appointments = $query->latest('appointment_date')->latest('appointment_time')->paginate(15);
+        if ($request->filled('doctor_id')) {
+            $dayQuery->where('doctor_id', $request->doctor_id);
+        }
+        if ($request->filled('status')) {
+            $dayQuery->where('status', $request->status);
+        }
+        $dayAppointments = $dayQuery
+            ->whereDate('appointment_date', $selectedDate)
+            ->orderBy('appointment_time')
+            ->get();
 
         $doctorsQuery = $clinic->doctors()->where('is_active', true);
         if ($branchId) {
@@ -59,7 +70,10 @@ class AppointmentController extends Controller
         }
         $doctors = $doctorsQuery->get();
 
-        return view('admin.appointments.index', compact('appointments', 'doctors'));
+        return view('admin.appointments.index', compact(
+            'dayAppointments', 'doctors', 'appointmentCounts',
+            'month', 'year', 'selectedDate', 'startOfMonth', 'endOfMonth'
+        ));
     }
 
     public function create()
@@ -154,6 +168,13 @@ class AppointmentController extends Controller
             } catch (\Exception $e) {
                 // Skip notification failures (e.g. invalid push subscriptions)
             }
+        }
+
+        // Send WhatsApp notification to patient
+        try {
+            app(WhatsAppService::class)->notifyAppointmentBooked($firstAppointment);
+        } catch (\Exception $e) {
+            // Don't block appointment creation if WhatsApp fails
         }
 
         $message = $isRecurring
@@ -324,7 +345,7 @@ class AppointmentController extends Controller
             }
 
             if ($request->boolean('create_followup') && $validated['followup_date']) {
-                Appointment::create([
+                $followUp = Appointment::create([
                     'clinic_id' => $clinic->id,
                     'branch_id' => $appointment->branch_id,
                     'patient_id' => $appointment->patient_id,
@@ -334,6 +355,13 @@ class AppointmentController extends Controller
                     'status' => 'scheduled',
                     'notes' => __('app.followup_for', ['id' => $appointment->id]),
                 ]);
+
+                // Send WhatsApp follow-up notification
+                try {
+                    app(WhatsAppService::class)->notifyFollowUpCreated($followUp, $appointment);
+                } catch (\Exception $e) {
+                    // Don't block if WhatsApp fails
+                }
             }
         }
 

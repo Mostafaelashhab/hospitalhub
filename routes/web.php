@@ -46,6 +46,7 @@ use App\Http\Controllers\SuperAdmin\ClinicManagementController;
 use App\Http\Controllers\SuperAdmin\DashboardController as SuperDashboardController;
 use App\Http\Controllers\SuperAdmin\OfferController as SuperOfferController;
 use App\Http\Controllers\SuperAdmin\SettingsController as SuperSettingsController;
+use App\Http\Controllers\Auth\OtpController;
 use Illuminate\Support\Facades\Route;
 
 // SEO
@@ -59,6 +60,16 @@ Route::get('/', function () {
 
 // Language switcher
 Route::get('/lang/{locale}', [LanguageController::class, 'switch'])->name('lang.switch');
+
+// OTP Auth
+Route::middleware('guest')->group(function () {
+    Route::get('/login/phone', [OtpController::class, 'showLoginForm'])->name('otp.login');
+    Route::post('/login/phone', [OtpController::class, 'sendLoginOtp'])->name('otp.login.send');
+    Route::get('/otp/verify', [OtpController::class, 'showVerifyForm'])->name('otp.verify.form');
+    Route::post('/otp/verify', [OtpController::class, 'verify'])->name('otp.verify');
+});
+Route::post('/otp/send', [OtpController::class, 'sendVerifyOtp'])->name('otp.send');
+Route::post('/otp/check', [OtpController::class, 'verifyAjax'])->name('otp.check');
 
 // Clinic Registration
 Route::middleware('guest')->group(function () {
@@ -213,8 +224,8 @@ Route::middleware(['auth', 'role:clinic_staff', 'clinic.active'])->prefix('dashb
 
     // Diagnoses
     Route::get('/diagnoses', [DiagnosisController::class, 'index'])->name('.diagnoses.index')->middleware('permission:appointments.view');
-    Route::get('/appointments/{appointment}/diagnosis', [DiagnosisController::class, 'create'])->name('.diagnoses.create')->middleware('permission:appointments.view');
-    Route::post('/appointments/{appointment}/diagnosis', [DiagnosisController::class, 'store'])->name('.diagnoses.store')->middleware('permission:appointments.edit');
+    Route::get('/appointments/{appointment}/diagnosis', [DiagnosisController::class, 'create'])->name('.diagnoses.create')->middleware('role:doctor');
+    Route::post('/appointments/{appointment}/diagnosis', [DiagnosisController::class, 'store'])->name('.diagnoses.store')->middleware('role:doctor');
     Route::get('/diagnoses/{diagnosis}', [DiagnosisController::class, 'show'])->name('.diagnoses.show')->middleware('permission:appointments.view');
 
     // Invoices

@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "2d8cfbb904e008b7b01fd076ce6d85d7",
+    "content-hash": "ee5d5c73d69ed1a19b7cf50aebdbde8e",
     "packages": [
         {
             "name": "bacon/bacon-qr-code",
@@ -3069,6 +3069,74 @@
                 }
             ],
             "time": "2026-02-16T23:10:27+00:00"
+        },
+        {
+            "name": "octopusteam/waapi-laravel",
+            "version": "v1.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/octopus-software-team/waapi-laravel.git",
+                "reference": "ce65c4d6ac7945f07da3a0655b3a41b047382571"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/octopus-software-team/waapi-laravel/zipball/ce65c4d6ac7945f07da3a0655b3a41b047382571",
+                "reference": "ce65c4d6ac7945f07da3a0655b3a41b047382571",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/support": "^8.0|^9.0|^10.0|^11.0|^12.0",
+                "php": ">=8.0"
+            },
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "aliases": {
+                        "Waapi": "OctopusTeam\\Waapi\\Facades\\Waapi"
+                    },
+                    "providers": [
+                        "OctopusTeam\\Waapi\\WaapiServiceProvider"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "OctopusTeam\\Waapi\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Octopus Team",
+                    "email": "octopussoftwareteam@gmail.com"
+                },
+                {
+                    "name": "Abdallah Mahmoud",
+                    "email": "abdallahmahmoud1422003@gmail.com"
+                }
+            ],
+            "description": "WAAPI whatsapp api integration for Laravel",
+            "homepage": "https://github.com/octopus-software-team/waapi-laravel",
+            "keywords": [
+                "WaAPI",
+                "api",
+                "laravel",
+                "whatsapp"
+            ],
+            "support": {
+                "issues": "https://github.com/octopus-software-team/waapi-laravel/issues",
+                "source": "https://github.com/octopus-software-team/waapi-laravel"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/sponsors/octopus-software-team",
+                    "type": "github"
+                }
+            ],
+            "time": "2026-01-10T11:08:13+00:00"
         },
         {
             "name": "phpoption/phpoption",

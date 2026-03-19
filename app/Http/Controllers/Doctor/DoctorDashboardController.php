@@ -11,6 +11,7 @@ use App\Models\PrescriptionItem;
 use App\Models\User;
 use App\Notifications\AppointmentStatusChanged;
 use App\Notifications\DiagnosisRecorded;
+use App\Services\WhatsAppService;
 use Illuminate\Http\Request;
 
 class DoctorDashboardController extends Controller
@@ -231,6 +232,13 @@ class DoctorDashboardController extends Controller
             } catch (\Exception $e) {
                 // Skip notification failures
             }
+        }
+
+        // Send WhatsApp notification with diagnosis details
+        try {
+            app(WhatsAppService::class)->notifyDiagnosisCreated($diagnosisRecord);
+        } catch (\Exception $e) {
+            // Don't block if WhatsApp fails
         }
 
         return redirect()->route('doctor.appointment.show', $appointment)
