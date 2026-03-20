@@ -232,7 +232,7 @@
                         <p class="text-sm text-gray-500 mb-4">{{ __('app.working_days_desc') }}</p>
 
                         <div class="grid grid-cols-4 sm:grid-cols-7 gap-2 mb-6">
-                            @php $weekDays = ['saturday'=>['en'=>'Sat','ar'=>'سبت'],'sunday'=>['en'=>'Sun','ar'=>'أحد'],'monday'=>['en'=>'Mon','ar'=>'إثنين'],'tuesday'=>['en'=>'Tue','ar'=>'ثلاثاء'],'wednesday'=>['en'=>'Wed','ar'=>'أربعاء'],'thursday'=>['en'=>'Thu','ar'=>'خميس'],'friday'=>['en'=>'Fri','ar'=>'جمعة']]; @endphp
+                            @php $weekDays = ['sat'=>['en'=>'Sat','ar'=>'سبت'],'sun'=>['en'=>'Sun','ar'=>'أحد'],'mon'=>['en'=>'Mon','ar'=>'إثنين'],'tue'=>['en'=>'Tue','ar'=>'ثلاثاء'],'wed'=>['en'=>'Wed','ar'=>'أربعاء'],'thu'=>['en'=>'Thu','ar'=>'خميس'],'fri'=>['en'=>'Fri','ar'=>'جمعة']]; @endphp
                             @foreach($weekDays as $key => $labels)
                             <button type="button" @click="toggle('{{ $key }}')"
                                     :class="isActive('{{ $key }}') ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-500/25' : 'bg-gray-50 text-gray-700 border-gray-200 hover:border-indigo-300 hover:bg-indigo-50'"

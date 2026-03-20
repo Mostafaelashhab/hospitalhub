@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Appointment;
 use App\Models\Clinic;
 use App\Models\Doctor;
+use App\Models\DoctorLeave;
 use App\Models\Patient;
 use App\Models\PlatformSetting;
 use App\Models\User;
@@ -35,6 +36,11 @@ class OnlineBookingController extends Controller
             ->where('is_active', true)
             ->firstOrFail();
 
+        // Check if doctor is on leave
+        if (DoctorLeave::isOnLeave($doctor->id, $validated['appointment_date'])) {
+            return back()->with('booking_error', __('app.doctor_on_leave'));
+        }
+
         // Find or create patient
         $patient = Patient::where('clinic_id', $clinic->id)
             ->where('phone', $validated['patient_phone'])
@@ -42,7 +48,7 @@ class OnlineBookingController extends Controller
 
         if (!$patient) {
             $freeMode = PlatformSetting::isFreeModeActive($clinic);
-            $pointCost = (int) PlatformSetting::getPointPrice();
+            $pointCost = (int) PlatformSetting::getPointPrice($clinic);
 
             // Check wallet balance for new patient (skip if free mode)
             if (!$freeMode && $pointCost > 0) {

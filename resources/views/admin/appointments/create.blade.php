@@ -52,7 +52,7 @@
                 {{-- Doctor --}}
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('app.doctor') }} <span class="text-red-500">*</span></label>
-                    <select name="doctor_id" required x-model="doctorId" @change="fetchServices()"
+                    <select name="doctor_id" required x-model="doctorId" @change="fetchServices(); fetchSlots()"
                             class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-all">
                         <option value="">{{ __('app.select_doctor') }}</option>
                         @foreach($doctors as $doctor)
@@ -88,14 +88,59 @@
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('app.appointment_date') }} <span class="text-red-500">*</span></label>
                     <input type="date" name="appointment_date" value="{{ old('appointment_date') }}" required min="{{ date('Y-m-d') }}"
+                           x-model="appointmentDate" @change="fetchSlots()" @input="fetchSlots()"
                            class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-all">
                 </div>
 
-                {{-- Time --}}
+                {{-- Time Slots --}}
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('app.appointment_time') }} <span class="text-red-500">*</span></label>
-                    <input type="time" name="appointment_time" value="{{ old('appointment_time') }}" required
-                           class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-3 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-all">
+                    <input type="hidden" name="appointment_time" :value="selectedTime" required>
+
+                    {{-- Leave Warning --}}
+                    <template x-if="onLeave">
+                        <div class="p-3 rounded-xl bg-red-50 border border-red-200 text-sm text-red-700 flex items-center gap-2">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            {{ app()->getLocale() === 'ar' ? 'الدكتور في إجازة في التاريخ ده' : 'Doctor is on leave on this date' }}
+                        </div>
+                    </template>
+
+                    {{-- No Slots --}}
+                    <template x-if="!onLeave && slotsLoaded && slots.length === 0">
+                        <div class="p-3 rounded-xl bg-amber-50 border border-amber-200 text-sm text-amber-700 flex items-center gap-2">
+                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            {{ app()->getLocale() === 'ar' ? 'مفيش مواعيد متاحة — الدكتور مش شغال اليوم ده' : 'No slots — doctor doesn\'t work this day' }}
+                        </div>
+                    </template>
+
+                    {{-- Loading --}}
+                    <template x-if="slotsLoading">
+                        <div class="flex justify-center py-4">
+                            <svg class="animate-spin w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                        </div>
+                    </template>
+
+                    {{-- Slots Grid --}}
+                    <template x-if="!onLeave && !slotsLoading && slots.length > 0">
+                        <div class="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-48 overflow-y-auto p-1">
+                            <template x-for="slot in slots" :key="slot.time">
+                                <button type="button" @click="slot.available && (selectedTime = slot.time)"
+                                        :disabled="!slot.available"
+                                        :class="{
+                                            'bg-indigo-600 text-white border-indigo-600 shadow-md': selectedTime === slot.time,
+                                            'bg-white text-gray-700 border-gray-200 hover:border-indigo-300 hover:bg-indigo-50': selectedTime !== slot.time && slot.available,
+                                            'bg-gray-100 text-gray-300 border-gray-100 cursor-not-allowed line-through': !slot.available
+                                        }"
+                                        class="px-2 py-2 text-xs font-semibold rounded-lg border transition-all text-center"
+                                        x-text="slot.label"></button>
+                            </template>
+                        </div>
+                    </template>
+
+                    {{-- Prompt to select doctor + date --}}
+                    <template x-if="!slotsLoaded && !slotsLoading && !onLeave">
+                        <p class="text-xs text-gray-400 py-3">{{ app()->getLocale() === 'ar' ? 'اختر الدكتور والتاريخ أولاً' : 'Select doctor & date first' }}</p>
+                    </template>
                 </div>
 
                 {{-- Notes --}}
@@ -160,8 +205,14 @@
         function appointmentForm() {
             return {
                 doctorId: '{{ old('doctor_id') }}',
+                appointmentDate: '{{ old('appointment_date') }}',
+                selectedTime: '{{ old('appointment_time', '') }}',
                 selectedServices: [],
                 services: [],
+                slots: [],
+                slotsLoaded: false,
+                slotsLoading: false,
+                onLeave: false,
                 get servicesTotal() {
                     return this.services
                         .filter(s => this.selectedServices.includes(s.id))
@@ -169,6 +220,7 @@
                 },
                 init() {
                     if (this.doctorId) this.fetchServices();
+                    if (this.doctorId && this.appointmentDate) this.fetchSlots();
                 },
                 toggleService(id) {
                     const idx = this.selectedServices.indexOf(id);
@@ -185,6 +237,24 @@
                     } catch (e) {
                         this.services = [];
                     }
+                },
+                async fetchSlots() {
+                    this.slots = [];
+                    this.slotsLoaded = false;
+                    this.onLeave = false;
+                    this.selectedTime = '';
+                    if (!this.doctorId || !this.appointmentDate) return;
+                    this.slotsLoading = true;
+                    try {
+                        const res = await fetch(`/dashboard/appointments/available-slots?doctor_id=${this.doctorId}&date=${this.appointmentDate}`);
+                        const data = await res.json();
+                        this.slots = data.slots || [];
+                        this.onLeave = data.on_leave || false;
+                    } catch (e) {
+                        this.slots = [];
+                    }
+                    this.slotsLoading = false;
+                    this.slotsLoaded = true;
                 }
             }
         }

@@ -53,9 +53,11 @@ class PatientController extends Controller
 
     public function store(Request $request)
     {
+        $clinic = auth()->user()->clinic;
+
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
+            'phone' => ['required', 'string', 'max:20', \Illuminate\Validation\Rule::unique('patients')->where('clinic_id', $clinic->id)],
             'email' => 'nullable|email|max:255',
             'gender' => 'required|in:male,female',
             'date_of_birth' => 'nullable|date|before:today',
@@ -68,8 +70,6 @@ class PatientController extends Controller
             'emergency_contact_phone' => 'nullable|string|max:20',
             'emergency_contact_relation' => 'nullable|string|max:100',
         ]);
-
-        $clinic = auth()->user()->clinic;
         $freeMode = PlatformSetting::isFreeModeActive($clinic);
 
         // Check wallet balance (skip if free mode)
@@ -140,7 +140,7 @@ class PatientController extends Controller
 
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
+            'phone' => ['required', 'string', 'max:20', \Illuminate\Validation\Rule::unique('patients')->where('clinic_id', $clinic->id)->ignore($patient->id)],
             'email' => 'nullable|email|max:255',
             'gender' => 'required|in:male,female',
             'date_of_birth' => 'nullable|date|before:today',

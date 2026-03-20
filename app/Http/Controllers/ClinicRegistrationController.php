@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Clinic;
 use App\Models\ClinicWallet;
-use App\Models\Doctor;
 use App\Models\Specialty;
 use App\Models\User;
 use App\Notifications\NewClinicRegistered;
@@ -45,19 +44,10 @@ class ClinicRegistrationController extends Controller
             // Step 2: Clinic Details
             'doctors_count' => 'nullable|integer|min:1|max:100',
             'expected_patients_monthly' => 'nullable|integer|min:1',
-            'clinic_size' => 'nullable|in:small,medium,large',
-            'working_hours_from' => 'nullable|string',
-            'working_hours_to' => 'nullable|string',
-            'working_days' => 'nullable|array',
-            'working_days.*' => 'in:sat,sun,mon,tue,wed,thu,fri',
-            'schedule' => 'nullable|array',
-            'schedule.*.from' => 'nullable|string',
-            'schedule.*.to' => 'nullable|string',
             'has_existing_system' => 'nullable|boolean',
             'existing_system_name' => 'nullable|string|max:255',
             'referral_source' => 'nullable|in:google,social_media,friend,ad,other',
             'notes' => 'nullable|string|max:1000',
-            'is_solo_doctor' => 'nullable|boolean',
             // Step 3: Admin Info
             'admin_name' => 'required|string|max:255',
             'admin_email' => 'required|email|unique:users,email|max:255',
@@ -73,6 +63,12 @@ class ClinicRegistrationController extends Controller
 
         if (!$result['success'] && $result['reason'] !== 'cooldown') {
             return back()->withInput()->withErrors(['admin_phone' => __('app.otp_rate_limit')]);
+        }
+
+        // If device is offline, OTP was skipped — complete registration directly
+        if (!empty($result['skipped'])) {
+            session(['phone_verified' => $validated['admin_phone']]);
+            return redirect()->route('register.clinic.complete');
         }
 
         // Redirect to OTP verification page
@@ -129,11 +125,6 @@ class ClinicRegistrationController extends Controller
                 'tax_number' => $validated['tax_number'] ?? null,
                 'doctors_count' => $validated['doctors_count'] ?? null,
                 'expected_patients_monthly' => $validated['expected_patients_monthly'] ?? null,
-                'clinic_size' => $validated['clinic_size'] ?? null,
-                'working_hours_from' => $validated['working_hours_from'] ?? null,
-                'working_hours_to' => $validated['working_hours_to'] ?? null,
-                'working_days' => $validated['working_days'] ?? null,
-                'working_schedule' => $validated['schedule'] ?? null,
                 'has_existing_system' => $validated['has_existing_system'] ?? false,
                 'existing_system_name' => $validated['existing_system_name'] ?? null,
                 'referral_source' => $validated['referral_source'] ?? null,
@@ -155,19 +146,6 @@ class ClinicRegistrationController extends Controller
                 'clinic_id' => $clinic->id,
                 'balance' => 0,
             ]);
-
-            if (!empty($validated['is_solo_doctor'])) {
-                Doctor::create([
-                    'clinic_id' => $clinic->id,
-                    'user_id' => $admin->id,
-                    'name' => $validated['admin_name'],
-                    'phone' => $validated['admin_phone'],
-                    'email' => $validated['admin_email'],
-                    'specialty_id' => $validated['specialty_id'],
-                    'consultation_fee' => 0,
-                    'is_active' => true,
-                ]);
-            }
 
             $clinic->seedDefaultPermissions();
             \App\Models\ClinicRole::seedForClinic($clinic->id);

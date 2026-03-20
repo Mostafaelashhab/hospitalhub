@@ -32,6 +32,7 @@ class ClinicWallet extends Model
             'description' => $description,
             'reference_type' => $referenceType,
             'reference_id' => $referenceId,
+            'performed_by' => auth()->id(),
         ]);
     }
 
@@ -46,6 +47,7 @@ class ClinicWallet extends Model
             'description' => $description,
             'reference_type' => $referenceType,
             'reference_id' => $referenceId,
+            'performed_by' => auth()->id(),
         ]);
     }
 

@@ -114,6 +114,28 @@
                                 <span class="text-base font-bold text-gray-900">{{ __('app.total') }}</span>
                                 <span class="text-xl font-bold text-indigo-600">{{ number_format($invoice->total, 2) }} {{ __('app.currency') }}</span>
                             </div>
+
+                            @if($invoice->status === 'partial' || ($invoice->paid_amount > 0 && $invoice->paid_amount < $invoice->total))
+                            <div class="mt-3 p-4 rounded-xl bg-amber-50 border border-amber-200 space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium text-amber-800">{{ app()->getLocale() === 'ar' ? 'المدفوع' : 'Paid' }}</span>
+                                    <span class="text-sm font-bold text-emerald-600">{{ number_format($invoice->paid_amount, 2) }} {{ __('app.currency') }}</span>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm font-medium text-amber-800">{{ app()->getLocale() === 'ar' ? 'المتبقي' : 'Remaining' }}</span>
+                                    <span class="text-sm font-bold text-red-600">{{ number_format($invoice->total - $invoice->paid_amount, 2) }} {{ __('app.currency') }}</span>
+                                </div>
+                                {{-- Progress bar --}}
+                                <div class="w-full bg-amber-200 rounded-full h-2 mt-1">
+                                    <div class="bg-emerald-500 h-2 rounded-full transition-all" style="width: {{ $invoice->total > 0 ? min(100, ($invoice->paid_amount / $invoice->total) * 100) : 0 }}%"></div>
+                                </div>
+                            </div>
+                            @elseif($invoice->status === 'paid')
+                            <div class="mt-3 p-3 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                <span class="text-sm font-bold text-emerald-700">{{ app()->getLocale() === 'ar' ? 'مدفوعة بالكامل' : 'Fully Paid' }}</span>
+                            </div>
+                            @endif
                         </div>
                     </div>
 
@@ -170,6 +192,17 @@
                             <option value="bank_transfer" {{ $invoice->payment_method === 'bank_transfer' ? 'selected' : '' }}>{{ __('app.bank_transfer') }}</option>
                             <option value="instapay" {{ $invoice->payment_method === 'instapay' ? 'selected' : '' }}>{{ __('app.instapay') }}</option>
                         </select>
+                    </div>
+
+                    {{-- Paid Amount (shown for partial) --}}
+                    <div class="mb-4" x-data="{ status: '{{ $invoice->status }}' }" x-init="$watch('status', v => {}); $el.closest('form').querySelector('[name=status]').addEventListener('change', e => status = e.target.value)">
+                        <template x-if="status === 'partial'">
+                            <div>
+                                <label class="block text-sm font-semibold text-gray-700 mb-1.5">{{ app()->getLocale() === 'ar' ? 'المبلغ المدفوع' : 'Paid Amount' }}</label>
+                                <input type="number" name="paid_amount" value="{{ $invoice->paid_amount }}" step="0.01" min="0" max="{{ $invoice->total }}"
+                                       class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all">
+                            </div>
+                        </template>
                     </div>
 
                     {{-- Discount --}}

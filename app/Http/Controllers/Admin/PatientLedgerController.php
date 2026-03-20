@@ -88,7 +88,7 @@ class PatientLedgerController extends Controller
 
         $validated = $request->validate([
             'amount' => 'required|numeric|min:0.01',
-            'payment_method' => 'required|in:cash,card,bank_transfer,instapay',
+            'payment_method' => 'required|in:' . implode(',', config('payment.methods')),
             'description' => 'nullable|string|max:500',
         ]);
 

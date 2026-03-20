@@ -6,6 +6,8 @@ use App\Helpers\BranchHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Appointment;
 use App\Models\Doctor;
+use App\Models\DoctorLeave;
+use App\Models\DoctorSchedule;
 use App\Models\Invoice;
 use App\Models\Patient;
 use App\Models\PatientInsurance;
@@ -112,6 +114,12 @@ class AppointmentController extends Controller
 
         $clinic = auth()->user()->clinic;
         $branchId = BranchHelper::activeBranchId();
+
+        // Check if doctor is on approved leave
+        if (DoctorLeave::isOnLeave($request->doctor_id, $request->appointment_date)) {
+            return back()->withInput()->withErrors(['appointment_date' => __('app.doctor_on_leave')]);
+        }
+
         $recurrenceType = $request->input('recurrence_type', 'none');
         $recurrenceCount = $request->input('recurrence_count', 1);
         $isRecurring = $recurrenceType !== 'none' && $recurrenceCount > 1;
@@ -214,6 +222,24 @@ class AppointmentController extends Controller
         });
 
         return response()->json($services);
+    }
+
+    public function availableSlots(Request $request)
+    {
+        $request->validate([
+            'doctor_id' => 'required|exists:doctors,id',
+            'date' => 'required|date',
+        ]);
+
+        $clinic = auth()->user()->clinic;
+        $doctor = Doctor::where('id', $request->doctor_id)->where('clinic_id', $clinic->id)->firstOrFail();
+
+        $slots = DoctorSchedule::getAvailableSlots($doctor->id, $request->date);
+
+        return response()->json([
+            'slots' => $slots,
+            'on_leave' => DoctorLeave::isOnLeave($doctor->id, $request->date),
+        ]);
     }
 
     public function show(Appointment $appointment)

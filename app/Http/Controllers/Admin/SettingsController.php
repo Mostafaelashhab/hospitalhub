@@ -109,7 +109,7 @@ class SettingsController extends Controller
                 'consultation_fee' => 'required|numeric|min:0',
                 'bio' => 'nullable|string|max:1000',
                 'working_days' => 'nullable|array',
-                'working_days.*' => 'in:saturday,sunday,monday,tuesday,wednesday,thursday,friday',
+                'working_days.*' => 'in:sat,sun,mon,tue,wed,thu,fri',
                 'working_from' => 'nullable|date_format:H:i',
                 'working_to' => 'nullable|date_format:H:i',
             ]);

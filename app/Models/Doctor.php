@@ -67,4 +67,17 @@ class Doctor extends Model
             ->withPivot('price', 'is_active')
             ->withTimestamps();
     }
+
+    public function schedules()
+    {
+        return $this->hasMany(DoctorSchedule::class);
+    }
+
+    /**
+     * Check if doctor works on a given day.
+     */
+    public function worksOn(string $day): bool
+    {
+        return $this->schedules()->where('day', $day)->where('is_active', true)->exists();
+    }
 }

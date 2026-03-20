@@ -46,6 +46,7 @@ use App\Http\Controllers\SuperAdmin\ClinicManagementController;
 use App\Http\Controllers\SuperAdmin\DashboardController as SuperDashboardController;
 use App\Http\Controllers\SuperAdmin\OfferController as SuperOfferController;
 use App\Http\Controllers\SuperAdmin\SettingsController as SuperSettingsController;
+use App\Http\Controllers\SuperAdmin\WhatsAppMessageController;
 use App\Http\Controllers\Auth\OtpController;
 use Illuminate\Support\Facades\Route;
 
@@ -83,6 +84,7 @@ Route::get('/register-clinic/success', [ClinicRegistrationController::class, 'su
 // Public clinic website
 Route::get('/clinic/{slug}', [ClinicPageController::class, 'show'])->name('clinic.page');
 Route::post('/clinic/{slug}/book', [OnlineBookingController::class, 'store'])->name('clinic.book');
+Route::get('/clinic/{slug}/slots', [ClinicPageController::class, 'availableSlots'])->name('clinic.slots');
 
 // Waiting Room Display (public, no auth required)
 Route::get('/waiting-room/{slug}', [WaitingRoomController::class, 'show'])->name('waiting-room');
@@ -118,6 +120,11 @@ Route::middleware(['auth', 'role:super_admin'])->prefix('super-admin')->name('su
     Route::patch('/recharge/{rechargeRequest}/approve', [ClinicManagementController::class, 'approveRecharge'])->name('recharge.approve');
     Route::patch('/recharge/{rechargeRequest}/reject', [ClinicManagementController::class, 'rejectRecharge'])->name('recharge.reject');
 
+    // WhatsApp Messages
+    Route::get('/whatsapp-messages', [WhatsAppMessageController::class, 'index'])->name('whatsapp.index');
+    Route::patch('/whatsapp-messages/{message}/read', [WhatsAppMessageController::class, 'markAsRead'])->name('whatsapp.read');
+    Route::post('/whatsapp-messages/read-all', [WhatsAppMessageController::class, 'markAllAsRead'])->name('whatsapp.read-all');
+
     // Platform Settings
     Route::get('/settings', [SuperSettingsController::class, 'index'])->name('settings.index');
     Route::put('/settings', [SuperSettingsController::class, 'update'])->name('settings.update');
@@ -134,6 +141,7 @@ Route::middleware(['auth', 'role:clinic_staff', 'clinic.active'])->prefix('dashb
     // Appointments
     Route::get('/appointments', [AppointmentController::class, 'index'])->name('.appointments.index')->middleware('permission:appointments.view');
     Route::get('/appointments/create', [AppointmentController::class, 'create'])->name('.appointments.create')->middleware('permission:appointments.create');
+    Route::get('/appointments/available-slots', [AppointmentController::class, 'availableSlots'])->name('.appointments.slots');
     Route::post('/appointments', [AppointmentController::class, 'store'])->name('.appointments.store')->middleware('permission:appointments.create');
     Route::get('/appointments/{appointment}', [AppointmentController::class, 'show'])->name('.appointments.show')->middleware('permission:appointments.view');
     Route::patch('/appointments/{appointment}/status', [AppointmentController::class, 'updateStatus'])->name('.appointments.status')->middleware('permission:appointments.change_status');
@@ -147,6 +155,8 @@ Route::middleware(['auth', 'role:clinic_staff', 'clinic.active'])->prefix('dashb
     Route::put('/doctors/{doctor}', [DoctorController::class, 'update'])->name('.doctors.update')->middleware('permission:doctors.edit');
     Route::patch('/doctors/{doctor}/toggle', [DoctorController::class, 'toggleStatus'])->name('.doctors.toggle')->middleware('permission:doctors.edit');
     Route::delete('/doctors/{doctor}', [DoctorController::class, 'destroy'])->name('.doctors.destroy')->middleware('permission:doctors.edit');
+    Route::get('/doctors/{doctor}/schedule', [DoctorController::class, 'schedule'])->name('.doctors.schedule')->middleware('permission:doctors.edit');
+    Route::post('/doctors/{doctor}/schedule', [DoctorController::class, 'updateSchedule'])->name('.doctors.schedule.update')->middleware('permission:doctors.edit');
 
     // Patients
     Route::get('/patients', [PatientController::class, 'index'])->name('.patients.index')->middleware('permission:patients.view');
@@ -255,6 +265,7 @@ Route::middleware(['auth', 'role:clinic_staff', 'clinic.active'])->prefix('dashb
 
     // Services by Doctor
     Route::get('/doctors/{doctor}/services', [AppointmentController::class, 'servicesByDoctor'])->name('.doctors.services');
+    // moved to before {appointment} wildcard
 
     // Offers (view only for clinic admins)
     Route::get('/offers', [AdminOfferController::class, 'index'])->name('.offers.index');

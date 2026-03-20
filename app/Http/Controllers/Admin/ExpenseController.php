@@ -97,7 +97,7 @@ class ExpenseController extends Controller
             'amount' => 'required|numeric|min:0.01',
             'description' => 'nullable|string|max:500',
             'expense_date' => 'required|date',
-            'payment_method' => 'required|in:cash,card,bank_transfer,instapay',
+            'payment_method' => 'required|in:' . implode(',', config('payment.methods')),
             'receipt' => 'nullable|image|max:2048',
         ]);
 
@@ -142,7 +142,7 @@ class ExpenseController extends Controller
             'amount' => 'required|numeric|min:0.01',
             'description' => 'nullable|string|max:500',
             'expense_date' => 'required|date',
-            'payment_method' => 'required|in:cash,card,bank_transfer,instapay',
+            'payment_method' => 'required|in:' . implode(',', config('payment.methods')),
             'receipt' => 'nullable|image|max:2048',
         ]);
 

@@ -72,13 +72,13 @@
             <div class="grid grid-cols-7 gap-2 mb-6">
                 @php
                     $weekDays = [
-                        'saturday' => ['en' => 'Sat', 'ar' => 'سبت'],
-                        'sunday' => ['en' => 'Sun', 'ar' => 'أحد'],
-                        'monday' => ['en' => 'Mon', 'ar' => 'إثنين'],
-                        'tuesday' => ['en' => 'Tue', 'ar' => 'ثلاثاء'],
-                        'wednesday' => ['en' => 'Wed', 'ar' => 'أربعاء'],
-                        'thursday' => ['en' => 'Thu', 'ar' => 'خميس'],
-                        'friday' => ['en' => 'Fri', 'ar' => 'جمعة'],
+                        'sat' => ['en' => 'Sat', 'ar' => 'سبت'],
+                        'sun' => ['en' => 'Sun', 'ar' => 'أحد'],
+                        'mon' => ['en' => 'Mon', 'ar' => 'إثنين'],
+                        'tue' => ['en' => 'Tue', 'ar' => 'ثلاثاء'],
+                        'wed' => ['en' => 'Wed', 'ar' => 'أربعاء'],
+                        'thu' => ['en' => 'Thu', 'ar' => 'خميس'],
+                        'fri' => ['en' => 'Fri', 'ar' => 'جمعة'],
                     ];
                 @endphp
 

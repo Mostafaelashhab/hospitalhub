@@ -98,11 +98,14 @@ class Appointment extends Model
 
     public static function nextQueueNumber(int $doctorId, string $date): int
     {
-        $max = static::where('doctor_id', $doctorId)
-            ->whereDate('appointment_date', $date)
-            ->max('queue_number');
+        return \Illuminate\Support\Facades\DB::transaction(function () use ($doctorId, $date) {
+            $max = static::where('doctor_id', $doctorId)
+                ->whereDate('appointment_date', $date)
+                ->lockForUpdate()
+                ->max('queue_number');
 
-        return ($max ?? 0) + 1;
+            return ($max ?? 0) + 1;
+        });
     }
 
     /**

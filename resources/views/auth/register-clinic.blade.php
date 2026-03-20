@@ -17,11 +17,11 @@
 
     @php
         $hasStep3Errors = $errors->hasAny(['admin_name', 'admin_email', 'admin_phone', 'password']);
-        $hasStep2Errors = $errors->hasAny(['doctors_count', 'clinic_size', 'working_hours_from']);
+        $hasStep2Errors = $errors->hasAny(['doctors_count', 'expected_patients_monthly', 'has_existing_system']);
         $initialStep = $hasStep3Errors ? 3 : ($hasStep2Errors ? 2 : 1);
     @endphp
 
-    <div class="min-h-screen flex" x-data="{ step: {{ $initialStep }}, loading: false, hasSystem: {{ old('has_existing_system', false) ? 'true' : 'false' }}, isSolo: {{ old('is_solo_doctor', '0') == '1' ? 'true' : 'false' }} }">
+    <div class="min-h-screen flex" x-data="{ step: {{ $initialStep }}, loading: false, hasSystem: {{ old('has_existing_system', false) ? 'true' : 'false' }} }">
 
         {{-- Left Side - Branding --}}
         <div class="hidden lg:flex lg:w-1/2 relative bg-gradient-to-br from-indigo-950 via-indigo-900 to-purple-950 overflow-hidden">
@@ -138,8 +138,8 @@
                         </div>
                         <div class="grid grid-cols-2 gap-2">
                             <div class="bg-white/[0.06] rounded-lg p-3 text-center">
-                                <svg class="w-5 h-5 text-purple-400 mx-auto mb-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                <p class="text-[9px] text-indigo-300/50">{{ app()->getLocale()==='ar' ? 'مواعيد العمل' : 'Working Hours' }}</p>
+                                <svg class="w-5 h-5 text-purple-400 mx-auto mb-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                                <p class="text-[9px] text-indigo-300/50">{{ app()->getLocale()==='ar' ? 'تفاصيل العيادة' : 'Clinic Info' }}</p>
                             </div>
                             <div class="bg-white/[0.06] rounded-lg p-3 text-center">
                                 <svg class="w-5 h-5 text-pink-400 mx-auto mb-1" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg>
@@ -356,49 +356,7 @@
                         <div x-show="step === 2" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" x-cloak>
                             <div class="space-y-5">
 
-                                {{-- Solo Doctor Toggle --}}
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-300 mb-2">{{ __('app.is_solo_doctor') }}</label>
-                                    <p class="text-xs text-gray-500 mb-3">{{ __('app.is_solo_doctor_desc') }}</p>
-                                    <div class="grid grid-cols-2 gap-3">
-                                        <label class="cursor-pointer">
-                                            <input type="radio" name="is_solo_doctor" value="1" class="peer hidden" @click="isSolo = true" {{ old('is_solo_doctor') == '1' ? 'checked' : '' }}>
-                                            <div class="peer-checked:border-indigo-500 peer-checked:bg-indigo-600/10 border border-gray-700 rounded-xl p-4 text-center transition hover:border-gray-600">
-                                                <div class="w-10 h-10 mx-auto mb-2 rounded-full bg-gray-800 flex items-center justify-center">
-                                                    <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                                                </div>
-                                                <div class="text-sm font-medium text-white">{{ __('app.solo_practice') }}</div>
-                                            </div>
-                                        </label>
-                                        <label class="cursor-pointer">
-                                            <input type="radio" name="is_solo_doctor" value="0" class="peer hidden" @click="isSolo = false" {{ old('is_solo_doctor', '0') == '0' ? 'checked' : '' }}>
-                                            <div class="peer-checked:border-indigo-500 peer-checked:bg-indigo-600/10 border border-gray-700 rounded-xl p-4 text-center transition hover:border-gray-600">
-                                                <div class="w-10 h-10 mx-auto mb-2 rounded-full bg-gray-800 flex items-center justify-center">
-                                                    <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                                </div>
-                                                <div class="text-sm font-medium text-white">{{ __('app.multi_doctor') }}</div>
-                                            </div>
-                                        </label>
-                                    </div>
-                                </div>
-
-                                {{-- Clinic Size (multi-doctor only) --}}
-                                <div x-show="!isSolo" x-transition x-cloak>
-                                    <label class="block text-sm font-medium text-gray-300 mb-2">{{ __('app.clinic_size') }}</label>
-                                    <div class="grid grid-cols-3 gap-3">
-                                        @foreach(['small' => 'size_small', 'medium' => 'size_medium', 'large' => 'size_large'] as $value => $label)
-                                        <label class="cursor-pointer">
-                                            <input type="radio" name="clinic_size" value="{{ $value }}" class="peer hidden" {{ old('clinic_size') === $value ? 'checked' : '' }}>
-                                            <div class="peer-checked:border-indigo-500 peer-checked:bg-indigo-600/10 border border-gray-700 rounded-xl p-3 text-center transition hover:border-gray-600">
-                                                <div class="text-sm font-medium text-white">{{ __('app.' . $label) }}</div>
-                                            </div>
-                                        </label>
-                                        @endforeach
-                                    </div>
-                                </div>
-
-                                {{-- Doctors count (multi-doctor only) --}}
-                                <div x-show="!isSolo" x-transition x-cloak>
                                     <label class="block text-sm font-medium text-gray-300 mb-1.5">{{ __('app.doctors_count') }}</label>
                                     <input type="number" name="doctors_count" value="{{ old('doctors_count') }}" min="1" max="100" placeholder="3"
                                         class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
@@ -408,53 +366,6 @@
                                     <label class="block text-sm font-medium text-gray-300 mb-1.5">{{ __('app.expected_patients') }}</label>
                                     <input type="number" name="expected_patients_monthly" value="{{ old('expected_patients_monthly') }}" min="1" placeholder="200"
                                         class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
-                                </div>
-
-                                {{-- Working Schedule --}}
-                                <div x-data="{
-                                    days: [
-                                        { key: 'sat', label: '{{ __("app.day_sat") }}', active: true, from: '09:00', to: '17:00' },
-                                        { key: 'sun', label: '{{ __("app.day_sun") }}', active: true, from: '09:00', to: '17:00' },
-                                        { key: 'mon', label: '{{ __("app.day_mon") }}', active: true, from: '09:00', to: '17:00' },
-                                        { key: 'tue', label: '{{ __("app.day_tue") }}', active: true, from: '09:00', to: '17:00' },
-                                        { key: 'wed', label: '{{ __("app.day_wed") }}', active: true, from: '09:00', to: '17:00' },
-                                        { key: 'thu', label: '{{ __("app.day_thu") }}', active: true, from: '09:00', to: '17:00' },
-                                        { key: 'fri', label: '{{ __("app.day_fri") }}', active: false, from: '09:00', to: '17:00' }
-                                    ]
-                                }">
-                                    <label class="block text-sm font-medium text-gray-300 mb-3">{{ __('app.working_hours') }}</label>
-                                    <div class="space-y-2">
-                                        <template x-for="(day, index) in days" :key="day.key">
-                                            <div class="flex items-center gap-3 p-3 rounded-xl border transition-all"
-                                                 :class="day.active ? 'border-gray-700 bg-gray-900/50' : 'border-gray-800 bg-gray-900/20 opacity-50'">
-                                                {{-- Toggle --}}
-                                                <button type="button" @click="day.active = !day.active"
-                                                        class="w-10 h-6 rounded-full transition-all duration-200 relative shrink-0"
-                                                        :class="day.active ? 'bg-indigo-600' : 'bg-gray-700'">
-                                                    <span class="absolute top-1 w-4 h-4 bg-white rounded-full transition-all duration-200 shadow-sm"
-                                                          :class="day.active ? '{{ app()->getLocale() === "ar" ? "left-1" : "left-5" }}' : '{{ app()->getLocale() === "ar" ? "left-5" : "left-1" }}'"></span>
-                                                </button>
-                                                {{-- Day name --}}
-                                                <span class="text-sm font-medium w-12 shrink-0" :class="day.active ? 'text-white' : 'text-gray-500'" x-text="day.label"></span>
-                                                {{-- Time inputs --}}
-                                                <div class="flex items-center gap-2 flex-1" x-show="day.active" x-transition>
-                                                    <input type="time" x-model="day.from"
-                                                           class="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-2 py-1.5 text-sm text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
-                                                    <span class="text-gray-500 text-xs">→</span>
-                                                    <input type="time" x-model="day.to"
-                                                           class="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-2 py-1.5 text-sm text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
-                                                </div>
-                                                <span x-show="!day.active" class="text-xs text-gray-600 flex-1">{{ app()->getLocale() === 'ar' ? 'إجازة' : 'Off' }}</span>
-                                                {{-- Hidden inputs --}}
-                                                <template x-if="day.active">
-                                                    <div>
-                                                        <input type="hidden" :name="'schedule[' + day.key + '][from]'" :value="day.from">
-                                                        <input type="hidden" :name="'schedule[' + day.key + '][to]'" :value="day.to">
-                                                    </div>
-                                                </template>
-                                            </div>
-                                        </template>
-                                    </div>
                                 </div>
 
                                 {{-- Has Existing System --}}

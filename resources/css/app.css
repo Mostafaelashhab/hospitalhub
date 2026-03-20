@@ -113,6 +113,11 @@ main {
     @apply flex items-center gap-3 px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 rounded-xl transition-colors;
 }
 
+/* Force light color scheme for form controls */
+:root {
+    color-scheme: light;
+}
+
 /* Space for bottom nav on mobile */
 @media (max-width: 1023px) {
     #main-content {

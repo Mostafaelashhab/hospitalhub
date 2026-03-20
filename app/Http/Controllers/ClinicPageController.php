@@ -3,7 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Clinic;
+use App\Models\Doctor;
+use App\Models\DoctorLeave;
+use App\Models\DoctorSchedule;
 use App\Models\Review;
+use Illuminate\Http\Request;
 
 class ClinicPageController extends Controller
 {
@@ -65,5 +69,28 @@ class ClinicPageController extends Controller
             'clinic', 'metaTitle', 'metaDescription', 'ogType', 'ogImage', 'canonicalUrl', 'jsonLd',
             'reviews', 'avgRating', 'totalReviews'
         ));
+    }
+
+    public function availableSlots(Request $request, string $slug)
+    {
+        $clinic = Clinic::where('slug', $slug)
+            ->where('website_enabled', true)
+            ->where('status', 'active')
+            ->firstOrFail();
+
+        $request->validate([
+            'doctor_id' => 'required|integer',
+            'date' => 'required|date|after_or_equal:today',
+        ]);
+
+        $doctor = Doctor::where('id', $request->doctor_id)
+            ->where('clinic_id', $clinic->id)
+            ->where('is_active', true)
+            ->firstOrFail();
+
+        return response()->json([
+            'slots' => DoctorSchedule::getAvailableSlots($doctor->id, $request->date),
+            'on_leave' => DoctorLeave::isOnLeave($doctor->id, $request->date),
+        ]);
     }
 }

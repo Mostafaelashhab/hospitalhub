@@ -22,4 +22,16 @@ class DoctorLeave extends Model
 
     public function doctor() { return $this->belongsTo(Doctor::class); }
     public function clinic() { return $this->belongsTo(Clinic::class); }
+
+    /**
+     * Check if a doctor is on approved leave for a given date.
+     */
+    public static function isOnLeave(int $doctorId, string $date): bool
+    {
+        return static::where('doctor_id', $doctorId)
+            ->where('status', 'approved')
+            ->where('start_date', '<=', $date)
+            ->where('end_date', '>=', $date)
+            ->exists();
+    }
 }

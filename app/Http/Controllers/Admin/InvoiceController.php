@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Admin;
 
 use App\Helpers\BranchHelper;
 use App\Http\Controllers\Controller;
+use App\Models\Coupon;
+use App\Models\CouponUsage;
 use App\Models\Invoice;
 use App\Models\User;
 use App\Notifications\InvoiceUpdated;
@@ -73,37 +75,68 @@ class InvoiceController extends Controller
 
         $validated = $request->validate([
             'status' => 'required|in:unpaid,paid,partial,refunded',
-            'payment_method' => 'nullable|in:cash,card,bank_transfer,instapay',
+            'payment_method' => 'nullable|in:' . implode(',', config('payment.methods')),
             'discount' => 'nullable|numeric|min:0',
+            'paid_amount' => 'nullable|numeric|min:0',
+            'coupon_code' => 'nullable|string|max:50',
             'notes' => 'nullable|string|max:1000',
         ]);
 
+        // Validate status transition
+        if (!$invoice->canTransitionTo($validated['status'])) {
+            return back()->withErrors(['status' => __('app.invalid_status_transition')]);
+        }
+
         $discount = $validated['discount'] ?? $invoice->discount;
+        $couponId = $invoice->coupon_id;
+
+        // Apply coupon if provided
+        if (!empty($validated['coupon_code']) && !$invoice->coupon_id) {
+            $coupon = Coupon::where('clinic_id', $clinic->id)
+                ->where('code', $validated['coupon_code'])
+                ->first();
+
+            if ($coupon && $coupon->isValid($invoice->amount, $invoice->patient_id)) {
+                $discount = $coupon->calculateDiscount($invoice->amount);
+                $couponId = $coupon->id;
+
+                // Record usage
+                CouponUsage::create([
+                    'coupon_id' => $coupon->id,
+                    'patient_id' => $invoice->patient_id,
+                    'invoice_id' => $invoice->id,
+                    'discount_amount' => $discount,
+                ]);
+
+                $coupon->increment('used_count');
+            }
+        }
         $subtotal = $invoice->amount - $discount;
 
         // Recalculate insurance coverage
-        $insuranceCoverage = 0;
-        $patientShare = max(0, $subtotal);
+        $insurance = $invoice->calculateInsurance($subtotal);
 
-        if ($invoice->insurance_provider_id) {
-            $provider = $invoice->insuranceProvider;
-            if ($provider) {
-                $insuranceCoverage = $subtotal * ($provider->coverage_percentage / 100);
-                if ($provider->max_coverage && $insuranceCoverage > $provider->max_coverage) {
-                    $insuranceCoverage = $provider->max_coverage;
-                }
-                $insuranceCoverage = max(0, round($insuranceCoverage, 2));
-                $patientShare = max(0, $subtotal - $insuranceCoverage);
-            }
+        $total = max(0, $insurance['patient_share']);
+
+        // Calculate paid amount
+        $paidAmount = $invoice->paid_amount;
+        if ($validated['status'] === 'paid') {
+            $paidAmount = $total;
+        } elseif ($validated['status'] === 'partial' && isset($validated['paid_amount'])) {
+            $paidAmount = min($validated['paid_amount'], $total);
+        } elseif ($validated['status'] === 'refunded') {
+            $paidAmount = 0;
         }
 
         $invoice->update([
             'status' => $validated['status'],
             'payment_method' => $validated['payment_method'] ?? $invoice->payment_method,
+            'coupon_id' => $couponId,
             'discount' => $discount,
-            'insurance_coverage' => $insuranceCoverage,
-            'patient_share' => $patientShare,
-            'total' => max(0, $patientShare),
+            'insurance_coverage' => $insurance['insurance_coverage'],
+            'patient_share' => $insurance['patient_share'],
+            'total' => $total,
+            'paid_amount' => $paidAmount,
             'notes' => $validated['notes'] ?? $invoice->notes,
         ]);
 

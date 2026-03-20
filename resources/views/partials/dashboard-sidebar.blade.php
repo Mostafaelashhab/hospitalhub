@@ -127,6 +127,15 @@
 </a>
 @endif
 
+{{-- Clinic Website (admin only) --}}
+@if($user->isAdmin())
+<div class="my-3 border-t border-gray-100"></div>
+<a href="{{ route('dashboard.website.edit') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl {{ $active === 'website' ? 'nav-link-active' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100' }} transition-all duration-200">
+    <svg class="w-5 h-5 {{ $active === 'website' ? '' : 'text-gray-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"/></svg>
+    {{ app()->getLocale() === 'ar' ? 'موقع العيادة' : 'Clinic Website' }}
+</a>
+@endif
+
 {{-- Settings - everyone --}}
 <div class="my-3 border-t border-gray-100"></div>
 <a href="{{ route('dashboard.settings.index') }}" class="flex items-center gap-3 px-4 py-3 text-sm font-medium rounded-xl {{ $active === 'settings' ? 'nav-link-active' : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100' }} transition-all duration-200">

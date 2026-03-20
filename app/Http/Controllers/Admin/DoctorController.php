@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Helpers\BranchHelper;
 use App\Http\Controllers\Controller;
 use App\Models\Doctor;
+use App\Models\DoctorSchedule;
 use App\Models\Service;
 use App\Models\Specialty;
 use App\Models\User;
@@ -268,5 +269,56 @@ class DoctorController extends Controller
 
             DB::table('clinic_role_permissions')->insert($records);
         }
+    }
+
+    public function schedule(Doctor $doctor)
+    {
+        $clinic = auth()->user()->clinic;
+        abort_if($doctor->clinic_id !== $clinic->id, 403);
+
+        $schedules = $doctor->schedules()->orderByRaw("FIELD(day, 'sat','sun','mon','tue','wed','thu','fri')")->orderBy('start_time')->get();
+
+        $days = [
+            'sat' => app()->getLocale() === 'ar' ? 'السبت' : 'Saturday',
+            'sun' => app()->getLocale() === 'ar' ? 'الأحد' : 'Sunday',
+            'mon' => app()->getLocale() === 'ar' ? 'الإثنين' : 'Monday',
+            'tue' => app()->getLocale() === 'ar' ? 'الثلاثاء' : 'Tuesday',
+            'wed' => app()->getLocale() === 'ar' ? 'الأربعاء' : 'Wednesday',
+            'thu' => app()->getLocale() === 'ar' ? 'الخميس' : 'Thursday',
+            'fri' => app()->getLocale() === 'ar' ? 'الجمعة' : 'Friday',
+        ];
+
+        return view('admin.doctors.schedule', compact('doctor', 'schedules', 'days'));
+    }
+
+    public function updateSchedule(Request $request, Doctor $doctor)
+    {
+        $clinic = auth()->user()->clinic;
+        abort_if($doctor->clinic_id !== $clinic->id, 403);
+
+        $request->validate([
+            'schedules' => 'nullable|array',
+            'schedules.*.day' => 'required|in:sat,sun,mon,tue,wed,thu,fri',
+            'schedules.*.start_time' => 'required|date_format:H:i',
+            'schedules.*.end_time' => 'required|date_format:H:i|after:schedules.*.start_time',
+            'schedules.*.slot_duration' => 'required|integer|in:15,20,30,45,60',
+        ]);
+
+        // Delete old schedules and insert new
+        $doctor->schedules()->delete();
+
+        if ($request->schedules) {
+            foreach ($request->schedules as $schedule) {
+                $doctor->schedules()->create([
+                    'day' => $schedule['day'],
+                    'start_time' => $schedule['start_time'],
+                    'end_time' => $schedule['end_time'],
+                    'slot_duration' => $schedule['slot_duration'],
+                    'is_active' => true,
+                ]);
+            }
+        }
+
+        return back()->with('success', __('app.schedule_updated'));
     }
 }

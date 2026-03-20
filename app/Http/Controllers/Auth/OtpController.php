@@ -48,6 +48,13 @@ class OtpController extends Controller
             return back()->withInput()->withErrors(['phone' => $msg]);
         }
 
+        // If device is offline, OTP was skipped — auto-login
+        if (!empty($result['skipped'])) {
+            Auth::login($user, true);
+            $request->session()->regenerate();
+            return redirect()->intended($this->redirectPath($user));
+        }
+
         return redirect()->route('otp.verify.form', ['phone' => $phone, 'purpose' => 'login']);
     }
 
@@ -137,6 +144,12 @@ class OtpController extends Controller
                 default => __('app.otp_rate_limit'),
             };
             return response()->json(['success' => false, 'message' => $msg]);
+        }
+
+        // If device offline, auto-verify the phone
+        if (!empty($result['skipped'])) {
+            session(['phone_verified' => $request->phone]);
+            return response()->json(['success' => true, 'skipped' => true]);
         }
 
         return response()->json(['success' => true, 'cooldown' => $result['cooldown']]);

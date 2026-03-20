@@ -1374,4 +1374,6 @@ return [
     'otp_cooldown' => 'Please wait :seconds seconds before requesting a new code.',
     'otp_locked' => 'Too many wrong attempts. Try again after 30 minutes.',
     'phone_not_verified' => 'Please verify your phone number first.',
+    'doctor_on_leave' => 'This doctor is on leave on the selected date.',
+    'schedule_updated' => 'Schedule updated successfully.',
 ];

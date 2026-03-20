@@ -2,7 +2,10 @@
 
 namespace App\Services;
 
+use App\Models\User;
+use App\Notifications\WhatsAppDeviceOffline;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use OctopusTeam\Waapi\Facades\Waapi;
 
 class OtpService
@@ -72,6 +75,14 @@ class OtpService
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+
+        // Check WhatsApp device status before sending
+        if (!$this->isDeviceOnline()) {
+            // Device is offline - skip OTP, auto-verify, and notify super admins
+            DB::table('otp_codes')->where('phone', $phone)->where('code', $code)->update(['is_used' => true]);
+            $this->notifySuperAdminsDeviceOffline();
+            return ['success' => true, 'cooldown' => self::COOLDOWN_SECONDS, 'skipped' => true];
+        }
 
         // Send via WhatsApp
         $appName = config('app.name');
@@ -158,6 +169,48 @@ class OtpService
     /**
      * Format phone for Egypt.
      */
+    /**
+     * Check if the WhatsApp device is online.
+     */
+    private function isDeviceOnline(): bool
+    {
+        try {
+            $deviceId = config('waapi.app_key');
+            if (!$deviceId) {
+                return false;
+            }
+
+            $result = Waapi::getDeviceStatus($deviceId);
+
+            return $result['success'] && ($result['data']['status'] ?? '') === 'connected';
+        } catch (\Exception $e) {
+            Log::warning('WhatsApp device status check failed: ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    /**
+     * Notify all super admins that WhatsApp device is offline.
+     */
+    private function notifySuperAdminsDeviceOffline(): void
+    {
+        // Throttle: only notify once per 30 minutes
+        $cacheKey = 'whatsapp_device_offline_notified';
+        if (cache()->has($cacheKey)) {
+            return;
+        }
+        cache()->put($cacheKey, true, now()->addMinutes(30));
+
+        $superAdmins = User::where('role', 'super_admin')->get();
+        foreach ($superAdmins as $admin) {
+            try {
+                $admin->notify(new WhatsAppDeviceOffline());
+            } catch (\Exception $e) {
+                Log::error('Failed to notify super admin about device offline: ' . $e->getMessage());
+            }
+        }
+    }
+
     private function formatPhone(string $phone): string
     {
         $phone = preg_replace('/[^0-9]/', '', $phone);

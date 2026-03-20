@@ -9,7 +9,8 @@ class ClinicWebsiteController extends Controller
 {
     public function edit()
     {
-        return redirect()->route('dashboard')->with('info', __('app.coming_soon'));
+        $clinic = auth()->user()->clinic;
+        return view('admin.website.edit', compact('clinic'));
     }
 
     public function update(Request $request)
