@@ -931,10 +931,12 @@
             <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                 <h3 class="text-base font-bold text-gray-900 mb-4">{{ __('app.actions') }}</h3>
                 <div class="space-y-3">
+                    @if(auth()->user()->clinic?->specialty?->name_en === 'Gynecology')
                     <a href="{{ route('dashboard.patients.pregnancy.index', $patient) }}" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-pink-700 bg-pink-50 border border-pink-200 rounded-xl hover:bg-pink-100 transition-all">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
                         {{ __('app.pregnancy_tracker') }}
                     </a>
+                    @endif
                     <a href="{{ route('dashboard.patients.chronic-dashboard', $patient) }}" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-rose-700 bg-rose-50 border border-rose-200 rounded-xl hover:bg-rose-100 transition-all">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
                         {{ __('app.chronic_dashboard') }}
@@ -959,10 +961,12 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                         {{ __('app.edit_patient') }}
                     </a>
+                    @if(auth()->user()->clinic?->specialty?->name_en === 'Dentistry')
                     <a href="{{ route('dashboard.patients.dental-chart.show', $patient) }}" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-cyan-700 bg-cyan-50 border border-cyan-200 rounded-xl hover:bg-cyan-100 transition-all">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                         {{ __('app.dental_chart') }}
                     </a>
+                    @endif
                     @if(auth()->user()->hasPermission('patients.edit'))
                     <form method="POST" action="{{ route('dashboard.patients.destroy', $patient) }}" onsubmit="return confirm('{{ __('app.confirm_delete_patient') }}')">
                         @csrf @method('DELETE')

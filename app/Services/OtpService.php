@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\User;
 use App\Notifications\WhatsAppDeviceOffline;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use OctopusTeam\Waapi\Facades\Waapi;
 
@@ -172,19 +173,28 @@ class OtpService
     /**
      * Check if the WhatsApp device is online.
      */
-    private function isDeviceOnline(): bool
+    public function isDeviceOnline(): bool
     {
         try {
-            $deviceId = config('waapi.app_key');
-            if (!$deviceId) {
+            $url = config('waapi.app_url');
+            if (!$url) {
                 return false;
             }
 
-            $result = Waapi::getDeviceStatus($deviceId);
+            // Send a sandbox ping — if device is offline the API returns 500
+            $response = Http::timeout(5)->asForm()->post($url, [
+                'appkey' => config('waapi.app_key'),
+                'authkey' => config('waapi.auth_key'),
+                'to' => '201000000000',
+                'message' => 'health_check',
+                'sandbox' => true,
+            ]);
 
-            return $result['success'] && ($result['data']['status'] ?? '') === 'connected';
+            // 200 = sent, 400 = validation/number error (device is online)
+            // 500 = device offline
+            return $response->status() !== 500;
         } catch (\Exception $e) {
-            Log::warning('WhatsApp device status check failed: ' . $e->getMessage());
+            Log::warning('WhatsApp health check failed: ' . $e->getMessage());
             return false;
         }
     }

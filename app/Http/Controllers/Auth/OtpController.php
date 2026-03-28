@@ -196,6 +196,16 @@ class OtpController extends Controller
         ]);
     }
 
+    /**
+     * Check WhatsApp service health.
+     */
+    public function whatsappHealth()
+    {
+        return response()->json([
+            'online' => $this->otp->isDeviceOnline(),
+        ]);
+    }
+
     private function redirectPath(User $user): string
     {
         return match ($user->role) {

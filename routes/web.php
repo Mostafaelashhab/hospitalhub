@@ -62,6 +62,9 @@ Route::get('/', function () {
 // Language switcher
 Route::get('/lang/{locale}', [LanguageController::class, 'switch'])->name('lang.switch');
 
+// WhatsApp health check
+Route::get('/whatsapp/health', [OtpController::class, 'whatsappHealth'])->middleware('throttle:10,1')->name('whatsapp.health');
+
 // OTP Auth
 Route::middleware('guest')->group(function () {
     Route::get('/login/phone', [OtpController::class, 'showLoginForm'])->name('otp.login');

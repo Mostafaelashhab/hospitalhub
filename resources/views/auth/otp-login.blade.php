@@ -35,8 +35,15 @@
                 <h2 class="text-xl font-bold text-center mb-1">{{ app()->getLocale()==='ar' ? 'الدخول بالواتساب' : 'Login with WhatsApp' }}</h2>
                 <p class="text-sm text-gray-400 text-center mb-6">{{ app()->getLocale()==='ar' ? 'هيوصلك رمز تحقق على الواتساب' : "We'll send you a verification code on WhatsApp" }}</p>
 
-                <form method="POST" action="{{ route('otp.login.send') }}" x-data="{ loading: false }" @submit="loading = true">
+                <form method="POST" action="{{ route('otp.login.send') }}" x-data="whatsappOtp()" x-init="check()" @submit="if(online) loading = true; else $event.preventDefault();">
                     @csrf
+
+                    {{-- Service offline banner --}}
+                    <div x-show="!checking && !online" x-cloak class="mb-5 p-3 bg-red-600/10 border border-red-600/30 rounded-xl text-red-400 text-sm flex items-center gap-2">
+                        <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
+                        <span>@if(app()->getLocale()==='ar') خدمة الواتساب غير متاحة حالياً، حاول لاحقاً @else WhatsApp service is currently unavailable, try again later @endif</span>
+                    </div>
+
                     <div class="mb-5">
                         <label class="block text-sm font-medium text-gray-300 mb-1.5">{{ app()->getLocale()==='ar' ? 'رقم الهاتف' : 'Phone Number' }}</label>
                         <div class="relative">
@@ -45,16 +52,19 @@
                             </div>
                             <input type="text" name="phone" value="{{ old('phone') }}" required autofocus dir="ltr"
                                    placeholder="01xxxxxxxxx"
-                                   class="w-full bg-gray-800 border border-gray-700 rounded-xl ps-12 pe-4 py-3 text-white placeholder-gray-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition">
+                                   :disabled="!online && !checking"
+                                   class="w-full bg-gray-800 border border-gray-700 rounded-xl ps-12 pe-4 py-3 text-white placeholder-gray-500 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition disabled:opacity-50">
                         </div>
                         @error('phone') <p class="text-red-400 text-xs mt-1.5">{{ $message }}</p> @enderror
                     </div>
 
-                    <button type="submit" :disabled="loading"
-                            class="w-full py-3.5 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20 disabled:opacity-50 flex items-center justify-center gap-2">
-                        <svg x-show="loading" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-                        <span x-show="!loading">{{ app()->getLocale()==='ar' ? 'إرسال رمز التحقق' : 'Send Verification Code' }}</span>
-                        <span x-show="loading">{{ app()->getLocale()==='ar' ? 'جاري الإرسال...' : 'Sending...' }}</span>
+                    <button type="submit" :disabled="loading || !online"
+                            class="w-full py-3.5 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-all shadow-lg shadow-emerald-600/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                        <svg x-show="loading || checking" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                        <span x-show="checking">@if(app()->getLocale()==='ar') جاري التحقق من الخدمة... @else Checking service... @endif</span>
+                        <span x-show="!checking && !loading && online">{{ app()->getLocale()==='ar' ? 'إرسال رمز التحقق' : 'Send Verification Code' }}</span>
+                        <span x-show="!checking && !online">@if(app()->getLocale()==='ar') الخدمة غير متاحة @else Service Unavailable @endif</span>
+                        <span x-show="loading && !checking">{{ app()->getLocale()==='ar' ? 'جاري الإرسال...' : 'Sending...' }}</span>
                     </button>
                 </form>
 
@@ -66,5 +76,24 @@
             </div>
         </div>
     </div>
+<script>
+function whatsappOtp() {
+    return {
+        online: false,
+        checking: true,
+        loading: false,
+        async check() {
+            try {
+                const res = await fetch('{{ route("whatsapp.health") }}');
+                const data = await res.json();
+                this.online = data.online;
+            } catch (e) {
+                this.online = false;
+            }
+            this.checking = false;
+        }
+    }
+}
+</script>
 </body>
 </html>

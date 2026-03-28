@@ -83,7 +83,7 @@ class AppointmentController extends Controller
         $clinic = auth()->user()->clinic;
         $branchId = BranchHelper::activeBranchId();
 
-        $doctorsQuery = $clinic->doctors()->where('is_active', true);
+        $doctorsQuery = $clinic->doctors()->with('specialty')->where('is_active', true);
         if ($branchId) {
             $doctorsQuery->where('branch_id', $branchId);
         }
