@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Drug;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 
 class DrugSearchController extends Controller
 {
@@ -16,10 +17,14 @@ class DrugSearchController extends Controller
             return response()->json([]);
         }
 
-        $drugs = Drug::where('name', 'like', "%{$query}%")
-            ->orWhere('name_ar', 'like', "%{$query}%")
-            ->limit(15)
-            ->get(['id', 'name', 'name_ar', 'price', 'image']);
+        $cacheKey = 'search_drugs_' . md5(mb_strtolower(trim($query)));
+
+        $drugs = Cache::remember($cacheKey, 300, function () use ($query) {
+            return Drug::where('name', 'like', "%{$query}%")
+                ->orWhere('name_ar', 'like', "%{$query}%")
+                ->limit(15)
+                ->get(['id', 'name', 'name_ar', 'price', 'image']);
+        });
 
         return response()->json($drugs->map(fn($d) => [
             'id' => $d->id,
