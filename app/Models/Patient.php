@@ -135,4 +135,9 @@ class Patient extends Model
     {
         return $this->hasOne(DentalChart::class)->latest();
     }
+
+    public function treatmentPlans()
+    {
+        return $this->hasMany(TreatmentPlan::class);
+    }
 }

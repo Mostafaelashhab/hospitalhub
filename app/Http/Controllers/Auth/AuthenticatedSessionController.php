@@ -35,10 +35,6 @@ class AuthenticatedSessionController extends Controller
         }
 
         if ($user->isDoctor()) {
-            // Single-doctor clinic: doctor acts as admin
-            if ($user->isSoloDoctorAdmin()) {
-                return redirect()->intended(route('dashboard', absolute: false));
-            }
             return redirect()->intended(route('doctor.dashboard', absolute: false));
         }
 

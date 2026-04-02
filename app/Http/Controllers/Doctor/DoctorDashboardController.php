@@ -68,21 +68,35 @@ class DoctorDashboardController extends Controller
     {
         $doctor = $request->user()->doctor;
 
-        $query = $doctor->appointments()->with(['patient']);
+        $month = $request->input('month', now()->month);
+        $year = $request->input('year', now()->year);
+        $selectedDate = $request->input('date', now()->toDateString());
 
-        if ($date = $request->get('date')) {
-            $query->where('appointment_date', $date);
-        } else {
-            $query->where('appointment_date', '>=', today());
+        $startOfMonth = \Carbon\Carbon::create($year, $month, 1)->startOfMonth();
+        $endOfMonth = $startOfMonth->copy()->endOfMonth();
+
+        // Appointment counts per day for calendar
+        $appointmentCounts = $doctor->appointments()
+            ->whereBetween('appointment_date', [$startOfMonth, $endOfMonth])
+            ->selectRaw('appointment_date, count(*) as count')
+            ->groupBy('appointment_date')
+            ->pluck('count', 'appointment_date')
+            ->toArray();
+
+        // Day appointments
+        $dayQuery = $doctor->appointments()->with(['patient', 'services']);
+        if ($request->filled('status')) {
+            $dayQuery->where('status', $request->status);
         }
+        $dayAppointments = $dayQuery
+            ->whereDate('appointment_date', $selectedDate)
+            ->orderBy('appointment_time')
+            ->get();
 
-        if ($status = $request->get('status')) {
-            $query->where('status', $status);
-        }
-
-        $appointments = $query->orderBy('appointment_date')->orderBy('appointment_time')->paginate(20);
-
-        return view('doctor.appointments', compact('doctor', 'appointments'));
+        return view('doctor.appointments', compact(
+            'doctor', 'dayAppointments', 'appointmentCounts',
+            'month', 'year', 'selectedDate', 'startOfMonth', 'endOfMonth'
+        ));
     }
 
     public function showAppointment(Request $request, Appointment $appointment)
@@ -148,7 +162,6 @@ class DoctorDashboardController extends Controller
             'diagnosis' => 'nullable|string|max:2000',
             'prescription' => 'nullable|string|max:2000',
             'lab_tests' => 'nullable|string|max:2000',
-            'radiology' => 'nullable|string|max:2000',
             'notes' => 'nullable|string|max:2000',
             'diagram_data' => 'nullable|json',
             'rx_drugs_json' => 'nullable|string',
@@ -173,7 +186,6 @@ class DoctorDashboardController extends Controller
             'diagnosis' => $validated['diagnosis'],
             'prescription' => $validated['prescription'],
             'lab_tests' => $validated['lab_tests'],
-            'radiology' => $validated['radiology'],
             'notes' => $validated['notes'],
             'diagram_data' => $validated['diagram_data'] ? json_decode($validated['diagram_data'], true) : null,
         ];
@@ -345,6 +357,56 @@ class DoctorDashboardController extends Controller
 
         return redirect()->route('doctor.appointment.show', $appointment)
             ->with('success', __('app.patient_in_room'));
+    }
+
+    public function schedule(Request $request)
+    {
+        $doctor = $request->user()->doctor;
+        abort_if(!$doctor, 403);
+
+        $schedules = $doctor->schedules()->orderByRaw("FIELD(day, 'sat','sun','mon','tue','wed','thu','fri')")->orderBy('start_time')->get();
+
+        $days = [
+            'sat' => app()->getLocale() === 'ar' ? 'السبت' : 'Saturday',
+            'sun' => app()->getLocale() === 'ar' ? 'الأحد' : 'Sunday',
+            'mon' => app()->getLocale() === 'ar' ? 'الإثنين' : 'Monday',
+            'tue' => app()->getLocale() === 'ar' ? 'الثلاثاء' : 'Tuesday',
+            'wed' => app()->getLocale() === 'ar' ? 'الأربعاء' : 'Wednesday',
+            'thu' => app()->getLocale() === 'ar' ? 'الخميس' : 'Thursday',
+            'fri' => app()->getLocale() === 'ar' ? 'الجمعة' : 'Friday',
+        ];
+
+        return view('doctor.schedule', compact('doctor', 'schedules', 'days'));
+    }
+
+    public function updateSchedule(Request $request)
+    {
+        $doctor = $request->user()->doctor;
+        abort_if(!$doctor, 403);
+
+        $request->validate([
+            'schedules' => 'nullable|array',
+            'schedules.*.day' => 'required|in:sat,sun,mon,tue,wed,thu,fri',
+            'schedules.*.start_time' => 'required|date_format:H:i',
+            'schedules.*.end_time' => 'required|date_format:H:i|after:schedules.*.start_time',
+            'schedules.*.slot_duration' => 'required|integer|in:15,20,30,45,60',
+        ]);
+
+        $doctor->schedules()->delete();
+
+        if ($request->schedules) {
+            foreach ($request->schedules as $schedule) {
+                $doctor->schedules()->create([
+                    'day' => $schedule['day'],
+                    'start_time' => $schedule['start_time'],
+                    'end_time' => $schedule['end_time'],
+                    'slot_duration' => $schedule['slot_duration'],
+                    'is_active' => true,
+                ]);
+            }
+        }
+
+        return back()->with('success', __('app.schedule_updated'));
     }
 
     public function settings(Request $request)

@@ -53,61 +53,17 @@
             </div>
         </div>
 
-        {{-- Working Days --}}
-        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6" x-data="{
-            days: {{ json_encode(old('working_days', $doctor->working_days ?? [])) }},
-            toggle(day) {
-                const idx = this.days.indexOf(day);
-                if (idx > -1) this.days.splice(idx, 1);
-                else this.days.push(day);
-            },
-            isActive(day) {
-                return this.days.includes(day);
-            }
-        }">
-            <h3 class="text-lg font-bold text-gray-900 mb-1">{{ __('app.working_days') }}</h3>
-            <p class="text-sm text-gray-500 mb-4">{{ __('app.working_days_desc') }}</p>
-
-            {{-- Days Grid --}}
-            <div class="grid grid-cols-7 gap-2 mb-6">
-                @php
-                    $weekDays = [
-                        'sat' => ['en' => 'Sat', 'ar' => 'سبت'],
-                        'sun' => ['en' => 'Sun', 'ar' => 'أحد'],
-                        'mon' => ['en' => 'Mon', 'ar' => 'إثنين'],
-                        'tue' => ['en' => 'Tue', 'ar' => 'ثلاثاء'],
-                        'wed' => ['en' => 'Wed', 'ar' => 'أربعاء'],
-                        'thu' => ['en' => 'Thu', 'ar' => 'خميس'],
-                        'fri' => ['en' => 'Fri', 'ar' => 'جمعة'],
-                    ];
-                @endphp
-
-                @foreach($weekDays as $key => $labels)
-                <button type="button" @click="toggle('{{ $key }}')"
-                        :class="isActive('{{ $key }}') ? 'bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-500/25' : 'bg-gray-50 text-gray-700 border-gray-200 hover:border-indigo-300 hover:bg-indigo-50'"
-                        class="flex flex-col items-center justify-center py-3 px-2 rounded-xl border-2 transition-all duration-200 cursor-pointer">
-                    <span class="text-xs font-bold">{{ app()->getLocale() === 'ar' ? $labels['ar'] : $labels['en'] }}</span>
-                </button>
-                @endforeach
-
-                <template x-for="day in days" :key="day">
-                    <input type="hidden" name="working_days[]" :value="day">
-                </template>
-            </div>
-
-            {{-- Working Hours --}}
-            <h4 class="text-sm font-semibold text-gray-700 mb-3">{{ __('app.working_hours') }}</h4>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md">
+        {{-- Schedule Link --}}
+        <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
+            <div class="flex items-center justify-between">
                 <div>
-                    <label class="block text-xs text-gray-500 mb-1">{{ __('app.from') }}</label>
-                    <input type="time" name="working_from" value="{{ old('working_from', $doctor->working_from ? \Carbon\Carbon::parse($doctor->working_from)->format('H:i') : '') }}" dir="ltr"
-                           class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-all">
+                    <h3 class="text-lg font-bold text-gray-900 mb-1">{{ __('app.schedule') }}</h3>
+                    <p class="text-sm text-gray-500">{{ app()->getLocale() === 'ar' ? 'حدد أيام وأوقات عملك من صفحة الجدول' : 'Set your working days & hours from the schedule page' }}</p>
                 </div>
-                <div>
-                    <label class="block text-xs text-gray-500 mb-1">{{ __('app.to') }}</label>
-                    <input type="time" name="working_to" value="{{ old('working_to', $doctor->working_to ? \Carbon\Carbon::parse($doctor->working_to)->format('H:i') : '') }}" dir="ltr"
-                           class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-all">
-                </div>
+                <a href="{{ route('doctor.schedule') }}" class="inline-flex items-center gap-2 px-5 py-2.5 text-sm font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 rounded-xl hover:bg-indigo-100 transition-all">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                    {{ __('app.schedule') }}
+                </a>
             </div>
         </div>
 

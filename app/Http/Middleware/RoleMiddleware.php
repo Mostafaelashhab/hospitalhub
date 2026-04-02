@@ -16,8 +16,11 @@ class RoleMiddleware
             abort(403, 'Unauthorized.');
         }
 
-        // 'clinic_staff' matches any non-super_admin user with a clinic
+        // 'clinic_staff' matches admin and staff roles (not doctors — they use /doctor portal)
         if (in_array('clinic_staff', $roles) && $user->clinic_id && $user->role !== 'super_admin') {
+            if ($user->role === 'doctor') {
+                return redirect()->route('doctor.dashboard');
+            }
             return $next($request);
         }
 

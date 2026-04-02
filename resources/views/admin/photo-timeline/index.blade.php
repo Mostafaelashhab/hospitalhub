@@ -41,6 +41,7 @@
     <div x-data="{
         showUpload: false,
         activeCategory: 'all',
+        uploadCategory: '{{ old('category', 'teeth') }}',
         lightbox: false,
         lightboxSrc: '',
         lightboxLabel: '',
@@ -96,10 +97,28 @@
                         {{-- Category --}}
                         <div>
                             <label class="block text-xs font-semibold text-gray-600 mb-1.5">{{ __('app.photo_category') }} <span class="text-red-500">*</span></label>
-                            <select name="category" required class="w-full rounded-xl border-gray-200 text-sm focus:border-violet-500 focus:ring-violet-500">
+                            <select name="category" x-model="uploadCategory" required class="w-full rounded-xl border-gray-200 text-sm focus:border-violet-500 focus:ring-violet-500">
                                 @foreach($categories as $cat)
                                 <option value="{{ $cat }}" {{ old('category') === $cat ? 'selected' : '' }}>{{ __('app.' . $cat) }}</option>
                                 @endforeach
+                            </select>
+                        </div>
+
+                        {{-- Tooth Number (shown when category is teeth) --}}
+                        <div x-show="uploadCategory === 'teeth'" x-transition>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1.5">{{ __('app.tooth') }}</label>
+                            <select name="tooth_number" class="w-full rounded-xl border-gray-200 text-sm focus:border-violet-500 focus:ring-violet-500">
+                                <option value="">{{ app()->getLocale() === 'ar' ? 'عام (بدون سنة)' : 'General (no tooth)' }}</option>
+                                <optgroup label="{{ app()->getLocale() === 'ar' ? 'الفك العلوي' : 'Upper Jaw' }}">
+                                    @foreach(['18','17','16','15','14','13','12','11','21','22','23','24','25','26','27','28'] as $t)
+                                    <option value="{{ $t }}">#{{ $t }}</option>
+                                    @endforeach
+                                </optgroup>
+                                <optgroup label="{{ app()->getLocale() === 'ar' ? 'الفك السفلي' : 'Lower Jaw' }}">
+                                    @foreach(['48','47','46','45','44','43','42','41','31','32','33','34','35','36','37','38'] as $t)
+                                    <option value="{{ $t }}">#{{ $t }}</option>
+                                    @endforeach
+                                </optgroup>
                             </select>
                         </div>
 
@@ -209,9 +228,16 @@
                             ];
                         @endphp
                         <div class="flex items-center justify-between mb-2">
-                            <span class="inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-lg border {{ $catColors[$photo->category] ?? 'bg-gray-50 text-gray-600 border-gray-200' }}">
-                                {{ __('app.' . $photo->category) }}
-                            </span>
+                            <div class="flex items-center gap-1.5">
+                                <span class="inline-flex items-center px-2 py-0.5 text-xs font-semibold rounded-lg border {{ $catColors[$photo->category] ?? 'bg-gray-50 text-gray-600 border-gray-200' }}">
+                                    {{ __('app.' . $photo->category) }}
+                                </span>
+                                @if($photo->tooth_number)
+                                <span class="inline-flex items-center px-2 py-0.5 text-xs font-bold rounded-lg bg-indigo-50 text-indigo-700 border border-indigo-200">
+                                    #{{ $photo->tooth_number }}
+                                </span>
+                                @endif
+                            </div>
                             @if(auth()->user()->hasPermission('patients.edit'))
                             <form action="{{ route('dashboard.photo-records.destroy', $photo) }}" method="POST"
                                 onsubmit="return confirm('{{ __('app.confirm_delete') }}')" class="inline">

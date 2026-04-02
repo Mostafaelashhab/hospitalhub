@@ -77,11 +77,11 @@
                         <h1 class="text-4xl xl:text-5xl font-black leading-tight mb-5">
                             <span x-show="step === 1">
                                 @if(app()->getLocale() === 'ar')
-                                    <span class="text-white">ابدأ رحلتك</span><br>
-                                    <span class="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">في إدارة عيادتك</span>
+                                    <span class="text-white">سجّل عيادة</span><br>
+                                    <span class="bg-gradient-to-r from-cyan-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">أسنانك الآن</span>
                                 @else
-                                    <span class="text-white">Start Your</span><br>
-                                    <span class="bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">Clinic Journey</span>
+                                    <span class="text-white">Register Your</span><br>
+                                    <span class="bg-gradient-to-r from-cyan-400 via-indigo-400 to-purple-400 bg-clip-text text-transparent">Dental Clinic</span>
                                 @endif
                             </span>
                             <span x-show="step === 2" x-cloak>
@@ -181,30 +181,36 @@
                             <div class="w-7 h-7 rounded-lg bg-emerald-500/15 flex items-center justify-center flex-shrink-0">
                                 <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                             </div>
-                            <span class="text-sm text-indigo-200/70">{{ __('app.feature_appointments') }}</span>
+                            <span class="text-sm text-indigo-200/70">{{ app()->getLocale()==='ar' ? 'شارت أسنان تفاعلي لكل مريض' : 'Interactive dental chart per patient' }}</span>
                         </div>
                         <div class="flex items-center gap-3">
                             <div class="w-7 h-7 rounded-lg bg-emerald-500/15 flex items-center justify-center flex-shrink-0">
                                 <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                             </div>
-                            <span class="text-sm text-indigo-200/70">{{ __('app.feature_patients') }}</span>
+                            <span class="text-sm text-indigo-200/70">{{ app()->getLocale()==='ar' ? 'إدارة مواعيد وطوابير ذكية' : 'Smart appointments & queue management' }}</span>
                         </div>
                         <div class="flex items-center gap-3">
                             <div class="w-7 h-7 rounded-lg bg-emerald-500/15 flex items-center justify-center flex-shrink-0">
                                 <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                             </div>
-                            <span class="text-sm text-indigo-200/70">{{ __('app.feature_billing') }}</span>
+                            <span class="text-sm text-indigo-200/70">{{ app()->getLocale()==='ar' ? 'فواتير وتقسيط وكوبونات خصم' : 'Invoicing, installments & discount coupons' }}</span>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <div class="w-7 h-7 rounded-lg bg-emerald-500/15 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                            </div>
+                            <span class="text-sm text-indigo-200/70">{{ app()->getLocale()==='ar' ? 'صور قبل وبعد العلاج' : 'Before & after treatment photos' }}</span>
                         </div>
                     </div>
                 </div>
 
                 {{-- Bottom stats --}}
                 <div class="flex gap-8">
-                    <div><div class="text-2xl font-black text-white">5,000+</div><div class="text-xs text-indigo-300/50 font-medium">{{ app()->getLocale()==='ar' ? 'دواء' : 'Medications' }}</div></div>
+                    <div><div class="text-2xl font-black text-white">32</div><div class="text-xs text-indigo-300/50 font-medium">{{ app()->getLocale()==='ar' ? 'سنّة بالشارت' : 'Teeth Charted' }}</div></div>
                     <div class="w-px h-10 bg-white/10"></div>
-                    <div><div class="text-2xl font-black text-white">500+</div><div class="text-xs text-indigo-300/50 font-medium">{{ app()->getLocale()==='ar' ? 'تحليل' : 'Lab Tests' }}</div></div>
+                    <div><div class="text-2xl font-black text-white">15+</div><div class="text-xs text-indigo-300/50 font-medium">{{ app()->getLocale()==='ar' ? 'خدمة أسنان' : 'Dental Services' }}</div></div>
                     <div class="w-px h-10 bg-white/10"></div>
-                    <div><div class="text-2xl font-black text-white">15+</div><div class="text-xs text-indigo-300/50 font-medium">{{ app()->getLocale()==='ar' ? 'تخصص' : 'Specialties' }}</div></div>
+                    <div><div class="text-2xl font-black text-white">24/7</div><div class="text-xs text-indigo-300/50 font-medium">{{ app()->getLocale()==='ar' ? 'حجز أونلاين' : 'Online Booking' }}</div></div>
                 </div>
             </div>
         </div>
@@ -233,7 +239,7 @@
                     <div class="mb-6">
                         <h2 class="text-3xl font-bold mb-2">{{ __('app.register_clinic') }}</h2>
                         <p class="text-gray-400">
-                            @if(app()->getLocale() === 'ar') سجّل عيادتك في دقائق وابدأ في إدارة مرضاك @else Register your clinic in minutes and start managing your patients @endif
+                            @if(app()->getLocale() === 'ar') سجّل عيادة أسنانك في دقائق وابدأ في إدارة مرضاك @else Register your dental clinic in minutes and start managing your patients @endif
                         </p>
                     </div>
 
@@ -295,25 +301,11 @@
                                     </div>
                                 </div>
 
-                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-300 mb-1.5">{{ __('app.specialty') }} <span class="text-red-400">*</span></label>
-                                        <select name="specialty_id" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
-                                            <option value="">{{ __('app.select_specialty') }}</option>
-                                            @foreach($specialties as $specialty)
-                                                <option value="{{ $specialty->id }}" {{ old('specialty_id') == $specialty->id ? 'selected' : '' }}>
-                                                    {{ app()->getLocale() === 'ar' ? $specialty->name_ar : $specialty->name_en }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                        @error('specialty_id') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
-                                    </div>
-                                    <div>
-                                        <label class="block text-sm font-medium text-gray-300 mb-1.5">{{ __('app.clinic_phone') }} <span class="text-red-400">*</span></label>
-                                        <input type="tel" name="clinic_phone" value="{{ old('clinic_phone') }}" placeholder="01xxxxxxxxx"
-                                            class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
-                                        @error('clinic_phone') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
-                                    </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-1.5">{{ __('app.clinic_phone') }} <span class="text-red-400">*</span></label>
+                                    <input type="tel" name="clinic_phone" value="{{ old('clinic_phone') }}" placeholder="01xxxxxxxxx"
+                                        class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition">
+                                    @error('clinic_phone') <p class="text-red-400 text-xs mt-1">{{ $message }}</p> @enderror
                                 </div>
 
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

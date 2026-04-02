@@ -39,7 +39,7 @@ class ClinicPageController extends Controller
 
         $jsonLd = [
             '@context' => 'https://schema.org',
-            '@type' => 'MedicalClinic',
+            '@type' => 'Dentist',
             'name' => $localeName,
             'description' => $metaDescription,
             'url' => $canonicalUrl,

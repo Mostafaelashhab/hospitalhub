@@ -11,6 +11,12 @@ class DashboardController extends Controller
     public function index(Request $request)
     {
         $user = $request->user();
+
+        // Doctors always go to doctor portal
+        if ($user->role === 'doctor') {
+            return redirect()->route('doctor.dashboard');
+        }
+
         $clinic = $user->clinic;
 
         if (!$clinic) {

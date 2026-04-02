@@ -50,20 +50,6 @@
                            class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-all">
                 </div>
 
-                {{-- Specialty --}}
-                <div>
-                    <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('app.specialty') }} <span class="text-red-500">*</span></label>
-                    <select name="specialty_id" required
-                            class="w-full bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5 text-sm text-gray-900 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 focus:bg-white transition-all">
-                        <option value="">{{ __('app.select_specialty') }}</option>
-                        @foreach($specialties as $specialty)
-                        <option value="{{ $specialty->id }}" {{ old('specialty_id') == $specialty->id ? 'selected' : '' }}>
-                            {{ app()->getLocale() === 'ar' ? $specialty->name_ar : $specialty->name_en }}
-                        </option>
-                        @endforeach
-                    </select>
-                </div>
-
                 {{-- Consultation Fee --}}
                 <div>
                     <label class="block text-sm font-semibold text-gray-700 mb-2">{{ __('app.consultation_fee') }} <span class="text-red-500">*</span></label>

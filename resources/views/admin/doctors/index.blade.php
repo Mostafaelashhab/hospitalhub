@@ -61,7 +61,7 @@
                         </div>
                         <div class="min-w-0">
                             <h3 class="text-gray-900 font-bold text-base truncate">{{ $doctor->name }}</h3>
-                            <p class="text-sm text-gray-500 truncate">{{ $doctor->specialty ? (app()->getLocale() === 'ar' ? $doctor->specialty->name_ar : $doctor->specialty->name_en) : '-' }}</p>
+                            <p class="text-sm text-gray-500 truncate">{{ $doctor->phone }}</p>
                         </div>
                     </div>
 

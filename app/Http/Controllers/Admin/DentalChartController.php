@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\DentalChart;
 use App\Models\Patient;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 
 class DentalChartController extends Controller
@@ -88,9 +89,50 @@ class DentalChartController extends Controller
             'notes'          => $request->input('notes'),
         ]);
 
+        $route = auth()->user()->role === 'doctor' && request()->is('doctor/*')
+            ? 'doctor.dental-chart.show'
+            : 'dashboard.patients.dental-chart.show';
+
         return redirect()
-            ->route('dashboard.patients.dental-chart.show', $patient)
+            ->route($route, $patient)
             ->with('success', __('app.chart_saved'));
+    }
+
+    /**
+     * Export the latest dental chart as PDF.
+     */
+    public function exportPdf(Patient $patient)
+    {
+        $clinic = auth()->user()->clinic;
+        abort_if($patient->clinic_id !== $clinic->id, 403);
+
+        $chart = DentalChart::where('patient_id', $patient->id)
+            ->where('clinic_id', $clinic->id)
+            ->with('doctor')
+            ->latest()
+            ->first();
+
+        $allTeeth = DentalChart::allToothNumbers();
+        $savedData = $chart ? ($chart->tooth_data ?? []) : [];
+
+        $toothData = [];
+        foreach ($allTeeth as $tooth) {
+            $toothData[$tooth] = array_merge(
+                ['status' => 'healthy', 'notes' => ''],
+                $savedData[$tooth] ?? []
+            );
+        }
+
+        $pdf = Pdf::loadView('admin.dental-chart.pdf', [
+            'patient' => $patient,
+            'clinic' => $clinic,
+            'chart' => $chart,
+            'toothData' => $toothData,
+        ])->setPaper('a4', 'landscape');
+
+        $filename = 'dental-chart-' . $patient->name . '-' . now()->format('Y-m-d') . '.pdf';
+
+        return $pdf->download($filename);
     }
 
     /**

@@ -21,7 +21,7 @@ class DoctorController extends Controller
 
         $branchId = BranchHelper::activeBranchId();
 
-        $query = $clinic->doctors()->with('specialty');
+        $query = $clinic->doctors();
 
         if ($branchId) {
             $query->where('branch_id', $branchId);
@@ -47,9 +47,7 @@ class DoctorController extends Controller
 
     public function create()
     {
-        $specialties = Specialty::where('is_active', true)->get();
-
-        return view('admin.doctors.create', compact('specialties'));
+        return view('admin.doctors.create');
     }
 
     public function store(Request $request)
@@ -59,7 +57,6 @@ class DoctorController extends Controller
             'phone' => 'required|string|max:20',
             'email' => 'required|email|max:255|unique:users,email',
             'password' => 'required|string|min:6',
-            'specialty_id' => 'required|exists:specialties,id',
             'consultation_fee' => 'required|numeric|min:0',
             'bio' => 'nullable|string|max:1000',
         ]);
@@ -78,12 +75,14 @@ class DoctorController extends Controller
 
         $this->ensureDefaultPermissions($clinic->id, 'doctor');
 
+        $dentistry = Specialty::where('name_en', 'Dentistry')->first();
+
         $clinic->doctors()->create([
             'branch_id' => BranchHelper::activeBranchId(),
             'name' => $validated['name'],
             'phone' => $validated['phone'],
             'email' => $validated['email'],
-            'specialty_id' => $validated['specialty_id'],
+            'specialty_id' => $dentistry->id,
             'consultation_fee' => $validated['consultation_fee'],
             'bio' => $validated['bio'] ?? null,
             'user_id' => $user->id,
@@ -99,7 +98,7 @@ class DoctorController extends Controller
         $clinic = auth()->user()->clinic;
         abort_if($doctor->clinic_id !== $clinic->id, 403);
 
-        $doctor->load(['specialty', 'appointments' => function ($q) {
+        $doctor->load(['appointments' => function ($q) {
             $q->with('patient')->latest('appointment_date')->limit(10);
         }]);
 
@@ -111,7 +110,6 @@ class DoctorController extends Controller
         $clinic = auth()->user()->clinic;
         abort_if($doctor->clinic_id !== $clinic->id, 403);
 
-        $specialties = Specialty::where('is_active', true)->get();
         $doctor->load('services');
         $specialtyServices = Service::where('specialty_id', $doctor->specialty_id)
             ->where('is_active', true)->get();
@@ -121,7 +119,7 @@ class DoctorController extends Controller
             $doctor->user->load('branches');
         }
 
-        return view('admin.doctors.edit', compact('doctor', 'specialties', 'specialtyServices', 'branches'));
+        return view('admin.doctors.edit', compact('doctor', 'specialtyServices', 'branches'));
     }
 
     public function update(Request $request, Doctor $doctor)
@@ -141,7 +139,6 @@ class DoctorController extends Controller
             'phone' => 'required|string|max:20',
             'email' => $emailRule,
             'password' => 'nullable|string|min:6',
-            'specialty_id' => 'required|exists:specialties,id',
             'consultation_fee' => 'required|numeric|min:0',
             'bio' => 'nullable|string|max:1000',
             'is_active' => 'boolean',
@@ -156,7 +153,6 @@ class DoctorController extends Controller
             'name' => $validated['name'],
             'phone' => $validated['phone'],
             'email' => $validated['email'],
-            'specialty_id' => $validated['specialty_id'],
             'consultation_fee' => $validated['consultation_fee'],
             'bio' => $validated['bio'] ?? null,
             'is_active' => $validated['is_active'] ?? true,

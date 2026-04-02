@@ -20,16 +20,7 @@
             <svg class="w-4 h-4 {{ app()->getLocale() === 'ar' ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
             {{ __('app.back') }}
         </a>
-        {{-- Growth Chart button (only shown when patient has a DOB and is under 5 years old) --}}
-        @if($patient->date_of_birth && $patient->date_of_birth->diffInMonths(now()) <= 60)
-        <a href="{{ route('dashboard.patients.growth-chart', $patient) }}"
-           class="inline-flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 transition-all shadow-sm">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-            </svg>
-            {{ __('app.growth_chart') }}
-        </a>
-        @endif
+        {{-- Growth Chart hidden — dental-only focus --}}
     </div>
 
     {{-- Chronic Diseases Alert --}}
@@ -774,7 +765,7 @@
                                 <label class="block text-xs font-semibold text-gray-600 mb-1.5">{{ __('app.category') }} <span class="text-red-500">*</span></label>
                                 <select name="category" x-model="category" class="w-full rounded-xl border-gray-200 text-sm focus:border-indigo-500 focus:ring-indigo-500">
                                     <option value="lab_result">{{ __('app.lab_result') }}</option>
-                                    <option value="radiology">{{ __('app.radiology') }}</option>
+                                    {{-- <option value="radiology">{{ __('app.radiology') }}</option> --}}
                                     <option value="prescription">{{ __('app.prescription') }}</option>
                                     <option value="report">{{ __('app.medical_report') }}</option>
                                     <option value="id_document">{{ __('app.id_document') }}</option>
@@ -931,12 +922,7 @@
             <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
                 <h3 class="text-base font-bold text-gray-900 mb-4">{{ __('app.actions') }}</h3>
                 <div class="space-y-3">
-                    @if(auth()->user()->clinic?->specialty?->name_en === 'Gynecology')
-                    <a href="{{ route('dashboard.patients.pregnancy.index', $patient) }}" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-pink-700 bg-pink-50 border border-pink-200 rounded-xl hover:bg-pink-100 transition-all">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
-                        {{ __('app.pregnancy_tracker') }}
-                    </a>
-                    @endif
+                    {{-- Pregnancy tracker hidden — dental-only focus --}}
                     <a href="{{ route('dashboard.patients.chronic-dashboard', $patient) }}" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-rose-700 bg-rose-50 border border-rose-200 rounded-xl hover:bg-rose-100 transition-all">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"/></svg>
                         {{ __('app.chronic_dashboard') }}
@@ -949,10 +935,7 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                         {{ __('app.photo_timeline') }}
                     </a>
-                    <a href="{{ route('dashboard.ai-radiology.index', $patient) }}" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-fuchsia-700 bg-fuchsia-50 border border-fuchsia-200 rounded-xl hover:bg-fuchsia-100 transition-all">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                        {{ __('app.ai_radiology') }}
-                    </a>
+                    {{-- AI Radiology hidden — dental-only focus --}}
                     <a href="{{ route('dashboard.appointments.create', ['patient_id' => $patient->id]) }}" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-xl hover:bg-emerald-100 transition-all">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                         {{ __('app.schedule_follow_up') }}
@@ -960,6 +943,10 @@
                     <a href="{{ route('dashboard.patients.edit', $patient) }}" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-amber-700 bg-amber-50 border border-amber-200 rounded-xl hover:bg-amber-100 transition-all">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                         {{ __('app.edit_patient') }}
+                    </a>
+                    <a href="{{ route('dashboard.patients.treatment-plans.index', $patient) }}" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-teal-700 bg-teal-50 border border-teal-200 rounded-xl hover:bg-teal-100 transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+                        {{ __('app.treatment_plans') }}
                     </a>
                     @if(auth()->user()->clinic?->specialty?->name_en === 'Dentistry')
                     <a href="{{ route('dashboard.patients.dental-chart.show', $patient) }}" class="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-semibold text-cyan-700 bg-cyan-50 border border-cyan-200 rounded-xl hover:bg-cyan-100 transition-all">

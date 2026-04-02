@@ -171,16 +171,17 @@ Route::middleware(['auth', 'role:clinic_staff', 'clinic.active'])->prefix('dashb
     Route::get('/patients/{patient}/timeline', [PatientController::class, 'timeline'])->name('.patients.timeline')->middleware('permission:patients.view');
     Route::get('/patients/{patient}/chronic-dashboard', [ChronicDashboardController::class, 'show'])->name('.patients.chronic-dashboard')->middleware('permission:patients.view');
     Route::delete('/patients/{patient}', [PatientController::class, 'destroy'])->name('.patients.destroy')->middleware('permission:patients.edit');
-    Route::get('/patients/{patient}/growth-chart', [GrowthChartController::class, 'show'])->name('.patients.growth-chart')->middleware('permission:patients.view');
+    // Growth Chart (hidden — dental-only focus)
+    // Route::get('/patients/{patient}/growth-chart', [GrowthChartController::class, 'show'])->name('.patients.growth-chart')->middleware('permission:patients.view');
 
-    // Pregnancy Tracker
-    Route::get('/patients/{patient}/pregnancy', [PregnancyController::class, 'index'])->name('.patients.pregnancy.index')->middleware('permission:patients.view');
-    Route::get('/patients/{patient}/pregnancy/create', [PregnancyController::class, 'create'])->name('.patients.pregnancy.create')->middleware('permission:patients.edit');
-    Route::post('/patients/{patient}/pregnancy', [PregnancyController::class, 'store'])->name('.patients.pregnancy.store')->middleware('permission:patients.edit');
-    Route::get('/pregnancy/{pregnancy}', [PregnancyController::class, 'show'])->name('.pregnancy.show')->middleware('permission:patients.view');
-    Route::post('/pregnancy/{pregnancy}/visit', [PregnancyController::class, 'addVisit'])->name('.pregnancy.visit')->middleware('permission:patients.edit');
-    Route::patch('/pregnancy/{pregnancy}/complete', [PregnancyController::class, 'complete'])->name('.pregnancy.complete')->middleware('permission:patients.edit');
-    Route::delete('/pregnancy/{pregnancy}', [PregnancyController::class, 'destroy'])->name('.pregnancy.destroy')->middleware('permission:patients.edit');
+    // Pregnancy Tracker (hidden — dental-only focus)
+    // Route::get('/patients/{patient}/pregnancy', [PregnancyController::class, 'index'])->name('.patients.pregnancy.index')->middleware('permission:patients.view');
+    // Route::get('/patients/{patient}/pregnancy/create', [PregnancyController::class, 'create'])->name('.patients.pregnancy.create')->middleware('permission:patients.edit');
+    // Route::post('/patients/{patient}/pregnancy', [PregnancyController::class, 'store'])->name('.patients.pregnancy.store')->middleware('permission:patients.edit');
+    // Route::get('/pregnancy/{pregnancy}', [PregnancyController::class, 'show'])->name('.pregnancy.show')->middleware('permission:patients.view');
+    // Route::post('/pregnancy/{pregnancy}/visit', [PregnancyController::class, 'addVisit'])->name('.pregnancy.visit')->middleware('permission:patients.edit');
+    // Route::patch('/pregnancy/{pregnancy}/complete', [PregnancyController::class, 'complete'])->name('.pregnancy.complete')->middleware('permission:patients.edit');
+    // Route::delete('/pregnancy/{pregnancy}', [PregnancyController::class, 'destroy'])->name('.pregnancy.destroy')->middleware('permission:patients.edit');
 
     // Patient Files
     Route::post('/patients/{patient}/files', [PatientFileController::class, 'store'])->name('.patients.files.store')->middleware('permission:patients.edit');
@@ -214,15 +215,25 @@ Route::middleware(['auth', 'role:clinic_staff', 'clinic.active'])->prefix('dashb
     Route::post('/patients/{patient}/notes', [PatientMedicalController::class, 'storeNote'])->name('.patients.notes.store')->middleware('permission:patients.edit');
     Route::delete('/medical-notes/{note}', [PatientMedicalController::class, 'destroyNote'])->name('.patients.notes.destroy')->middleware('permission:patients.edit');
 
-    // AI Radiology
-    Route::get('/patients/{patient}/ai-radiology', [AIRadiologyController::class, 'index'])->name('.ai-radiology.index')->middleware('permission:patients.view');
-    Route::post('/patients/{patient}/ai-radiology/analyze', [AIRadiologyController::class, 'analyze'])->name('.ai-radiology.analyze')->middleware('permission:patients.edit');
-    Route::post('/patients/{patient}/ai-radiology/analyze-ajax', [AIRadiologyController::class, 'analyzeAjax'])->name('.ai-radiology.analyze-ajax')->middleware('permission:patients.edit');
+    // AI Radiology (hidden — dental-only focus)
+    // Route::get('/patients/{patient}/ai-radiology', [AIRadiologyController::class, 'index'])->name('.ai-radiology.index')->middleware('permission:patients.view');
+    // Route::post('/patients/{patient}/ai-radiology/analyze', [AIRadiologyController::class, 'analyze'])->name('.ai-radiology.analyze')->middleware('permission:patients.edit');
+    // Route::post('/patients/{patient}/ai-radiology/analyze-ajax', [AIRadiologyController::class, 'analyzeAjax'])->name('.ai-radiology.analyze-ajax')->middleware('permission:patients.edit');
+
+    // Treatment Plans
+    Route::get('/patients/{patient}/treatment-plans', [\App\Http\Controllers\Admin\TreatmentPlanController::class, 'index'])->name('.patients.treatment-plans.index')->middleware('permission:patients.view');
+    Route::get('/patients/{patient}/treatment-plans/create', [\App\Http\Controllers\Admin\TreatmentPlanController::class, 'create'])->name('.patients.treatment-plans.create')->middleware('permission:patients.edit');
+    Route::post('/patients/{patient}/treatment-plans', [\App\Http\Controllers\Admin\TreatmentPlanController::class, 'store'])->name('.patients.treatment-plans.store')->middleware('permission:patients.edit');
+    Route::get('/treatment-plans/{plan}', [\App\Http\Controllers\Admin\TreatmentPlanController::class, 'show'])->name('.treatment-plans.show')->middleware('permission:patients.view');
+    Route::patch('/treatment-plans/{plan}/status', [\App\Http\Controllers\Admin\TreatmentPlanController::class, 'updateStatus'])->name('.treatment-plans.status')->middleware('permission:patients.edit');
+    Route::patch('/treatment-plans/{plan}/items/{item}/complete', [\App\Http\Controllers\Admin\TreatmentPlanController::class, 'completeItem'])->name('.treatment-plans.items.complete')->middleware('permission:patients.edit');
+    Route::delete('/treatment-plans/{plan}', [\App\Http\Controllers\Admin\TreatmentPlanController::class, 'destroy'])->name('.treatment-plans.destroy')->middleware('permission:patients.edit');
 
     // Dental Chart
     Route::get('/patients/{patient}/dental-chart', [\App\Http\Controllers\Admin\DentalChartController::class, 'show'])->name('.patients.dental-chart.show')->middleware('permission:patients.view');
     Route::post('/patients/{patient}/dental-chart', [\App\Http\Controllers\Admin\DentalChartController::class, 'store'])->name('.patients.dental-chart.store')->middleware('permission:patients.edit');
     Route::get('/patients/{patient}/dental-chart/history', [\App\Http\Controllers\Admin\DentalChartController::class, 'history'])->name('.patients.dental-chart.history')->middleware('permission:patients.view');
+    Route::get('/patients/{patient}/dental-chart/pdf', [\App\Http\Controllers\Admin\DentalChartController::class, 'exportPdf'])->name('.patients.dental-chart.pdf')->middleware('permission:patients.view');
 
     // Staff Management (admin only)
     Route::get('/staff', [StaffController::class, 'index'])->name('.staff.index')->middleware('permission:staff.view');
@@ -368,10 +379,28 @@ Route::middleware(['auth', 'role:doctor', 'clinic.active'])->prefix('doctor')->n
     Route::patch('/appointments/{appointment}/call', [DoctorDashboardController::class, 'callPatient'])->name('appointment.call');
     Route::patch('/appointments/{appointment}/start-from-queue', [DoctorDashboardController::class, 'startFromQueue'])->name('appointment.start-from-queue');
 
+    // Schedule
+    Route::get('/schedule', [DoctorDashboardController::class, 'schedule'])->name('schedule');
+    Route::post('/schedule', [DoctorDashboardController::class, 'updateSchedule'])->name('schedule.update');
+
     // Settings
     Route::get('/settings', [DoctorDashboardController::class, 'settings'])->name('settings');
     Route::put('/settings', [DoctorDashboardController::class, 'updateSettings'])->name('settings.update');
     Route::delete('/services/{service}', [DoctorDashboardController::class, 'destroyService'])->name('services.destroy');
+
+    // Dental Chart (doctor access)
+    Route::get('/patients/{patient}/dental-chart', [\App\Http\Controllers\Admin\DentalChartController::class, 'show'])->name('dental-chart.show');
+    Route::post('/patients/{patient}/dental-chart', [\App\Http\Controllers\Admin\DentalChartController::class, 'store'])->name('dental-chart.store');
+    Route::get('/patients/{patient}/dental-chart/history', [\App\Http\Controllers\Admin\DentalChartController::class, 'history'])->name('dental-chart.history');
+    Route::get('/patients/{patient}/dental-chart/pdf', [\App\Http\Controllers\Admin\DentalChartController::class, 'exportPdf'])->name('dental-chart.pdf');
+
+    // Treatment Plans (doctor access)
+    Route::get('/patients/{patient}/treatment-plans', [\App\Http\Controllers\Admin\TreatmentPlanController::class, 'index'])->name('treatment-plans.index');
+    Route::get('/patients/{patient}/treatment-plans/create', [\App\Http\Controllers\Admin\TreatmentPlanController::class, 'create'])->name('treatment-plans.create');
+    Route::post('/patients/{patient}/treatment-plans', [\App\Http\Controllers\Admin\TreatmentPlanController::class, 'store'])->name('treatment-plans.store');
+    Route::get('/treatment-plans/{plan}', [\App\Http\Controllers\Admin\TreatmentPlanController::class, 'show'])->name('treatment-plans.show');
+    Route::patch('/treatment-plans/{plan}/status', [\App\Http\Controllers\Admin\TreatmentPlanController::class, 'updateStatus'])->name('treatment-plans.status');
+    Route::patch('/treatment-plans/{plan}/items/{item}/complete', [\App\Http\Controllers\Admin\TreatmentPlanController::class, 'completeItem'])->name('treatment-plans.items.complete');
 
     // Drug Search (shared)
     Route::get('/drugs/search', [DrugSearchController::class, 'search'])->name('drugs.search');

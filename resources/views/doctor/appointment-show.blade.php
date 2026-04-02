@@ -504,7 +504,7 @@
                     <p x-show="labItems.length === 0" class="text-xs text-gray-400 mt-2">{{ __('app.lab_tests_hint') }}</p>
                 </div>
 
-                {{-- Radiology --}}
+                {{-- Radiology (hidden — dental-only focus)
                 <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6"
                      x-data="{
                          radioItems: {{ json_encode($diagnosis?->radiology ? array_filter(array_map('trim', explode("\n", $diagnosis->radiology))) : []) }},
@@ -646,6 +646,7 @@
                     </div>
                     <p x-show="radioItems.length === 0" class="text-xs text-gray-400 mt-2">{{ __('app.radiology_hint') }}</p>
                 </div>
+                --}}
 
                 {{-- Notes --}}
                 <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">

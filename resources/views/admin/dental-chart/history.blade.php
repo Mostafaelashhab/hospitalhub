@@ -3,12 +3,17 @@
     <x-slot name="pageTitle">{{ __('app.chart_history') }}</x-slot>
 
     <x-slot name="sidebar">
-        @include('partials.dashboard-sidebar', ['active' => 'patients'])
+        @if(auth()->user()->role === 'doctor' && request()->is('doctor/*'))
+            @include('partials.doctor-sidebar', ['active' => 'dental-chart'])
+        @else
+            @include('partials.dashboard-sidebar', ['active' => 'patients'])
+        @endif
     </x-slot>
 
+    @php $isDoctor = auth()->user()->role === 'doctor' && request()->is('doctor/*'); @endphp
     {{-- Back --}}
     <div class="mb-5">
-        <a href="{{ route('dashboard.patients.dental-chart.show', $patient) }}" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 font-medium transition-colors">
+        <a href="{{ $isDoctor ? route('doctor.dental-chart.show', $patient) : route('dashboard.patients.dental-chart.show', $patient) }}" class="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-700 font-medium transition-colors">
             <svg class="w-4 h-4 {{ app()->getLocale() === 'ar' ? 'rotate-180' : '' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
             {{ __('app.dental_chart') }}
         </a>
@@ -20,7 +25,7 @@
             <h2 class="text-xl sm:text-2xl font-bold text-gray-900">{{ __('app.chart_history') }}</h2>
             <p class="text-sm text-gray-500 mt-1">{{ $patient->name }}</p>
         </div>
-        <a href="{{ route('dashboard.patients.dental-chart.show', $patient) }}"
+        <a href="{{ $isDoctor ? route('doctor.dental-chart.show', $patient) : route('dashboard.patients.dental-chart.show', $patient) }}"
            class="inline-flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white text-sm font-semibold rounded-xl hover:bg-indigo-700 transition-colors shadow-sm">
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
             {{ __('app.dental_chart') }}

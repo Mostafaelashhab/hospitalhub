@@ -32,7 +32,7 @@
                     </div>
                     <div>
                         <h2 class="text-xl font-bold text-gray-900">{{ $doctor->name }}</h2>
-                        <p class="text-sm text-gray-500">{{ $doctor->specialty ? (app()->getLocale() === 'ar' ? $doctor->specialty->name_ar : $doctor->specialty->name_en) : '-' }}</p>
+                        <p class="text-sm text-gray-500">{{ $doctor->phone }}</p>
                     </div>
                     <div class="{{ app()->getLocale() === 'ar' ? 'mr-auto' : 'ml-auto' }}">
                         <span class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border {{ $doctor->is_active ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-gray-50 text-gray-600 border-gray-200' }}">

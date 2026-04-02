@@ -12,6 +12,7 @@ class PhotoRecord extends Model
         'clinic_id',
         'doctor_id',
         'category',
+        'tooth_number',
         'label',
         'photo_path',
         'taken_at',

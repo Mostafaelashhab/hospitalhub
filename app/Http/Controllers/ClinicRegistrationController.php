@@ -21,8 +21,7 @@ class ClinicRegistrationController extends Controller
 
     public function showForm()
     {
-        $specialties = Specialty::where('is_active', true)->get();
-        return view('auth.register-clinic', compact('specialties'));
+        return view('auth.register-clinic');
     }
 
     /**
@@ -34,7 +33,6 @@ class ClinicRegistrationController extends Controller
             // Step 1: Basic Info
             'clinic_name_en' => 'required|string|max:255',
             'clinic_name_ar' => 'required|string|max:255',
-            'specialty_id' => 'required|exists:specialties,id',
             'clinic_phone' => 'required|string|max:20',
             'clinic_email' => 'nullable|email|max:255',
             'address_en' => 'nullable|string|max:500',
@@ -112,11 +110,13 @@ class ClinicRegistrationController extends Controller
                 $slug = $originalSlug . '-' . $counter++;
             }
 
+            $dentistry = Specialty::where('name_en', 'Dentistry')->first();
+
             $clinic = Clinic::create([
                 'name_en' => $validated['clinic_name_en'],
                 'name_ar' => $validated['clinic_name_ar'],
                 'slug' => $slug,
-                'specialty_id' => $validated['specialty_id'],
+                'specialty_id' => $dentistry->id,
                 'phone' => $validated['clinic_phone'],
                 'email' => $validated['clinic_email'] ?? null,
                 'address_en' => $validated['address_en'] ?? null,
